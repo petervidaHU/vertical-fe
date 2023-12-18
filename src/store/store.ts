@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { storiesApi } from './storyAPI';
 import { useDispatch } from 'react-redux';
+import scrollReducer from './scrollSlice';
 
 export const store = configureStore({
   reducer: {
     [storiesApi.reducerPath]: storiesApi.reducer,
+    scroll: scrollReducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(storiesApi.middleware),
 });
