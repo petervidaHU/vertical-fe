@@ -1,19 +1,23 @@
 import { useEffect, useCallback } from "react";
-import { useFetchStoriesQuery } from "../store/storyAPI";
+import { useLazyFetchStoriesQuery } from "../store/storyAPI";
 import { useDispatch, useSelector } from 'react-redux';
 import { setScroll, selectScroll } from './../store/scrollSlice';
 
 export const useScroll = () => {
   const dispatch = useDispatch();
   const scrollAmount = useSelector(selectScroll);
-  const { data, error, isLoading } = useFetchStoriesQuery(scrollAmount);
-  
+  const [triggerFetch, { data = [], error, isLoading }] = useLazyFetchStoriesQuery();
+    
   const handleScroll = useCallback((event: WheelEvent) => {
     event.preventDefault();
     const deltaY = event.deltaY < 0 ? Math.abs(event.deltaY) : event.deltaY * -1;
-
     dispatch(setScroll((scrollAmount + deltaY > 0 ? scrollAmount + deltaY : 0)));
-  }, [scrollAmount, dispatch]);
+    
+    if(data.filter(story => story.startPoint > scrollAmount).length < 3) {
+      triggerFetch(scrollAmount);
+    }
+
+  }, [scrollAmount, dispatch, data.length, triggerFetch]);
 
   useEffect(() => {
     document.addEventListener('wheel', handleScroll, { passive: false });
@@ -23,10 +27,5 @@ export const useScroll = () => {
     };
   }, [handleScroll]);
 
-  /*   console.log('error: ', error)
-    console.log('data: ', data)
-    console.log('loading: ', isLoading)
-    console.log('scroll: ', scrollAmount);
-   */
   return { data, error, isLoading, scrollAmount };
 }

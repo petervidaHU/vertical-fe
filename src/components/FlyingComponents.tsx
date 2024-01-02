@@ -7,11 +7,14 @@ type FCProps = {
 }
 
 const FlyingComponents: React.FC<FCProps> = ({ comps }) => {
-  console.log('comps: ', comps);
-
+  
   return (
     <>
-      {comps.map((comp) => (<Story comp={comp} />))}
+      {comps.map((comp) => (
+        <Story
+          key={comp.id}
+          comp={comp} />
+      ))}
     </>
   );
 }

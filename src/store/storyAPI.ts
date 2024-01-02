@@ -15,4 +15,5 @@ export const storiesApi = createApi({
 
 export const {
   useFetchStoriesQuery,
-}  = storiesApi;
+  useLazyFetchStoriesQuery,
+} = storiesApi;
