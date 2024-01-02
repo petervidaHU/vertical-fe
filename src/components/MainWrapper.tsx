@@ -19,7 +19,7 @@ const MainWrapper = () => {
           )}
         </div>
         <div>
-          20
+          other div
         </div>
       </GridContainer>
     </>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useFetchStoriesQuery } from "../store/storyAPI";
 import { useDispatch, useSelector } from 'react-redux';
 import { setScroll, selectScroll } from './../store/scrollSlice';

@@ -10,6 +10,6 @@ const scrollSlice = createSlice({
 
 export const { setScroll } = scrollSlice.actions;
 
-export const selectScroll = state => state.scroll;
+export const selectScroll = (state) => state.scroll;
 
 export default scrollSlice.reducer;
