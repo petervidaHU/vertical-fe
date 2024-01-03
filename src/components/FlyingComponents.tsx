@@ -1,5 +1,5 @@
 import React from 'react'
-import { iStoryEntity } from '../store/story.interface';
+import { iStoryEntity } from '../types/story.interface';
 import Story from './Story';
 
 type FCProps = {

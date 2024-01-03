@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from "react";
-import { useLazyFetchStoriesQuery } from "../store/storyAPI";
+import { useLazyFetchStoriesQuery } from "../API/storyAPI";
 import { useDispatch, useSelector } from 'react-redux';
 import { setScroll, selectScroll } from './../store/scrollSlice';
 

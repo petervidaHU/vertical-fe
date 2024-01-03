@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { storiesApi } from './storyAPI';
+import { storiesApi } from '../API/storyAPI';
 import { useDispatch } from 'react-redux';
 import scrollReducer from './scrollSlice';
 
