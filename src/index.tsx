@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
-import { routs } from "./routs";
+import { routes } from "./routes";
 
 const container = document.getElementById("root");
 if (container) {
@@ -11,7 +11,7 @@ if (container) {
 
   root.render(
     <Provider store={store}>
-      <RouterProvider router={routs}/>
+      <RouterProvider router={routes}/>
     </Provider>
   );
 }
