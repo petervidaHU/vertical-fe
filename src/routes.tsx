@@ -16,7 +16,11 @@ export const routes = createBrowserRouter([
     children: [
       {
         path: "edit",
-        element: <StoryForm onSubmit={(a: any) => { console.log(a) }} />
+        element: <StoryForm />
+      },
+      {
+        path: "list",
+        element: <div>to be done </div>
       },
     ],
   },

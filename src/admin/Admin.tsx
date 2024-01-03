@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Text } from "@chakra-ui/react";
 import { Link, Outlet } from 'react-router-dom';
 
-const links = ['edit'];
+const links = ['edit', 'list'];
 
 const Admin = () => {
   return (<>
