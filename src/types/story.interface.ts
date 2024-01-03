@@ -5,3 +5,5 @@ export interface iStoryEntity {
   startPoint: number,
   endPoint: number,
 }
+
+export type sortByStories = 'title' | 'startPoint' | 'endPoint';
