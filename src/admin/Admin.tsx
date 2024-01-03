@@ -1,12 +1,20 @@
 import React from 'react'
 import { Box, Text } from "@chakra-ui/react";
+import { Link, Outlet } from 'react-router-dom';
+
+const links = ['edit'];
 
 const Admin = () => {
   return (<>
-    <div>Admin</div>
-    <Box p="5" shadow="md" borderWidth="1px">
-      <Text fontSize="xl">Hello Chakra UI!</Text>
+    <Box p="5" borderWidth="1px" marginBlockEnd={10}>
+      <Text fontSize="xl">ADMIN</Text>
+      {links.map(link => (
+        <Link to={link} key={link}>
+          <Text fontSize="lg">{link}</Text>
+        </Link>
+      ))}
     </Box>
+    <Outlet />
   </>
   )
 }
