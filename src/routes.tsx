@@ -3,6 +3,7 @@ import MainWrapper from "./components/MainWrapper";
 import Admin from "./admin/Admin";
 import ErrorPage from "./components/ErrorComponent";
 import StoryForm from "./admin/StoryForm";
+import StoriesList from "./admin/List";
 
 export const routes = createBrowserRouter([
   {
@@ -20,7 +21,7 @@ export const routes = createBrowserRouter([
       },
       {
         path: "list",
-        element: <div>to be done </div>
+        element: <StoriesList />
       },
     ],
   },
