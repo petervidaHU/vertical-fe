@@ -44,11 +44,8 @@ const StoriesList: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       deleteStory(id);
-      // then refetch the stories list to update the table
-      // useGetStoriesQuery.refetch();
     } catch (error) {
       console.error(error)
-      // handle the error
     }
   };
 

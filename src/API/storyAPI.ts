@@ -19,6 +19,7 @@ export const storiesApi = createApi({
   reducerPath: 'storiesApi',
   baseQuery: fetchBaseQuery({ baseUrl: baseUrl }),
   tagTypes: ['Story'],
+  
   endpoints: (builder) => ({
     fetchStories: builder.query<Array<iStoryEntity>, number>({
       query: (scroll) => ({ url: `story/pre/${scroll}` }),
