@@ -1,11 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { iStoryEntity, sortByStories } from '../types/story.interface';
+import { iStoryEntity, sortByStories, TypeOfStory } from '../types/story.interface';
 
 interface getListProps {
   page: number,
   limit: number,
   sortBy: sortByStories,
   sortOrder: 'ASC' | 'DESC',
+  type: TypeOfStory | null,
 }
 
 interface responseList {
@@ -30,8 +31,8 @@ export const storiesApi = createApi({
     }),
 
     getList: builder.query<responseList, getListProps>({
-      query: ({ page, limit, sortBy, sortOrder }) => (
-        { url: `story/list?page=${page}&limit=${limit}&sort=${sortBy}&order=${sortOrder}` }
+      query: ({ page, limit, sortBy, sortOrder, type }) => (
+        { url: `story/list?page=${page}&limit=${limit}&sort=${sortBy}&order=${sortOrder}${type ? `&type=${type}` : ''}` }
       ),
       providesTags: ['Story'],
     }),

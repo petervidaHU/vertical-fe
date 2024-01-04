@@ -1,9 +1,11 @@
 import React, { ChangeEvent, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Box, Button, Collapse, IconButton, Input, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from '@chakra-ui/react';
+import { Box, Button, IconButton, Input, Radio, RadioGroup, Stack, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from '@chakra-ui/react';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { useDeleteStoryMutation, useGetListQuery } from '../API/storyAPI';
-import { sortByStories, typeOfStory } from '../types/story.interface';
+import { sortByStories, TypeOfStory } from '../types/story.interface';
+
+type checkBoxType = TypeOfStory | 'both';
 
 const StoriesList: React.FC = () => {
   const navigate = useNavigate();
@@ -12,9 +14,11 @@ const StoriesList: React.FC = () => {
   const [showDescription, setShowDescription] = useState<{ [key: string]: boolean }>({});
   const [sortBy, setSortBy] = useState<sortByStories>('title');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
-  const [type, setType] = useState<typeOfStory>('story');
+  const [typeOfList, setTypeOfList] = useState<checkBoxType>(TypeOfStory.Story);
 
-  const { data: stories, isError, isLoading } = useGetListQuery({ page, limit, sortBy, sortOrder });
+  const type = typeOfList === 'both' ? null : typeOfList;
+
+  const { data: stories, isError, isLoading } = useGetListQuery({ page, limit, sortBy, sortOrder, type });
   const [deleteStory] = useDeleteStoryMutation();
 
   if (isLoading) {
@@ -53,6 +57,10 @@ const StoriesList: React.FC = () => {
     }
   };
 
+  const handleTypeOfListChange = (nextValue: checkBoxType) => {
+    setTypeOfList(nextValue);
+  };
+
   const ThSort: React.FC<{ name: sortByStories, publicName: string }> = ({ name, publicName }) => (
     <Th>
       {publicName}
@@ -70,6 +78,14 @@ const StoriesList: React.FC = () => {
 
   return (
     <>
+      <RadioGroup onChange={handleTypeOfListChange} value={typeOfList}>
+      <Stack direction="row">
+        <Radio value={TypeOfStory.Story}>Story</Radio>
+        <Radio value={TypeOfStory.Epic}>Epic</Radio>
+        <Radio value="both">Both</Radio>
+      </Stack>
+    </RadioGroup>
+
       <Table variant="" >
         <Thead>
           <Tr>

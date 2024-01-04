@@ -1,8 +1,12 @@
-export type typeOfStory = 'story' | 'epic';
+export enum TypeOfStory {
+  Story = 'story',
+  Epic = 'epic',
+}
+// export type typeOfStory = 'story' | 'epic';
 
 export interface iStoryEntity {
   id: string,
-  type: typeOfStory,
+  type: TypeOfStory,
   title: string,
   description: string,
   startPoint: number,

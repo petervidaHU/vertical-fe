@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useGetOneQuery, useUpdateStoryMutation, useCreateStoryMutation } from "../API/storyAPI";
-import { iStoryEntity } from '../types/story.interface';
+import { iStoryEntity, TypeOfStory } from '../types/story.interface';
 
 export const useOrganizeApis = (id: string) => {
   const [formState, setFormState] = useState<Omit<iStoryEntity, 'id'> | iStoryEntity>({ 
     title: "",
-    type: 'story',
+    type: TypeOfStory.Story,
     description: "",
     startPoint: 0,
     endPoint: 0,
