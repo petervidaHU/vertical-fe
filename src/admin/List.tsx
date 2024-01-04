@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { Box, Button, Collapse, Heading, IconButton, Input, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from '@chakra-ui/react';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from '@chakra-ui/icons';
-import { useGetListQuery } from '../API/storyAPI';
+import { useDeleteStoryMutation, useGetListQuery } from '../API/storyAPI';
 import { sortByStories } from '../types/story.interface';
 
 const StoriesList: React.FC = () => {
@@ -12,14 +12,23 @@ const StoriesList: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
 
   const { data: stories, isError, isLoading } = useGetListQuery({ page, limit, sortBy, sortOrder });
+  const [ deleteStory ] = useDeleteStoryMutation();
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (isError) {
+    return <Text>Error occurred while fetching stories.</Text>;
+  }
 
   const toggleSort = (name: sortByStories) => {
     setSortBy(name);
     setSortOrder(prev => prev === 'ASC' ? 'DESC' : 'ASC');
   }
-
-  const changeLimit = (event) => {
-    setLimit(event.target.value);
+  // TODO: bug if empty or not number
+  const changeLimit = (event: ChangeEvent<HTMLInputElement>) => {
+    setLimit(event.target.value as unknown as number);
   };
 
   const toggleShowDescription = (id: string) => {
@@ -29,13 +38,19 @@ const StoriesList: React.FC = () => {
     }));
   };
 
-  if (isLoading) {
-    return <Text>Loading...</Text>;
-  }
-
-  if (isError) {
-    return <Text>Error occurred while fetching stories.</Text>;
-  }
+  const handleEdit = (id: string) => {
+  };
+  
+  const handleDelete = async (id: string) => {
+    try {
+      deleteStory(id);
+      // then refetch the stories list to update the table
+      // useGetStoriesQuery.refetch();
+    } catch (error) {
+      console.error(error)
+      // handle the error
+    }
+  };
 
   const ThSort: React.FC<{ name: sortByStories, publicName: string }> = ({ name, publicName }) => (
     <Th>
@@ -54,18 +69,13 @@ const StoriesList: React.FC = () => {
 
   return (
     <>
-      <div>
-        sortby: {sortBy}
-      </div>
-      <div>
-        order: {sortOrder}
-      </div>
       <Table variant="" >
         <Thead>
           <Tr>
             <ThSort name="title" publicName="Title" />
             <ThSort name="startPoint" publicName="Start Point" />
             <ThSort name="endPoint" publicName="End Point" />
+            <Th isNumeric>Actions</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -84,6 +94,10 @@ const StoriesList: React.FC = () => {
               </Td>
               <Td>{story.startPoint}</Td>
               <Td>{story.endPoint}</Td>
+              <Td>
+                <Button onClick={() => handleEdit(story.id)}>Edit</Button>
+                <Button onClick={() => handleDelete(story.id)}>Delete</Button>
+              </Td>
 
             </Tr>
             <Tr>
