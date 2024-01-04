@@ -8,20 +8,27 @@ interface getListProps {
   sortOrder: 'ASC' | 'DESC',
 }
 
+interface responseList {
+  list: Array<iStoryEntity>,
+  meta: { total: number },
+}
+
 const baseUrl = 'http://localhost:3000';
 
 export const storiesApi = createApi({
   reducerPath: 'storiesApi',
-  baseQuery: fetchBaseQuery({ baseUrl:  baseUrl}),
+  baseQuery: fetchBaseQuery({ baseUrl: baseUrl }),
   endpoints: (builder) => ({
     fetchStories: builder.query<Array<iStoryEntity>, number>({
       query: (scroll) => ({ url: `story/pre/${scroll}` }),
     }),
 
-    getList: builder.query<Array<iStoryEntity>, getListProps>({
-      query: ({page, limit, sortBy, sortOrder}) => ({ url: `story/list?page=${page}&limit=${limit}&sort=${sortBy}&order=${sortOrder}` }),
+    getList: builder.query<responseList, getListProps>({
+      query: ({ page, limit, sortBy, sortOrder }) => (
+        { url: `story/list?page=${page}&limit=${limit}&sort=${sortBy}&order=${sortOrder}` }
+      ),
     }),
-  
+
     createStory: builder.mutation<iStoryEntity, Partial<iStoryEntity>>({
       query: (story) => ({
         url: 'story',
@@ -29,7 +36,7 @@ export const storiesApi = createApi({
         body: story,
       }),
     }),
-  
+
     updateStory: builder.mutation<iStoryEntity, Partial<iStoryEntity>>({
       query: (story) => ({
         url: `story/${story.id}`,

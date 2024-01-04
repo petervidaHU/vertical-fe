@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Button, Collapse, Heading, IconButton, Table, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react';
-import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
+import { Box, Button, Collapse, Heading, IconButton, Input, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from '@chakra-ui/react';
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import { useGetListQuery } from '../API/storyAPI';
 import { sortByStories } from '../types/story.interface';
 
@@ -17,6 +17,10 @@ const StoriesList: React.FC = () => {
     setSortBy(name);
     setSortOrder(prev => prev === 'ASC' ? 'DESC' : 'ASC');
   }
+
+  const changeLimit = (event) => {
+    setLimit(event.target.value);
+  };
 
   const toggleShowDescription = (id: string) => {
     setShowDescription(prev => ({
@@ -50,12 +54,12 @@ const StoriesList: React.FC = () => {
 
   return (
     <>
-    <div>
-      sortby: {sortBy}
-    </div>
-    <div>
-      order: {sortOrder}
-    </div>
+      <div>
+        sortby: {sortBy}
+      </div>
+      <div>
+        order: {sortOrder}
+      </div>
       <Table variant="" >
         <Thead>
           <Tr>
@@ -65,7 +69,7 @@ const StoriesList: React.FC = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {stories.map((story) => (<>
+          {stories.list.map((story) => (<>
             <Tr key={story.id}>
               <Td>
                 <IconButton
@@ -93,10 +97,25 @@ const StoriesList: React.FC = () => {
           ))}
         </Tbody>
       </Table>
-      <Box display="flex" justifyContent="center" marginTop="4">
-        <Button onClick={() => setPage(page > 1 ? page - 1 : 1)} disabled={page === 1} mr="4">Previous</Button>
-        <Button onClick={() => setPage(page => page + 1)}>Next</Button>
-      </Box>
+
+      <Wrap spacing="4">
+        <Button onClick={() => setPage(page > 1 ? page - 1 : 1)} leftIcon={<ChevronLeftIcon />} isDisabled={page === 1}>
+          Prev
+        </Button>
+        {[...Array(Math.ceil((stories.meta.total || 0) / limit))].map((_, i) => (
+          <WrapItem key={i}>
+            <Button onClick={() => setPage(i + 1)} isActive={page === i + 1}>
+              {i + 1}
+            </Button>
+          </WrapItem>
+        ))}
+        <Button onClick={() => setPage(page => page + 1)} rightIcon={<ChevronRightIcon />} isDisabled={page >= stories.meta.total || true}>
+          Next
+        </Button>
+        <Text>Total Number of Stories: {stories.meta.total || '0'}</Text>
+
+        <Input type="number" min={1} value={limit} onChange={changeLimit} />
+      </Wrap>
     </>
   );
 }
