@@ -1,9 +1,7 @@
 import React, { ChangeEvent, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-
-
-import { Box, Button, Collapse, Heading, IconButton, Input, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from '@chakra-ui/react';
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from '@chakra-ui/icons';
+import { Box, Button, Collapse, IconButton, Input, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from '@chakra-ui/react';
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { useDeleteStoryMutation, useGetListQuery } from '../API/storyAPI';
 import { sortByStories } from '../types/story.interface';
 
@@ -97,8 +95,8 @@ const StoriesList: React.FC = () => {
               <Td>{story.startPoint}</Td>
               <Td>{story.endPoint}</Td>
               <Td>
-                <Button onClick={() => handleEdit(story.id)}>Edit</Button>
-                <Button onClick={() => handleDelete(story.id)}>Delete</Button>
+                <IconButton aria-label="Delete" icon={<DeleteIcon />} isRound={true} colorScheme="red" onClick={() => handleDelete(story.id)} />
+                <IconButton aria-label="Edit" icon={<EditIcon />} isRound={true} colorScheme="teal" onClick={() => handleEdit(story.id)} />
               </Td>
 
             </Tr>
