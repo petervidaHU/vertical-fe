@@ -2,7 +2,6 @@ export enum TypeOfStory {
   Story = 'story',
   Epic = 'epic',
 }
-// export type typeOfStory = 'story' | 'epic';
 
 export interface iStoryEntity {
   id: string,

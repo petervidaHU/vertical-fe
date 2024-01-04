@@ -33,7 +33,7 @@ const StoriesList: React.FC = () => {
     setSortBy(name);
     setSortOrder(prev => prev === 'ASC' ? 'DESC' : 'ASC');
   }
-  // TODO: bug if empty or not number
+  // BUG: bug if empty or not number
   const changeLimit = (event: ChangeEvent<HTMLInputElement>) => {
     setLimit(event.target.value as unknown as number);
   };
@@ -75,16 +75,16 @@ const StoriesList: React.FC = () => {
       />
     </Th>
   )
-
+  // BUG: type not implemented for total number of stories
   return (
     <>
       <RadioGroup onChange={handleTypeOfListChange} value={typeOfList}>
-      <Stack direction="row">
-        <Radio value={TypeOfStory.Story}>Story</Radio>
-        <Radio value={TypeOfStory.Epic}>Epic</Radio>
-        <Radio value="both">Both</Radio>
-      </Stack>
-    </RadioGroup>
+        <Stack direction="row">
+          <Radio value={TypeOfStory.Story}>Story</Radio>
+          <Radio value={TypeOfStory.Epic}>Epic</Radio>
+          <Radio value="both">Both</Radio>
+        </Stack>
+      </RadioGroup>
 
       <Table variant="" >
         <Thead>
