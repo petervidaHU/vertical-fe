@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, NumberInput, NumberInputField } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, NumberInput, NumberInputField, Radio, RadioGroup, } from '@chakra-ui/react';
 import { useOrganizeApis } from './useOrganizeApis';
 import { useParams } from 'react-router-dom';
 
 const StoryForm: FC = () => {
   const { id } = useParams()
-  const {formState, setFormState, saveStory, isSuccess, isError, isLoading } = useOrganizeApis(id);
+  const { formState, setFormState, saveStory, isSuccess, isError, isLoading } = useOrganizeApis(id);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,6 +30,12 @@ const StoryForm: FC = () => {
       </Box>
 
       <Box as='form' onSubmit={handleSubmit}>
+        <Box padding="5">
+          <RadioGroup onChange={value => handleChange({target: {name: 'type', value}})} value={formState.type}>
+            <Radio value="story">Story</Radio>
+            <Radio value="epic">Epic</Radio>
+          </RadioGroup>
+        </Box>
         <FormControl id="title">
           <FormLabel>Title</FormLabel>
           <Input name='title' value={formState.title} onChange={handleChange} />

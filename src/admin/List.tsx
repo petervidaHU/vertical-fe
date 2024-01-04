@@ -101,12 +101,12 @@ const StoriesList: React.FC = () => {
               </Td>
 
             </Tr>
-            <Tr>
-              <Collapse in={showDescription[story.id]}>
+            <Tr display={showDescription[story.id] ? "table-row" : "none"}>
+              <Td colSpan={4}>
                 <Box margin={1} >
                   {story.description}
                 </Box>
-              </Collapse>
+              </Td>
             </Tr>
           </>
           ))}
