@@ -1,10 +1,14 @@
 import React, { ChangeEvent, useState } from 'react';
+import { useNavigate } from "react-router-dom";
+
+
 import { Box, Button, Collapse, Heading, IconButton, Input, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from '@chakra-ui/react';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import { useDeleteStoryMutation, useGetListQuery } from '../API/storyAPI';
 import { sortByStories } from '../types/story.interface';
 
 const StoriesList: React.FC = () => {
+  const navigate = useNavigate();
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [showDescription, setShowDescription] = useState<{ [key: string]: boolean }>({});
@@ -12,7 +16,7 @@ const StoriesList: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
 
   const { data: stories, isError, isLoading } = useGetListQuery({ page, limit, sortBy, sortOrder });
-  const [ deleteStory ] = useDeleteStoryMutation();
+  const [deleteStory] = useDeleteStoryMutation();
 
   if (isLoading) {
     return <Text>Loading...</Text>;
@@ -39,8 +43,9 @@ const StoriesList: React.FC = () => {
   };
 
   const handleEdit = (id: string) => {
+    navigate(`/admin/edit/${id}`);
   };
-  
+
   const handleDelete = async (id: string) => {
     try {
       deleteStory(id);

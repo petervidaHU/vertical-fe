@@ -1,24 +1,16 @@
-import React, { useState } from 'react';
+import React, { FC } from 'react';
 import { Box, Button, FormControl, FormLabel, Input, NumberInput, NumberInputField } from '@chakra-ui/react';
-import { useCreateStoryMutation } from '../API/storyAPI';
+import { useOrganizeApis } from './useOrganizeApis';
+import { useParams } from 'react-router-dom';
 
-export default function StoryForm() {
-  const [formState, setFormState] = useState({
-    title: '',
-    description: '',
-    startPoint: 0,
-    endPoint: 0,
-  });
-
-  const [createStory, { isLoading, isError, isSuccess, data }] = useCreateStoryMutation();
+const StoryForm: FC = () => {
+  const { id } = useParams()
+  const {formState, setFormState, saveStory, isSuccess, isError, isLoading } = useOrganizeApis(id);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createStory(formState);
-      if (isSuccess) {
-        console.log('Story created successfully', data);
-      }
+      await saveStory(formState);
     } catch (error) {
       console.error('Failed to create story:', error);
     }
@@ -50,14 +42,14 @@ export default function StoryForm() {
 
         <FormControl id="startPoint">
           <FormLabel>Start Point</FormLabel>
-          <NumberInput name='startPoint' value={formState.startPoint} onChange={value => handleChange({ target: { name: 'startPoint', value } })}>
+          <NumberInput name='startPoint' value={formState.startPoint} onChange={value => handleChange({ target: { name: 'startPoint', value: parseInt(value) } })}>
             <NumberInputField />
           </NumberInput>
         </FormControl>
 
         <FormControl id="endPoint">
           <FormLabel>End Point</FormLabel>
-          <NumberInput name='endPoint' value={formState.endPoint} onChange={value => handleChange({ target: { name: 'endPoint', value } })}>
+          <NumberInput name='endPoint' value={formState.endPoint} onChange={value => handleChange({ target: { name: 'endPoint', value: parseInt(value) } })}>
             <NumberInputField />
           </NumberInput>
         </FormControl>
@@ -69,3 +61,5 @@ export default function StoryForm() {
     </>
   );
 }
+
+export default StoryForm;

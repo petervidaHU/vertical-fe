@@ -16,7 +16,7 @@ export const routes = createBrowserRouter([
     element: <Admin />,
     children: [
       {
-        path: "edit",
+        path: "edit/:id?",
         element: <StoryForm />
       },
       {
