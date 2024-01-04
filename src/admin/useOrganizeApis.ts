@@ -5,6 +5,7 @@ import { iStoryEntity } from '../types/story.interface';
 export const useOrganizeApis = (id: string) => {
   const [formState, setFormState] = useState<Omit<iStoryEntity, 'id'> | iStoryEntity>({ 
     title: "",
+    type: 'story',
     description: "",
     startPoint: 0,
     endPoint: 0,

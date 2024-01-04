@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Button, Collapse, IconButton, Input, Table, Tbody, Td, Text, Th, Thead, Tr, Wrap, WrapItem } from '@chakra-ui/react';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { useDeleteStoryMutation, useGetListQuery } from '../API/storyAPI';
-import { sortByStories } from '../types/story.interface';
+import { sortByStories, typeOfStory } from '../types/story.interface';
 
 const StoriesList: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ const StoriesList: React.FC = () => {
   const [showDescription, setShowDescription] = useState<{ [key: string]: boolean }>({});
   const [sortBy, setSortBy] = useState<sortByStories>('title');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC');
+  const [type, setType] = useState<typeOfStory>('story');
 
   const { data: stories, isError, isLoading } = useGetListQuery({ page, limit, sortBy, sortOrder });
   const [deleteStory] = useDeleteStoryMutation();

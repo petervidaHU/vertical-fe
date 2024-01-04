@@ -14,6 +14,7 @@ export const routes = createBrowserRouter([
   {
     path: "/admin",
     element: <Admin />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "edit/:id?",
