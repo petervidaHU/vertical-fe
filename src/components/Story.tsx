@@ -1,15 +1,14 @@
 import React from 'react'
 import { iStoryEntity } from '../types/story.interface'
-import ScrollAmount from './ScrollAmount';
-import { useSelector } from 'react-redux';
-import { selectScroll } from '../store/scrollSlice';
 import styled from '@emotion/styled';
 
-type StoryProps = {
+type Props = {
+  scrollNumber: number,
   comp: iStoryEntity,
 }
 
-const Story: React.FC<StoryProps> = ({
+const Story: React.FC<Props> = ({
+  scrollNumber,
   comp: {
     title,
     description,
@@ -17,8 +16,7 @@ const Story: React.FC<StoryProps> = ({
     endPoint,
   },
 }) => {
-  const scrollNumber = useSelector(selectScroll);
-  const topPosition = scrollNumber - startPoint;
+ const topPosition = scrollNumber - startPoint;
 
   const isVisible = () => scrollNumber >= startPoint && scrollNumber <= endPoint;
 
@@ -51,6 +49,6 @@ const StoryComp = styled.div<StyledProps>`
   position: absolute;
   top: ${({startP}) => startP ? `${startP}px` : '0px'};
   left: 0;
-  width: 100%;
-  height: 100%;
+  // width: 100%;
+  // height: 100%;
   `

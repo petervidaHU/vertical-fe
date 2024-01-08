@@ -3,7 +3,7 @@ import PageTitle from './PageTitle'
 import styled from '@emotion/styled'
 import { useScroll } from '../hooks/useScroll'
 import ScrollAmount from './ScrollAmount'
-import FlyingComponents from './FlyingComponents'
+import StorySelector from './StorySelector'
 
 const MainWrapper = () => {
   const { data, error, isLoading, scrollAmount } = useScroll()
@@ -14,7 +14,7 @@ const MainWrapper = () => {
       <GridContainer>
         <div>
           {data && data.length > 0 && (
-            <FlyingComponents comps={data} />
+            <StorySelector comps={data} />
           )}
         </div>
         <RightChannel>
