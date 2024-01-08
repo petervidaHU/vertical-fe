@@ -4,12 +4,14 @@ import styled from '@emotion/styled'
 import { useScroll } from '../hooks/useScroll'
 import ScrollAmount from './ScrollAmount'
 import StorySelector from './StorySelector'
+import Settings from './settings/Settings'
 
 const MainWrapper = () => {
   const { data, error, isLoading, scrollAmount } = useScroll()
 
   return (
     <Main>
+      <Settings />
       <PageTitle />
       <GridContainer>
         <div>
@@ -28,10 +30,6 @@ const MainWrapper = () => {
 export default MainWrapper
 
 const Main = styled.section`
-      /* display: flex; */
-      /* flex-direction: column; */
-      /* align-items: center; */
-      /* justify-content: center; */
       width: auto;
       height: 100vh;
       background: #0f0919;
@@ -39,7 +37,7 @@ const Main = styled.section`
       overflow: hidden;
       position: relative;
       z-index: 1;
-      `;      
+      `;
 
 const GridContainer = styled.div`
       margin-inline-start: 40px;
