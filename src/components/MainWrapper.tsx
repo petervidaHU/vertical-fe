@@ -7,7 +7,7 @@ import StorySelector from './StorySelector'
 import Settings from './settings/Settings'
 
 const MainWrapper = () => {
-  const { data, error, isLoading, scrollAmount } = useScroll()
+  const { data, error, isLoading } = useScroll()
 
   return (
     <Main>
@@ -20,7 +20,7 @@ const MainWrapper = () => {
           )}
         </div>
         <RightChannel>
-          <ScrollAmount height={scrollAmount} />
+          <ScrollAmount />
         </RightChannel>
       </GridContainer>
     </Main>

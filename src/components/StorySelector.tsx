@@ -3,14 +3,15 @@ import { TypeOfStory, iStoryEntity } from '../types/story.interface';
 import Story from './Story';
 import Epic from './Epic';
 import { useSelector } from 'react-redux';
-import { selectScroll } from '../store/scrollSlice';
+import { selectNaturalScroll, selectScroll } from '../store/scrollSlice';
 
 type Props = {
   comps: Array<iStoryEntity>,
 }
 
 const StorySelector: React.FC<Props> = ({ comps }) => {
-  const scrollNumber = useSelector(selectScroll);
+  const naturalScrollPosition = useSelector(selectNaturalScroll);
+  const scrollPosition = useSelector(selectScroll);
   console.log('comps: ', comps);
 
   return (
@@ -18,13 +19,15 @@ const StorySelector: React.FC<Props> = ({ comps }) => {
       {comps.map(comp =>
         comp.type === TypeOfStory.Story ? (
           <Story
-            scrollNumber={scrollNumber}
+            scrollPosition={scrollPosition}
+            naturalScrollPosition={naturalScrollPosition}
             key={comp.id}
             comp={comp}
           />
         ) : (
           <Epic
-            scrollNumber={scrollNumber}
+            scrollPosition={scrollPosition}
+            naturalScrollPosition={naturalScrollPosition}
             key={comp.id}
             comp={comp}
           />

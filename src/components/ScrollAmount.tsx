@@ -1,12 +1,11 @@
 import React from 'react'
+import { useSelector } from 'react-redux';
+import { selectScroll } from '../store/scrollSlice';
 
-type ScrollAmountType = {
-  height: number
-}
-
-const ScrollAmount: React.FC<ScrollAmountType> = ({height} ) => {
+const ScrollAmount: React.FC = () => {
+  const scrollAmount = useSelector(selectScroll);
   return (
-    <div>height: {height}</div>
+    <div>height: {scrollAmount}</div>
   )
 }
 

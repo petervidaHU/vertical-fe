@@ -3,12 +3,14 @@ import { iStoryEntity } from '../types/story.interface'
 import styled from '@emotion/styled'
 
 type Props = {
-  scrollNumber: number,
+  naturalScrollPosition: number,
+  scrollPosition: number,
   comp: iStoryEntity,
 }
 
 const Epic: React.FC<Props> = ({
-  scrollNumber,
+  scrollPosition,
+  naturalScrollPosition,
   comp: {
     title,
     description,
@@ -16,7 +18,7 @@ const Epic: React.FC<Props> = ({
     endPoint,
   },
 }) => {
-const isVisible = scrollNumber >= startPoint && scrollNumber <= endPoint;
+const isVisible = scrollPosition >= startPoint && scrollPosition <= endPoint;
 
   return (
     <>

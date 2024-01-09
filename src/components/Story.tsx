@@ -1,14 +1,16 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { iStoryEntity } from '../types/story.interface'
 import styled from '@emotion/styled';
 
 type Props = {
-  scrollNumber: number,
+  naturalScrollPosition: number,
+  scrollPosition: number,
   comp: iStoryEntity,
 }
 
 const Story: React.FC<Props> = ({
-  scrollNumber,
+  scrollPosition,
+  naturalScrollPosition,
   comp: {
     title,
     description,
@@ -16,11 +18,15 @@ const Story: React.FC<Props> = ({
     endPoint,
   },
 }) => {
- const topPosition = scrollNumber - startPoint;
-
-  const isVisible = () => scrollNumber >= startPoint && scrollNumber <= endPoint;
-
+  const isVisible = () => scrollPosition >= startPoint && scrollPosition <= endPoint;
   if (!isVisible()) return null;
+
+   const starter= useRef<number>(naturalScrollPosition);
+   const topPosition = naturalScrollPosition - starter.current;
+  
+  console.log('natural position: ', title, naturalScrollPosition);
+  console.log('starter: ', title, starter);
+  console.log('toppos: ', title, topPosition);
 
   return (
     <StoryComp
@@ -45,9 +51,9 @@ type StyledProps = {
 };
 
 const StoryComp = styled.div<StyledProps>`
-  display: ${({isVisible}) => isVisible ? 'block' : 'none'};
+  display: ${({ isVisible }) => isVisible ? 'block' : 'none'};
   position: absolute;
-  top: ${({startP}) => startP ? `${startP}px` : '0px'};
+  top: ${({ startP }) => startP ? `${startP}px` : '0px'};
   left: 0;
   // width: 100%;
   // height: 100%;
