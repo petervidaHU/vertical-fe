@@ -2,5 +2,12 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@style/*": ["src/style/*"],
+      "@comp/*": ["src/components/*"],
+      "@type/*": ["src/types/*"],
+      "@store/*": ["src/store/*"]
+    }
   }
 }

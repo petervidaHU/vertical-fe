@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box } from '@chakra-ui/react';
 import Pace from './Pace';
-import { zIndex } from '../../style/zIndex';
+import { zIndex } from '@style/zIndex';
 
 const Settings = () => {
   const [showPace, setShowPace] = useState(false);

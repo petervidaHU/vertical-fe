@@ -1,5 +1,5 @@
 import React from 'react'
-import { iStoryEntity } from '../types/story.interface'
+import { iStoryEntity } from '@type/story.interface'
 import styled from '@emotion/styled'
 
 type Props = {
