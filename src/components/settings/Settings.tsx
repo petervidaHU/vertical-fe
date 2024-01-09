@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import styled from '@emotion/styled'
 import { Box } from '@chakra-ui/react';
 import Pace from './Pace';
+import { zIndex } from '../../style/zIndex';
 
 const Settings = () => {
   const [showPace, setShowPace] = useState(false);
@@ -11,7 +11,7 @@ const Settings = () => {
       onMouseEnter={() => setShowPace(true)}
       onMouseLeave={() => setShowPace(false)}
       position="relative"
-      zIndex="100"
+      zIndex={zIndex.settings}
     >
       <Box
         position="absolute"
