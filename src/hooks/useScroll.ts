@@ -32,7 +32,7 @@ export const useScroll = () => {
       data.stories.filter(story => story.startPoint > scrollAmount).length < 3 ||
       data.epics.filter(story => story.startPoint > scrollAmount).length < 3
     ) {
-      console.log('fetch triggered ', scrollAmount)
+      console.log("fetch triggered ", scrollAmount)
       triggerFetch(scrollAmount);
     }
 
