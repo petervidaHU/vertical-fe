@@ -14,6 +14,11 @@ interface responseList {
   meta: { total: number },
 }
 
+export interface StoriesResponse {
+  stories: Array<iStoryEntity>;
+  epics: Array<iStoryEntity>;
+};
+
 const baseUrl = 'http://localhost:3000';
 
 export const storiesApi = createApi({
@@ -22,7 +27,7 @@ export const storiesApi = createApi({
   tagTypes: ['Story'],
 
   endpoints: (builder) => ({
-    fetchStories: builder.query<Array<iStoryEntity>, number>({
+    fetchStories: builder.query<StoriesResponse, number>({
       query: (scroll) => ({ url: `story/pre/${scroll}` }),
     }),
 

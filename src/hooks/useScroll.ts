@@ -1,8 +1,13 @@
 import { useEffect, useCallback } from "react";
-import { useLazyFetchStoriesQuery } from "../API/storyAPI";
+import { StoriesResponse, useLazyFetchStoriesQuery } from "../API/storyAPI";
 import { useDispatch, useSelector } from 'react-redux';
 import { setScroll, setNaturalScroll, selectScroll, selectNaturalScroll } from './../store/scrollSlice';
 import { selectPace } from "../store/paceSlice";
+
+const initialState: StoriesResponse = {
+  stories: [],
+  epics: [],
+}
 
 export const useScroll = () => {
   const dispatch = useDispatch();
@@ -10,7 +15,8 @@ export const useScroll = () => {
   const pace = useSelector(selectPace);
   const naturalScroll = useSelector(selectNaturalScroll)
 
-  const [triggerFetch, { data = [], error, isLoading }] = useLazyFetchStoriesQuery();
+
+  const [triggerFetch, { data = initialState, error, isLoading }] = useLazyFetchStoriesQuery();
 
   const handleScroll = useCallback((event: WheelEvent) => {
     event.preventDefault();
@@ -21,12 +27,16 @@ export const useScroll = () => {
     dispatch(setNaturalScroll(naturalMovement > 0 ? naturalMovement : 0))
     dispatch(setScroll((movement > 0 ? movement : 0)));
 
-    if (data.filter(story => story.startPoint > scrollAmount).length < 3) {
+    if (
+      //TODO: refactor fetch logic
+      data.stories.filter(story => story.startPoint > scrollAmount).length < 3 ||
+      data.epics.filter(story => story.startPoint > scrollAmount).length < 3
+    ) {
       console.log('fetch triggered ', scrollAmount)
       triggerFetch(scrollAmount);
     }
 
-  }, [scrollAmount, dispatch, data.length, triggerFetch]);
+  }, [scrollAmount, dispatch, data, triggerFetch]);
 
   useEffect(() => {
     document.addEventListener('wheel', handleScroll, { passive: false });
@@ -36,5 +46,7 @@ export const useScroll = () => {
     };
   }, [handleScroll]);
 
-  return { data, error, isLoading };
+  const { stories, epics } = data;
+
+  return { stories, epics, error, isLoading };
 }
