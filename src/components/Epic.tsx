@@ -3,28 +3,22 @@ import { iStoryEntity } from '../types/story.interface'
 import styled from '@emotion/styled'
 
 type Props = {
-  naturalScrollPosition: number,
   scrollPosition: number,
-  comp: iStoryEntity,
+  epic: iStoryEntity,
 }
 
 const Epic: React.FC<Props> = ({
   scrollPosition,
-  naturalScrollPosition,
-  comp: {
+  epic: {
     title,
     description,
     startPoint,
     endPoint,
   },
 }) => {
-const isVisible = scrollPosition >= startPoint && scrollPosition <= endPoint;
-
   return (
     <>
-     <EpicComp
-      isVisible={isVisible}
-    >
+     <EpicComp>
       <div>{title}</div>
       <div>{description}</div>
       <div>{startPoint}</div>
@@ -36,12 +30,7 @@ const isVisible = scrollPosition >= startPoint && scrollPosition <= endPoint;
 
 export default Epic
 
-type StyledProps = {
-  isVisible: boolean,
-};
-
-const EpicComp = styled.div<StyledProps>`
-  display: ${({isVisible}) => isVisible ? 'block' : 'none'};
+const EpicComp = styled.div`
   position: absolute;
   bottom: 100px; 
   right: 100px;

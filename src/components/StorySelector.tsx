@@ -6,30 +6,30 @@ import { useSelector } from 'react-redux';
 import { selectNaturalScroll, selectScroll } from '../store/scrollSlice';
 
 type Props = {
-  comps: Array<iStoryEntity>,
+  stories: Array<iStoryEntity>,
 }
 
-const StorySelector: React.FC<Props> = ({ comps }) => {
+const StorySelector: React.FC<Props> = ({ stories }) => {
   const naturalScrollPosition = useSelector(selectNaturalScroll);
   const scrollPosition = useSelector(selectScroll);
-  console.log('comps: ', comps);
+  console.log('comps: ', stories);
+  const s = stories.filter(s => scrollPosition >= s.startPoint - 2000 && scrollPosition <= s.startPoint + 2000 )
+  console.log('s: ', s);
 
   return (
     <>
-      {comps.map(comp =>
+      {s.map(comp =>
         comp.type === TypeOfStory.Story ? (
           <Story
-            scrollPosition={scrollPosition}
             naturalScrollPosition={naturalScrollPosition}
             key={comp.id}
-            comp={comp}
+            story={comp}
           />
         ) : (
           <Epic
             scrollPosition={scrollPosition}
-            naturalScrollPosition={naturalScrollPosition}
             key={comp.id}
-            comp={comp}
+            epic={comp}
           />
         )
       )}

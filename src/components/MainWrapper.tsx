@@ -16,7 +16,7 @@ const MainWrapper = () => {
       <GridContainer>
         <div>
           {data && data.length > 0 && (
-            <StorySelector comps={data} />
+            <StorySelector stories={data} />
           )}
         </div>
         <RightChannel>
