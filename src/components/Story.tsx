@@ -1,6 +1,6 @@
 import React from 'react'
 import { iStoryEntity } from '../types/story.interface'
-import styled from '@emotion/styled';
+import { Box, Text } from "@chakra-ui/react";
 
 type Props = {
   naturalScrollPosition: number,
@@ -18,32 +18,12 @@ const Story: React.FC<Props> = ({
 }) => {
    const topPosition = naturalScrollPosition - startPoint;
   
-  console.log('natural position: ', title, naturalScrollPosition);
-  console.log('starter: ', title, startPoint);
-  console.log('toppos: ', title, topPosition);
-
   return (
-    <StoryComp
-      startP={topPosition}
-      endP={endPoint}
-    >
-      <div>{title}</div>
-      <div>{description}</div>
-      <div>{startPoint}</div>
-      <div>{endPoint}</div>
-    </StoryComp>
+    <Box position="absolute" top={topPosition} left="0" m={4} bg="teal.500" p={5} color="white" borderRadius="md">
+      <Text fontWeight="bold" fontSize="2rem">{title}</Text>
+      <Text>{description}</Text>
+    </Box>
   )
 }
 
 export default Story
-
-type StyledProps = {
-  startP: number,
-  endP: number,
-};
-
-const StoryComp = styled.div<StyledProps>`
-  position: absolute;
-  top: ${({ startP }) => startP ? `${startP}px` : '0px'};
-  left: 0;
-  `
