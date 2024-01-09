@@ -10,6 +10,7 @@ const Settings = () => {
     <Box
       onMouseEnter={() => setShowPace(true)}
       onMouseLeave={() => setShowPace(false)}
+      position="relative"
       zIndex="100"
     >
       <Box
@@ -51,16 +52,3 @@ const Settings = () => {
 }
 
 export default Settings;
-
-const SettingContainer = styled.section`
-position: absolute;
-top: 0;
-left: 0;
-right: 0;
-`
-
-const SettingsTab = styled.div`
-padding: 10px;
-background: #ccc;
-
-`
