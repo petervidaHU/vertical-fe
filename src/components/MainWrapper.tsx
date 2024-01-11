@@ -28,6 +28,9 @@ const MainWrapper = () => {
     .filter(s => scrollPosition >= s.startPoint + viewportHeight)
     .filter(story => !passedStoriesIds.includes(story.id));
 
+    // TODO: delete passed stories if scoll up
+    // TODO: delete passed stories if epic changed ?
+    
   if (newPassed.length > 0) {
     dispatch(setPassedStories(newPassed));
   }

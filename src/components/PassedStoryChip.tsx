@@ -10,7 +10,7 @@ const PassedStoryChip: React.FC<Props> = ({
   story,
 }) => {
   const displayName = story.title.length > 10? story.title.substring(0, 10) + '...' : story.title;
-
+// TODO: interactivity with chips
   return (
     <Box
       alignItems="center"
