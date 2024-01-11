@@ -42,7 +42,7 @@ const MainWrapper = () => {
 
   return (
     <Box
-      bg="#0f0919"
+      bg="#2c81dd"
       color="#ffffff"
       h="100vh"
       position="relative"
