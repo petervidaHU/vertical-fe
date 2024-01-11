@@ -1,6 +1,5 @@
-import React from 'react'
-import { iStoryEntity } from '@type/story.interface'
-import styled from '@emotion/styled'
+import { Box, Text } from "@chakra-ui/react";
+import { iStoryEntity } from "@type/story.interface";
 
 type Props = {
   scrollPosition: number,
@@ -13,25 +12,27 @@ const Epic: React.FC<Props> = ({
     title,
     description,
     startPoint,
-    endPoint,
-  },
+    endPoint
+  }
 }) => {
   return (
-    <>
-     <EpicComp>
-      <div>{title}</div>
-      <div>{description}</div>
-      <div>{startPoint}</div>
-      <div>{endPoint}</div>
-    </EpicComp>
-    </>
-  )
+    <Box
+      mb="100px"
+      ml="auto"
+      mr="100px"
+      maxW="50vw"
+      m={4}
+      bg="teal.800"
+      p={5}
+      color="white"
+      borderRadius="md"
+    >
+      <Text fontWeight="bold" fontSize="2rem">{title}</Text>
+      <Text>{description}</Text>
+      <Text>from: {startPoint}</Text>
+      <Text>to: {endPoint}</Text>
+    </Box>
+  );
 }
 
-export default Epic
-
-const EpicComp = styled.div`
-  position: absolute;
-  bottom: 100px; 
-  right: 100px;
-  `
+export default Epic;

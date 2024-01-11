@@ -21,7 +21,7 @@ const Story: React.FC<Props> = ({
   return (
     <Box
       position="relative"
-      maxW="40vw"
+      maxW="60vw"
       top={topPosition}
       left="0"
       m={4}
