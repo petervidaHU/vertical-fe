@@ -17,11 +17,8 @@ const Epic: React.FC<Props> = ({
 }) => {
   return (
     <Box
-      mb="100px"
-      ml="auto"
-      mr="100px"
+      mt={1}
       maxW="50vw"
-      m={4}
       bg="teal.800"
       p={5}
       color="white"
