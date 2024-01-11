@@ -5,30 +5,37 @@ import ScrollAmount from './ScrollAmount'
 import Settings from './settings/Settings'
 import { useScroll } from './../hooks/useScroll';
 import { selectNaturalScroll, selectScroll } from '@store/scrollSlice';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import VisibleStories from './VisibleStories';
 import Epics from './Epics';
+import { getPassedStoriesIds, setPassedStories } from '@store/storiesSlice';
 
 const MainWrapper = () => {
+  const dispatch = useDispatch();
   // TODO: timeline visualization
   // TODO: set an event listener to handle resize
   const viewportHeight = window.innerHeight;
 
-  // BUG: older stories not saved to passed strories array
   const { stories, epics, error, isLoading } = useScroll()
   const naturalScrollPosition = useSelector(selectNaturalScroll);
   const scrollPosition = useSelector(selectScroll);
+  const passedStoriesIds = useSelector(getPassedStoriesIds);
 
-  const storiesVisible = stories.filter(s => scrollPosition >= s.startPoint - 500 && scrollPosition <= s.startPoint + viewportHeight + 500)
+  const storiesVisible = stories.filter(s => scrollPosition >= s.startPoint - 100 && scrollPosition <= s.startPoint + viewportHeight + 100)
   const epicsVisible = epics.filter(s => scrollPosition >= s.startPoint && scrollPosition <= s.endPoint)
-  const storiesPassed = stories.filter(s => scrollPosition >= s.startPoint + viewportHeight - 100)
+
+  const newPassed = storiesVisible
+    .filter(s => scrollPosition >= s.startPoint + viewportHeight)
+    .filter(story => !passedStoriesIds.includes(story.id));
+
+  if (newPassed.length > 0) {
+    dispatch(setPassedStories(newPassed));
+  }
 
   if (error) {
     console.error('there is an error occured during prefetch records: ', error);
     return (<div>error, see console!</div>);
   }
-
-  console.log('passed: ', storiesPassed)
 
   return (
     <Box
@@ -41,6 +48,7 @@ const MainWrapper = () => {
     >
       <Settings />
       <PageTitle />
+
       <Flex
         direction="row"
         p={0}
@@ -61,7 +69,6 @@ const MainWrapper = () => {
 
           <Epics
             epics={epicsVisible}
-            passedStories={storiesPassed}
             scrollPosition={scrollPosition}
           />
 
