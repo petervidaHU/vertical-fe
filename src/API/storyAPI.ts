@@ -19,7 +19,7 @@ export interface StoriesResponse {
   epics: Array<iStoryEntity>;
 };
 
-const baseUrl = 'http://localhost:3000';
+const baseUrl = process.env.REACT_APP_BACKEND_API;
 
 export const storiesApi = createApi({
   reducerPath: 'storiesApi',
