@@ -19,7 +19,8 @@ export interface StoriesResponse {
   epics: Array<iStoryEntity>;
 };
 
-const baseUrl = process.env.REACT_APP_BACKEND_API;
+// const baseUrl = process.env.REACT_APP_BACKEND_API;
+const baseUrl = 'https://vertical-b08vv3rcm-petervidahu.vercel.app/';
 
 export const storiesApi = createApi({
   reducerPath: 'storiesApi',
