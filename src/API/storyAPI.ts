@@ -20,7 +20,7 @@ export interface StoriesResponse {
 };
 
 // const baseUrl = process.env.REACT_APP_BACKEND_API;
-const baseUrl = 'https://vertical-gfvuggaeo-petervidahu.vercel.app/';
+const baseUrl = 'https://vertical-be.vercel.app/';
 
 export const storiesApi = createApi({
   reducerPath: 'storiesApi',
