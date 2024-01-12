@@ -3,8 +3,8 @@ import { iStoryEntity } from '../types/story.interface';
 import { StoriesResponse, getListProps, iTimeline, responseList } from './apiTypes';
 
 // const baseUrl = process.env.REACT_APP_BACKEND_API;
-// const baseUrl = 'https://vertical-be.vercel.app/';
-const baseUrl = 'http://localhost:3000/';
+const baseUrl = 'https://vertical-be.vercel.app/';
+// const baseUrl = 'http://localhost:3000/';
 
 export const storiesApi = createApi({
   reducerPath: 'storiesApi',
