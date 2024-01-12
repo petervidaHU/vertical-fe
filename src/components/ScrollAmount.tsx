@@ -7,6 +7,7 @@ const ScrollAmount: React.FC = () => {
   const scrollAmount = useSelector(selectScroll);
   return (
     <Box>
+      <div className="bg-blue-500">teszt</div>
       <Text
         float="right"
         fontWeight="bold"
