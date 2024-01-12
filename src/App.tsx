@@ -1,6 +1,4 @@
 import React, { useEffect } from 'react'
-import "@style/tailwind.css";
-import { ChakraProvider } from '@chakra-ui/react';
 import { setWindowHeight } from '@store/settingSlice';
 import { useDispatch } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
@@ -21,9 +19,7 @@ const App = () => {
   }, []);
 
   return (
-    <ChakraProvider>
       <RouterProvider router={routes} />
-    </ChakraProvider>
   )
 }
 
