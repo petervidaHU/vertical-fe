@@ -1,5 +1,4 @@
 import React, { FC } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, NumberInput, NumberInputField, Radio, RadioGroup, } from '@chakra-ui/react';
 import { useOrganizeApis } from './useOrganizeApis';
 import { useParams } from 'react-router-dom';
 
@@ -25,45 +24,37 @@ const StoryForm: FC = () => {
 
   return (
     <>
-      <Box>
+      <div>
         {isLoading && (<div>is loading</div>)}
-      </Box>
+      </div>
 
-      <Box as='form' onSubmit={handleSubmit}>
-        <Box padding="5">
-          <RadioGroup onChange={value => handleChange({target: {name: 'type', value}})} value={formState.type}>
-            <Radio value="story">Story</Radio>
-            <Radio value="epic">Epic</Radio>
-          </RadioGroup>
-        </Box>
-        <FormControl id="title">
-          <FormLabel>Title</FormLabel>
-          <Input name='title' value={formState.title} onChange={handleChange} />
-        </FormControl>
+      <form className="" onSubmit={handleSubmit}>
+        <div className="p-5">
+          {/* radio buttons */}
+          <label><input type="radio" value="story" name="type" onChange={(e) => handleChange({ target: { name: 'type', value: e.target.value } })} checked={formState.type === "story"} /> Story</label>
+          <label><input type="radio" value="epic" name="type" onChange={(e) => handleChange({ target: { name: 'type', value: e.target.value } })} checked={formState.type === "epic"} /> Epic</label>
+        </div>
+        {/* title input */}
+        <label htmlFor="title">Title</label>
+        <input id="title" className="block" name='title' value={formState.title} onChange={handleChange} />
 
-        <FormControl id="description">
-          <FormLabel>Description</FormLabel>
-          <Input name='description' value={formState.description} onChange={handleChange} />
-        </FormControl>
+        {/* description input */}
+        <label htmlFor="description">Description</label>
+        <input id="description" className="block" name='description' value={formState.description} onChange={handleChange} />
 
-        <FormControl id="startPoint">
-          <FormLabel>Start Point</FormLabel>
-          <NumberInput name='startPoint' value={formState.startPoint} onChange={value => handleChange({ target: { name: 'startPoint', value: parseInt(value) } })}>
-            <NumberInputField />
-          </NumberInput>
-        </FormControl>
+        {/* start point input */}
+        <label htmlFor="startPoint">Start Point</label>
+        <input id="startPoint" type="number" className="block" name='startPoint' value={formState.startPoint} onChange={e => handleChange({ target: { name: 'startPoint', value: parseInt(e.target.value) } })} />
 
-        <FormControl id="endPoint">
-          <FormLabel>End Point</FormLabel>
-          <NumberInput name='endPoint' value={formState.endPoint} onChange={value => handleChange({ target: { name: 'endPoint', value: parseInt(value) } })}>
-            <NumberInputField />
-          </NumberInput>
-        </FormControl>
+        {/* end point input */}
+        <label htmlFor="endPoint">End Point</label>
+        <input id="endPoint" type="number" className="block" name='endPoint' value={formState.endPoint} onChange={e => handleChange({ target: { name: 'endPoint', value: parseInt(e.target.value) } })} />
 
-        <Button type="submit" colorScheme="blue" mt={4}>
+        {/* submit button */}
+        <button type="submit" className="bg-blue-500 text-white mt-4">
           Submit
-        </Button>
-      </Box>
+        </button>
+      </form>
     </>
   );
 }

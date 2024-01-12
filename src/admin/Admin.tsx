@@ -1,19 +1,18 @@
 import React from 'react'
-import { Box, Text } from "@chakra-ui/react";
 import { Link, Outlet } from 'react-router-dom';
 
 const links = ['edit', 'list'];
 
 const Admin = () => {
   return (<>
-    <Box p="5" borderWidth="1px" marginBlockEnd={10}>
-      <Text fontSize="xl">ADMIN</Text>
-      {links.map(link => (
-        <Link to={link} key={link}>
-          <Text fontSize="lg">{link}</Text>
-        </Link>
-      ))}
-    </Box>
+   <div className="p-5 border mb-10">
+  <p className="text-xl">ADMIN</p>
+  {links.map(link => (
+    <Link to={link} key={link}>
+      <p className="text-lg">{link}</p>
+    </Link>
+  ))}
+</div>
     <Outlet />
   </>
   )
