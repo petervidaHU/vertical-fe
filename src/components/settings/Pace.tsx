@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button, Text, HStack, Box } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectPace, dividePace, multiplyPace } from '../../store/paceSlice';
 
@@ -14,14 +13,14 @@ const Pace = () => {
     }
   
   return (
-    <HStack>
-      <Button onClick={() => dispatch(dividePace())}>-</Button>
-      <Box>
-      <Text>{userFriendlyPace(pace)}</Text>
-
-      </Box>
-      <Button onClick={() => dispatch(multiplyPace())}>+</Button>
-    </HStack>
+    <div className="flex space-x-2">
+    <button className="py-2 px-4 bg-blue-500 text-white rounded" onClick={() => dispatch(dividePace())}>-</button>
+    <div>
+      <p>{userFriendlyPace(pace)}</p>
+  
+    </div>
+    <button className="py-2 px-4 bg-blue-500 text-white rounded" onClick={() => dispatch(multiplyPace())}>+</button>
+  </div>
   )
 }
 

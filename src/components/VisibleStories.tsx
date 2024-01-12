@@ -1,6 +1,5 @@
 import React from 'react'
 import { iStoryEntity } from '@type/story.interface'
-import { Box } from '@chakra-ui/react'
 import Story from './Story'
 
 interface Props {
@@ -13,10 +12,7 @@ const VisibleStories: React.FC<Props> = ({
   pos,
 }) => {
   return (
-    <Box
-      height={{ base: "100vh" }}
-      width={{ base: "60vw" }}
-    >
+    <div className="h-screen">
       {stories.map(story => (
         <Story
           naturalScrollPosition={pos}
@@ -24,7 +20,7 @@ const VisibleStories: React.FC<Props> = ({
           story={story}
         />
       ))}
-    </Box>
+    </div>
   )
 }
 

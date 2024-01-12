@@ -1,6 +1,5 @@
 import React from 'react'
 import { iStoryEntity } from '../types/story.interface'
-import { Box, Text } from "@chakra-ui/react";
 
 type Props = {
   naturalScrollPosition: number,
@@ -19,20 +18,13 @@ const Story: React.FC<Props> = ({
   const topPosition = naturalScrollPosition - startPoint;
 
   return (
-    <Box
-      position="relative"
-      maxW="60vw"
-      top={topPosition}
-      left="0"
-      m={4}
-      bg="teal.500"
-      p={5}
-      color="white"
-      borderRadius="md"
-    >
-      <Text fontWeight="bold" fontSize="2rem">{title}</Text>
-      <Text>{description}</Text>
-    </Box>
+    <div
+    className="relative max-w-100 top-0 left-0 m-4 bg-teal-500 p-5 text-white rounded-md"
+    style={{ top: topPosition }}
+  >
+    <p className="font-bold text-3xl">{title}</p>
+    <p>{description}</p>
+  </div>
   )
 }
 

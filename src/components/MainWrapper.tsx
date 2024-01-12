@@ -1,6 +1,5 @@
 import React from 'react'
 import PageTitle from './PageTitle'
-import { Flex, Box } from "@chakra-ui/react";
 import ScrollAmount from './ScrollAmount'
 import Settings from './settings/Settings'
 import { useScroll } from './../hooks/useScroll';
@@ -16,7 +15,7 @@ const MainWrapper = () => {
   const dispatch = useDispatch();
   // TODO: timeline visualization
   // TODO: set an event listener to handle resize
-  
+
   const viewportHeight = useSelector(getWindowHeight);
   const { stories, epics, error, isLoading } = useScroll()
   const naturalScrollPosition = useSelector(selectNaturalScroll);
@@ -31,7 +30,7 @@ const MainWrapper = () => {
   const newPassed = storiesVisible
     .filter(s => scrollPosition >= s.startPoint + viewportHeight)
     .filter(story => !passedStoriesIds.includes(story.id));
-    
+
   // BUG: speed up pace ruin everything
   // TODO: delete passed stories if scoll up
   // TODO: delete passed stories if epic changed ?
@@ -46,33 +45,22 @@ const MainWrapper = () => {
   }
 
   return (
-    <Box
-      bg="#2c81dd"
-      color="#ffffff"
-      h="100vh"
-      position="relative"
-      overflow="hidden"
-      zIndex="1"
+    <div
+      className="bg-blue-600 text-white min-h-screen relative overflow-hidden h-lvh p-0"
     >
       <Settings />
       <PageTitle />
 
-      <Flex
-        direction="row"
-        p={0}
-      >
+      <div className="flex p-0">
         <ProgressBar progress={30} />
-        <VisibleStories
-          pos={naturalScrollPosition}
-          stories={storiesVisible}
-        />
+        <div className="flex-col w-3/5">
+          <VisibleStories
+            pos={scrollPosition}
+            stories={storiesVisible}
+          />
+        </div>
 
-        <Flex
-          direction="column"
-          p={4}
-          justifyContent="space-between"
-          width="40vw"
-        >
+        <div className="flex flex-col p-4 justify-between w-2/5">
           <ScrollAmount />
 
           <Epics
@@ -80,9 +68,15 @@ const MainWrapper = () => {
             scrollPosition={scrollPosition}
           />
 
-        </Flex>
-      </Flex>
-    </Box>
+        </div>
+      </div>
+      {isLoading && <div
+        className='font-semibold text-lg text-fuchsia-600 absolute bottom-4 left-auto right-auto bg-gray-50 mx-px'
+      >
+        loading...
+      </div>
+      }
+    </div>
   )
 }
 

@@ -1,4 +1,3 @@
-import { Box, Text } from "@chakra-ui/react";
 import { iStoryEntity } from "@type/story.interface";
 
 type Props = {
@@ -16,19 +15,14 @@ const Epic: React.FC<Props> = ({
   }
 }) => {
   return (
-    <Box
-      mt={1}
-      maxW="50vw"
-      bg="teal.800"
-      p={5}
-      color="white"
-      borderRadius="md"
-    >
-      <Text fontWeight="bold" fontSize="2rem">{title}</Text>
-      <Text>{description}</Text>
-      <Text>from: {startPoint}</Text>
-      <Text>to: {endPoint}</Text>
-    </Box>
+    <div
+    className="mt-1 max-w-1/2 bg-teal-800 p-5 text-white rounded-md"
+  >
+    <p className="font-bold text-2xl">{title}</p>
+    <p>{description}</p>
+    <p>from: {startPoint}</p>
+    <p>to: {endPoint}</p>
+  </div>
   );
 }
 

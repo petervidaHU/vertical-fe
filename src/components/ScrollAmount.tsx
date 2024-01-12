@@ -1,21 +1,17 @@
 import React from 'react'
 import { useSelector } from 'react-redux';
 import { selectScroll } from '@store/scrollSlice';
-import { Box, Text } from '@chakra-ui/react';
 
 const ScrollAmount: React.FC = () => {
   const scrollAmount = useSelector(selectScroll);
   return (
-    <Box>
-      <div className="bg-blue-500">teszt</div>
-      <Text
-        float="right"
-        fontWeight="bold"
-        fontSize="2rem"
-      >
-        height: {scrollAmount}
-      </Text>
-    </Box>
+    <div>
+    <p
+      className="float-right font-bold text-3xl"
+    >
+      height: {scrollAmount}
+    </p>
+  </div>
   )
 }
 

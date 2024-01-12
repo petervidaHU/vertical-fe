@@ -1,7 +1,6 @@
 import { iStoryEntity } from '@type/story.interface'
 import React from 'react'
 import Epic from './Epic'
-import { Box, Flex } from '@chakra-ui/react'
 import PassedStoryChip from './PassedStoryChip'
 import { useSelector } from 'react-redux'
 import { getPassedStories } from '@store/storiesSlice'
@@ -18,28 +17,24 @@ const Epics: React.FC<Props> = ({
   const passedStories = useSelector(getPassedStories) 
 
   return (
-    <Box
-      mt={{ base: 4, md: 0 }}
-    >
-      <Flex
-        wrap="wrap"
-      >
-        {passedStories.map(story => (
-          <PassedStoryChip
-            story={story}
-            key={story.id}
-          />
-        ))}
-      </Flex>
-
-      {epics.map(epic => (
-        <Epic
-          scrollPosition={scrollPosition}
-          key={epic.id}
-          epic={epic}
+    <div className="mt-4 md:mt-0">
+    <div className="flex-wrap flex">
+      {passedStories.map(story => (
+        <PassedStoryChip
+          story={story}
+          key={story.id}
         />
       ))}
-    </Box>
+    </div>
+  
+    {epics.map(epic => (
+      <Epic
+        scrollPosition={scrollPosition}
+        key={epic.id}
+        epic={epic}
+      />
+    ))}
+  </div>
   )
 }
 
