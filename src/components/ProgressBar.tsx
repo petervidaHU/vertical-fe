@@ -2,18 +2,23 @@ import React from 'react';
 import { getWindowHeight } from '@store/settingSlice';
 import { useSelector } from 'react-redux';
 import { useGetTimelineQuery } from '../API/storyAPI';
+import { getScroll } from '@store/scrollSlice';
 
-const ProgressBar = ({ progress }) => {
-  const { data, error, isLoading  } = useGetTimelineQuery();
-  
+const ProgressBar = () => {
   const height = useSelector(getWindowHeight);
-  const dotY = height * ((100-progress) / 100);
+  const scroll = useSelector(getScroll);
 
-  console.log('timeline data:', data)
-  
-  if (error) return <div>Error</div>;
-  if (isLoading) return <div>Loading</div>;
-  
+  const { data, error, isLoading } = useGetTimelineQuery();
+
+  // if (data.last) {dispatch(setLastId(data.last.lastId))}
+
+  if (error) return <div>Error, no timelione :\</div>;
+  if (isLoading) return <div>Loading timeline</div>;
+
+  const progressPerecntage = scroll > 0 ?
+    height - (height * scroll / data.last.endOfTheWorld)
+    : height;
+
   return (
     <svg width="50" height={height}>
       <rect
@@ -25,7 +30,7 @@ const ProgressBar = ({ progress }) => {
       />
       <circle
         cx="15"
-        cy={dotY}
+        cy={progressPerecntage}
         r="10"
         fill="red"
       />

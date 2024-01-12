@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { useLazyFetchStoriesQuery } from "../API/storyAPI";
 import { useDispatch, useSelector } from 'react-redux';
-import { setScroll, setNaturalScroll, selectScroll, selectNaturalScroll } from './../store/scrollSlice';
+import { setScroll, setNaturalScroll, getScroll, getNaturalScroll } from './../store/scrollSlice';
 import { selectPace } from "../store/paceSlice";
 import { StoriesResponse } from "src/API/apiTypes";
 
@@ -12,9 +12,9 @@ const initialState: StoriesResponse = {
 
 export const useScroll = () => {
   const dispatch = useDispatch();
-  const scrollAmount = useSelector(selectScroll);
+  const scrollAmount = useSelector(getScroll);
   const pace = useSelector(selectPace);
-  const naturalScroll = useSelector(selectNaturalScroll)
+  const naturalScroll = useSelector(getNaturalScroll)
 
 
   const [triggerFetch, { data = initialState, error, isLoading }] = useLazyFetchStoriesQuery();

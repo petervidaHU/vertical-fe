@@ -3,7 +3,7 @@ import PageTitle from './PageTitle'
 import ScrollAmount from './ScrollAmount'
 import Settings from './settings/Settings'
 import { useScroll } from './../hooks/useScroll';
-import { selectNaturalScroll, selectScroll } from '@store/scrollSlice';
+import { getNaturalScroll, getScroll } from '@store/scrollSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import VisibleStories from './VisibleStories';
 import Epics from './Epics';
@@ -13,13 +13,13 @@ import { getWindowHeight } from '@store/settingSlice';
 
 const MainWrapper = () => {
   const dispatch = useDispatch();
-  // TODO: timeline visualization
+  
   // TODO: set an event listener to handle resize
 
   const viewportHeight = useSelector(getWindowHeight);
   const { stories, epics, error, isLoading } = useScroll()
-  const naturalScrollPosition = useSelector(selectNaturalScroll);
-  const scrollPosition = useSelector(selectScroll);
+  const naturalScrollPosition = useSelector(getNaturalScroll);
+  const scrollPosition = useSelector(getScroll);
 
   // BUG: Selector getPassedStoriesIds returned a different result when called with the same parameters. see console
   const passedStoriesIds = useSelector(getPassedStoriesIds);
@@ -52,7 +52,7 @@ const MainWrapper = () => {
       <PageTitle />
 
       <div className="flex p-0">
-        <ProgressBar progress={30} />
+        <ProgressBar />
         <div className="flex-col w-3/5">
           <VisibleStories
             pos={scrollPosition}

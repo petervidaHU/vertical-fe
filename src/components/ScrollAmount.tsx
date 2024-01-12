@@ -1,9 +1,9 @@
 import React from 'react'
 import { useSelector } from 'react-redux';
-import { selectScroll } from '@store/scrollSlice';
+import { getScroll } from '@store/scrollSlice';
 
 const ScrollAmount: React.FC = () => {
-  const scrollAmount = useSelector(selectScroll);
+  const scrollAmount = useSelector(getScroll);
   return (
     <div>
     <p
