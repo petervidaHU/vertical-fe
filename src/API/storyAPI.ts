@@ -1,26 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { iStoryEntity, sortByStories, TypeOfStory } from '../types/story.interface';
-
-interface getListProps {
-  page: number,
-  limit: number,
-  sortBy: sortByStories,
-  sortOrder: 'ASC' | 'DESC',
-  type: TypeOfStory | null,
-}
-
-interface responseList {
-  list: Array<iStoryEntity>,
-  meta: { total: number },
-}
-
-export interface StoriesResponse {
-  stories: Array<iStoryEntity>;
-  epics: Array<iStoryEntity>;
-};
+import { iStoryEntity } from '../types/story.interface';
+import { StoriesResponse, getListProps, iTimeline, responseList } from './apiTypes';
 
 // const baseUrl = process.env.REACT_APP_BACKEND_API;
-const baseUrl = 'https://vertical-be.vercel.app/';
+// const baseUrl = 'https://vertical-be.vercel.app/';
+const baseUrl = 'http://localhost:3000/';
 
 export const storiesApi = createApi({
   reducerPath: 'storiesApi',
@@ -34,6 +18,10 @@ export const storiesApi = createApi({
 
     getOne: builder.query<iStoryEntity, string>({
       query: (id) => `story/${id}`,
+    }),
+
+    getTimeline: builder.query<iTimeline, void>({
+      query: () => 'story/timeline'
     }),
 
     getList: builder.query<responseList, getListProps>({
@@ -59,7 +47,7 @@ export const storiesApi = createApi({
       }),
       invalidatesTags: ['Story'],
     }),
-    
+
     updateStory: builder.mutation<iStoryEntity, Partial<iStoryEntity>>({
       query: (story) => ({
         url: `story/${story.id}`,
@@ -73,6 +61,7 @@ export const storiesApi = createApi({
 
 export const {
   useGetOneQuery,
+  useGetTimelineQuery,
   useFetchStoriesQuery,
   useGetListQuery,
   useLazyFetchStoriesQuery,

@@ -1,8 +1,9 @@
 import { useEffect, useCallback } from "react";
-import { StoriesResponse, useLazyFetchStoriesQuery } from "../API/storyAPI";
+import { useLazyFetchStoriesQuery } from "../API/storyAPI";
 import { useDispatch, useSelector } from 'react-redux';
 import { setScroll, setNaturalScroll, selectScroll, selectNaturalScroll } from './../store/scrollSlice';
 import { selectPace } from "../store/paceSlice";
+import { StoriesResponse } from "src/API/apiTypes";
 
 const initialState: StoriesResponse = {
   stories: [],
