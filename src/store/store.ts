@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import scrollReducer from './scrollSlice';
 import paceReducer from './paceSlice';
 import storiesReducer from './storiesSlice';
+import settingsSlice from './settingSlice';
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     scroll: scrollReducer,
     pace: paceReducer,
     stories: storiesReducer,
+    settings: settingsSlice,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(storiesApi.middleware),
 });

@@ -1,11 +1,7 @@
-import React from "react";
-import "@style/tailwind.css";
 import { createRoot } from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
-import { ChakraProvider } from "@chakra-ui/react";
+import { store } from "@store/store";
 import { Provider } from "react-redux";
-import { store } from "./store/store";
-import { routes } from "./routes";
+import App from "./App";
 
 const container = document.getElementById("root");
 if (container) {
@@ -13,9 +9,7 @@ if (container) {
 
   root.render(
     <Provider store={store}>
-      <ChakraProvider>
-        <RouterProvider router={routes} />
-      </ChakraProvider>
+      <App />
     </Provider>
   );
 }

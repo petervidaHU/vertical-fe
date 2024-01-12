@@ -29,6 +29,7 @@ export const useScroll = () => {
 
     if (
       //TODO: refactor fetch logic
+      scrollAmount == 0 ||
       data.stories.filter(story => story.startPoint > scrollAmount).length < 3 ||
       data.epics.filter(story => story.startPoint > scrollAmount).length < 3
     ) {
