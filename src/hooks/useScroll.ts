@@ -29,7 +29,7 @@ export const useScroll = () => {
     dispatch(setScroll((movement > 0 ? movement : 0)));
 
     if (
-      //TODO: refactor fetch logic
+      //TODO: refactor fetch logic: do not need last 10, if we know the direction, but caching?
       scrollAmount == 0 ||
       data.stories.filter(story => story.startPoint > scrollAmount).length < 3 ||
       data.epics.filter(story => story.startPoint > scrollAmount).length < 3
