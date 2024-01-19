@@ -3,13 +3,13 @@ import PageTitle from './PageTitle'
 import ScrollAmount from './ScrollAmount'
 import Settings from './settings/Settings'
 import { useScroll } from './../hooks/useScroll';
-import { getNaturalScroll, getScroll } from '@store/scrollSlice';
+import { getScroll } from '@store/scrollSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import VisibleStories from './VisibleStories';
 import Epics from './Epics';
 import { getPassedStoriesIds, setPassedStories } from '@store/storiesSlice';
-import ProgressBar from './ProgressBar';
 import { getWindowHeight } from '@store/settingSlice';
+import ProgressLogic from './ProgressLogic';
 
 const MainWrapper = () => {
   const dispatch = useDispatch();
@@ -51,7 +51,7 @@ const MainWrapper = () => {
       <PageTitle />
 
       <div className="flex p-0">
-        <ProgressBar />
+        <ProgressLogic />
         <div className="flex-col w-3/5">
           <VisibleStories
             pos={scrollPosition}

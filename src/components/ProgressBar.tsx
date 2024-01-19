@@ -1,41 +1,60 @@
-import React from 'react';
-import { getWindowHeight } from '@store/settingSlice';
-import { useSelector } from 'react-redux';
-import { useGetTimelineQuery } from '../API/storyAPI';
-import { getScroll } from '@store/scrollSlice';
+import { iStoryEntity } from '@type/story.interface';
+import React, { useState, useEffect, ReactNode } from 'react';
 
-const ProgressBar = () => {
-  const height = useSelector(getWindowHeight);
-  const scroll = useSelector(getScroll);
+interface Props {
+  epics: Array<Omit<iStoryEntity, 'description' | 'type'>>,
+  height: number,
+  end: number,
+}
 
-  const { data, error, isLoading } = useGetTimelineQuery();
+const ProgressBar: React.FC<Props> = ({
+  epics,
+  height,
+  end,
+}) => {
+  const [epicBar, setEpicBar] = useState<Array<ReactNode>>([]);
 
-  // if (data.last) {dispatch(setLastId(data.last.lastId))}
+  useEffect(() => {
+    let lastBorder = 0;
+    // TODO: use fix colors
+    const randomColor = () => {
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      return `rgb(${r}, ${g}, ${b})`;
+    };
 
-  if (error) return <div>Error, no timelione :\</div>;
-  if (isLoading) return <div>Loading timeline</div>;
+    setEpicBar(epics.map((epic) => {
+      const { startPoint, endPoint } = epic;
 
-  const progressPerecntage = scroll > 0 ?
-    height - (height * scroll / data.last.endOfTheWorld)
-    : height;
+      let top = height - Math.ceil(height * (startPoint / end));
+      let bottom = height - Math.ceil(height * (endPoint / end));
 
-  return (
-    <svg width="50" height={height}>
-      <rect
-        x="10"
-        y="10"
-        width="10"
-        height={height > 20 ? height - 20 : height}
-        fill="lightgray"
-      />
-      <circle
-        cx="15"
-        cy={progressPerecntage}
-        r="10"
-        fill="red"
-      />
-    </svg>
-  );
+      if (lastBorder === bottom) {
+        bottom++
+      };
+
+      if (top === bottom) {
+        top++;
+      };
+
+      lastBorder = top;
+
+      return (
+        <rect
+          onMouseEnter={() => { console.log(epic.id) }}
+          key={epic.id}
+          x="10"
+          y={bottom}
+          width="10"
+          height={top}
+          fill={randomColor()}
+        />
+      );
+    }));
+  }, [epics, height, end])
+
+  return epicBar;
 };
 
 export default ProgressBar;
