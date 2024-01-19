@@ -3,6 +3,8 @@ import { Link, Outlet } from 'react-router-dom';
 
 const links = ['edit', 'list'];
 
+// CFC: Should force that the end of the world have to be an endPoint of an Epic?  
+
 const Admin = () => {
   return (<>
    <div className="p-5 border mb-10">
