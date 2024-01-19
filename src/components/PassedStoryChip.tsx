@@ -1,3 +1,4 @@
+import { setPace } from '@store/paceSlice';
 import { setScroll } from '@store/scrollSlice';
 import { iStoryEntity } from '@type/story.interface'
 import React from 'react'
@@ -16,12 +17,13 @@ const PassedStoryChip: React.FC<Props> = ({
 
   const handleOnclick = () => {
     dispatch(setScroll(story.startPoint));
+    dispatch(setPace(1));
   }
 
   return (
     <div 
     onClick={handleOnclick}
-    className="flex items-center justify-center text-sm px-2 py-1 m-1 rounded-md bg-teal-500 text-white cursor-pointer"
+    className="flex items-center justify-center text-sm px-2 py-1 m-1 rounded-md bg-teal-500 text-white cursor-pointer hover:bg-teal-950"
   >
     <p>{displayName}</p>
   </div>

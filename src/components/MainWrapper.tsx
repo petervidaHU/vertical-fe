@@ -18,7 +18,6 @@ const MainWrapper = () => {
 
   const viewportHeight = useSelector(getWindowHeight);
   const { stories, epics, error, isLoading } = useScroll()
-  const naturalScrollPosition = useSelector(getNaturalScroll);
   const scrollPosition = useSelector(getScroll);
 
   // BUG: Selector getPassedStoriesIds returned a different result when called with the same parameters. see console
@@ -27,7 +26,7 @@ const MainWrapper = () => {
   const storiesVisible = stories.filter(s => scrollPosition >= s.startPoint - 100 && scrollPosition <= s.startPoint + viewportHeight + 100)
   const epicsVisible = epics.filter(s => scrollPosition >= s.startPoint && scrollPosition <= s.endPoint)
 
-  const newPassed = storiesVisible
+  const newPassed = stories
     .filter(s => scrollPosition >= s.startPoint + viewportHeight)
     .filter(story => !passedStoriesIds.includes(story.id));
 
