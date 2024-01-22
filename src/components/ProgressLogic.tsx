@@ -15,7 +15,7 @@ const ProgressLogic = () => {
 
   // TODO: if (data.last) {dispatch(setLastId(data.last.lastId))}
 
-  if (error) return <div>Error, no timelione :\</div>;
+  if (error) return <div>Error, no timeline :\</div>;
   if (isLoading) return <div>Loading timeline</div>;
 
   const { epics, last: { endOfTheWorld } } = data;
@@ -24,13 +24,14 @@ const ProgressLogic = () => {
     height - (height * scroll / endOfTheWorld)
     : height;
 
-  return (
+    return (
     <svg className="mt-5 mb-5" width="50" height={height}>
-      <ProgressBar epics={epics} end={endOfTheWorld} height={height}/>
-      <circle
-        cx="15"
-        cy={progressPercentage}
-        r="10"
+      <ProgressBar epics={epics} end={endOfTheWorld} height={height} />
+      <rect
+        y={progressPercentage}
+        x="5"
+        width="20"
+        height="5"
         fill="red"
       />
     </svg>

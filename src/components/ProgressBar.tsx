@@ -27,7 +27,7 @@ const ProgressBar: React.FC<Props> = ({
     setEpicBar(epics.map((epic) => {
       const { startPoint, endPoint } = epic;
 
-      let top = height - Math.ceil(height * (startPoint / end));
+      let top = height * ((endPoint - startPoint)/ end);
       let bottom = height - Math.ceil(height * (endPoint / end));
 
       if (lastBorder === bottom) {
@@ -42,7 +42,7 @@ const ProgressBar: React.FC<Props> = ({
 
       return (
         <rect
-          onMouseEnter={() => { console.log(epic.id) }}
+          onMouseEnter={() => { console.log(epic.title) }}
           key={epic.id}
           x="10"
           y={bottom}
