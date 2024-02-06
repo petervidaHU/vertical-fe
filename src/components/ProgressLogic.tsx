@@ -1,24 +1,25 @@
 import React from 'react';
 import { getWindowHeight } from '@store/settingSlice';
-import { useSelector } from 'react-redux';
-import { getScroll } from '@store/scrollSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { getScroll, setLastId } from '@store/scrollSlice';
 import { useGetTimelineQuery } from '../API/storyAPI';
 import ProgressBar from './ProgressBar';
 
 const MARGIN = 40;
 
 const ProgressLogic = () => {
+  const dispatch = useDispatch();
   const heightStored = useSelector(getWindowHeight);
   const height = heightStored - MARGIN;
   const scroll = useSelector(getScroll);
   const { data, error, isLoading } = useGetTimelineQuery();
 
-  // TODO: if (data.last) {dispatch(setLastId(data.last.lastId))}
-
+  
   if (error) return <div>Error, no timeline :\</div>;
   if (isLoading) return <div>Loading timeline</div>;
-
-  const { epics, last: { endOfTheWorld } } = data;
+  
+  const { epics, last: { endOfTheWorld, lastId } } = data;
+  if (lastId) {dispatch(setLastId(lastId))}
 
   const progressPercentage = scroll > 0 ?
     height - (height * scroll / endOfTheWorld)

@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { useLazyFetchStoriesQuery } from "../API/storyAPI";
 import { useDispatch, useSelector } from 'react-redux';
-import { setScroll, setNaturalScroll, getScroll, getNaturalScroll } from './../store/scrollSlice';
+import { setScroll, setNaturalScroll, getScroll, getNaturalScroll, getLastId } from './../store/scrollSlice';
 import { selectPace } from "../store/paceSlice";
 import { StoriesResponse } from "src/API/apiTypes";
 
@@ -15,7 +15,7 @@ export const useScroll = () => {
   const scrollAmount = useSelector(getScroll);
   const pace = useSelector(selectPace);
   const naturalScroll = useSelector(getNaturalScroll)
-
+  const lastId = useSelector(getLastId);
 
   const [triggerFetch, { data = initialState, error, isLoading }] = useLazyFetchStoriesQuery();
 
@@ -31,8 +31,10 @@ export const useScroll = () => {
     if (
       //TODO: refactor fetch logic: do not need last 10, if we know the direction, but caching?
       scrollAmount == 0 ||
-      data.stories.filter(story => story.startPoint > scrollAmount).length < 3 ||
+      (
+        data.stories.filter(story => story.startPoint > scrollAmount).length < 3 ||
       data.epics.filter(story => story.startPoint > scrollAmount).length < 3
+      ) && !data.stories.find(story => story.id === lastId)
     ) {
       console.log("fetch triggered ", scrollAmount)
       triggerFetch(scrollAmount);
