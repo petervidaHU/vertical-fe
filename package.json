@@ -9,10 +9,12 @@
     }
   },
   "scripts": {
-    "build": "webpack --mode production",
-    "dev": "webpack serve --mode development",
-    "start": "serve /dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "react-router build",
+    "dev": "react-router dev --port 3001",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -23,6 +25,7 @@
     "@babel/core": "^7.23.3",
     "@babel/preset-env": "^7.23.3",
     "@babel/preset-react": "^7.23.3",
+    "@react-router/dev": "^7.14.0",
     "@types/jest": "^29.5.8",
     "@types/node": "^20.9.2",
     "@types/react": "^18.2.37",
@@ -42,12 +45,18 @@
     "prettier": "^3.1.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.2.2",
+    "vite": "^8.0.3",
+    "vitest": "^4.1.5",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
+    "@mantine/core": "^8.3.18",
+    "@mantine/hooks": "^8.3.18",
+    "@react-router/node": "^7.14.0",
+    "@react-router/serve": "^7.14.0",
     "@reduxjs/toolkit": "^2.0.1",
     "autoprefixer": "^10.4.16",
     "css-loader": "^6.9.0",
@@ -56,8 +65,10 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^9.0.0",
-    "react-router-dom": "^6.21.1",
+    "react-router": "^7.14.0",
     "style-loader": "^3.3.4",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "zod": "^4.3.6",
+    "isbot": "^5"
   }
 }
