@@ -1,8 +1,7 @@
 import "@mantine/core/styles.css";
-import { AppShell, Container, Group, MantineProvider, Text, Title, createTheme } from "@mantine/core";
+import { MantineProvider, createTheme } from "@mantine/core";
 import {
   isRouteErrorResponse,
-  Link,
   Links,
   Meta,
   Outlet,
@@ -36,26 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function Root() {
   return (
     <MantineProvider theme={theme}>
-      <AppShell padding="md">
-        <AppShell.Header>
-          <Group justify="space-between" h="100%" px="md">
-            <Title order={4}>Vertical FE Rewrite</Title>
-            <Group>
-              <Link to="/">Timeline</Link>
-              <Link to="/admin">Admin</Link>
-            </Group>
-          </Group>
-        </AppShell.Header>
-
-        <AppShell.Main>
-          <Container size="lg" py="lg">
-            <Text c="dimmed" mb="md">
-              React Router framework mode enabled (SSR-ready).
-            </Text>
-            <Outlet />
-          </Container>
-        </AppShell.Main>
-      </AppShell>
+      <Outlet />
     </MantineProvider>
   );
 }
