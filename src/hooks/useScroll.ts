@@ -1,9 +1,11 @@
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { useLazyFetchStoriesQuery } from "../API/storyAPI";
 import { useDispatch, useSelector } from 'react-redux';
 import { setScroll, setNaturalScroll, getScroll, getNaturalScroll, getLastId } from './../store/scrollSlice';
 import { selectPace } from "../store/paceSlice";
-import { StoriesResponse } from "src/API/apiTypes";
+import { StoriesResponse } from "../API/apiTypes";
+import { useWheelAltitude } from '../../app/shared/hooks/useWheelAltitude';
+import { useAltitudePrefetchTrigger } from '../../app/shared/hooks/useAltitudePrefetchTrigger';
 
 const initialState: StoriesResponse = {
   stories: [],
@@ -19,36 +21,31 @@ export const useScroll = () => {
 
   const [triggerFetch, { data = initialState, error, isLoading }] = useLazyFetchStoriesQuery();
 
-  const handleScroll = useCallback((event: WheelEvent) => {
-    event.preventDefault();
-    const deltaY = -event.deltaY;
-    const movement = deltaY * pace + scrollAmount;
-    const naturalMovement = deltaY + naturalScroll;
+  const shouldPrefetch = useAltitudePrefetchTrigger({
+    stories: data.stories,
+    epics: data.epics,
+    lastId,
+    minAhead: 3,
+    getStoryStartPoint: (story) => story.startPoint,
+    getEpicStartPoint: (story) => story.startPoint,
+    getStoryId: (story) => story.id,
+  });
 
-    dispatch(setNaturalScroll(naturalMovement > 0 ? naturalMovement : 0))
-    dispatch(setScroll((movement > 0 ? movement : 0)));
+  const handleAltitudeChange = useCallback(({ nextScaled, nextNatural }: { nextScaled: number, nextNatural: number }) => {
+    dispatch(setNaturalScroll(nextNatural));
+    dispatch(setScroll(nextScaled));
 
-    if (
-      //TODO: refactor fetch logic: do not need last 10, if we know the direction, but caching?
-      scrollAmount == 0 ||
-      (
-        data.stories.filter(story => story.startPoint > scrollAmount).length < 3 ||
-      data.epics.filter(story => story.startPoint > scrollAmount).length < 3
-      ) && !data.stories.find(story => story.id === lastId)
-    ) {
-      console.log("fetch triggered ", scrollAmount)
-      triggerFetch(scrollAmount);
+    if (shouldPrefetch(nextScaled)) {
+      triggerFetch(nextScaled);
     }
+  }, [dispatch, shouldPrefetch, triggerFetch]);
 
-  }, [scrollAmount, dispatch, data, triggerFetch]);
-
-  useEffect(() => {
-    document.addEventListener('wheel', handleScroll, { passive: false });
-
-    return () => {
-      document.removeEventListener('wheel', handleScroll);
-    };
-  }, [handleScroll]);
+  useWheelAltitude({
+    pace,
+    scaledValue: scrollAmount,
+    naturalValue: naturalScroll,
+    onChange: handleAltitudeChange,
+  });
 
   const { stories, epics } = data;
 
