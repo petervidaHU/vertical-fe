@@ -4,3 +4,4 @@
 
 .env
 .env.*
+/src/generated/prisma

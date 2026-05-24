@@ -6,8 +6,7 @@ const AdminRoute = () => {
     <Stack>
       <Title order={2}>Admin</Title>
       <Group>
-        <Link to="/admin/list">List</Link>
-        <Link to="/admin/edit">Create</Link>
+        <Link to="/admin/journeys">Journeys</Link>
       </Group>
       <Card withBorder>
         <Outlet />

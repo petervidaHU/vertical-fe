@@ -1,0 +1,4 @@
+
+> vertical-fe@1.0.0 typecheck
+> react-router typegen && tsc
+

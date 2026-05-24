@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vertical-fe.local/schemas/epic.schema.json",
+  "title": "EpicImport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "startPoint", "endPoint"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable epic title."
+    },
+    "startPoint": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Start altitude/position for this epic."
+    },
+    "endPoint": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "End altitude/position for this epic. Must be >= startPoint."
+    },
+    "background": {
+      "description": "Optional background definition. Can be a hex color string or an object.",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "color"],
+          "properties": {
+            "mode": { "const": "color" },
+            "color": {
+              "type": "string",
+              "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "stops"],
+          "properties": {
+            "mode": { "const": "gradient" },
+            "stops": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["color", "percentage"],
+                "properties": {
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

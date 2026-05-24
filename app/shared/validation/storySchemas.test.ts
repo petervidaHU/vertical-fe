@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseStoryForm, parseStoryUpdateForm } from "./storySchemas";
+import { parseStoryForm, parseStoryUpdateForm, STORY_EXTRA_CONTENT_MAX_LENGTH } from "./storySchemas";
 
 describe("story schemas", () => {
   it("parses create form values", () => {
@@ -10,6 +10,7 @@ describe("story schemas", () => {
     expect(parseStoryForm(formData)).toEqual({
       title: "Story A",
       epicTitle: "Epic A",
+      extraContent: "",
     });
   });
 
@@ -21,7 +22,28 @@ describe("story schemas", () => {
     expect(parseStoryForm(formData)).toEqual({
       title: "Story B",
       epicTitle: undefined,
+      extraContent: "",
     });
+  });
+
+  it("normalizes bounded extra content", () => {
+    const formData = new FormData();
+    formData.set("title", "Story B");
+    formData.set("extraContent", "  # Heading\r\n\r\nBody text  ");
+
+    expect(parseStoryForm(formData)).toEqual({
+      title: "Story B",
+      epicTitle: undefined,
+      extraContent: "# Heading\n\nBody text",
+    });
+  });
+
+  it("throws when extra content exceeds limit", () => {
+    const formData = new FormData();
+    formData.set("title", "Story B");
+    formData.set("extraContent", "x".repeat(STORY_EXTRA_CONTENT_MAX_LENGTH + 1));
+
+    expect(() => parseStoryForm(formData)).toThrowError();
   });
 
   it("throws on missing title", () => {
@@ -40,6 +62,7 @@ describe("story schemas", () => {
       id: "42",
       title: "Story C",
       epicTitle: "Epic C",
+      extraContent: "",
     });
   });
 

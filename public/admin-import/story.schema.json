@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vertical-fe.local/schemas/story.schema.json",
+  "title": "StoryImport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "startPoint", "endPoint"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Story title displayed in the journey."
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "extraContent": {
+      "type": "string",
+      "description": "Optional long-form HTML or plain text."
+    },
+    "storyType": {
+      "type": "string",
+      "enum": ["CARD", "LINE"],
+      "default": "CARD"
+    },
+    "background": {
+      "description": "Optional card background. Can be hex color string or object.",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "color"],
+          "properties": {
+            "mode": { "const": "color" },
+            "color": {
+              "type": "string",
+              "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "stops"],
+          "properties": {
+            "mode": { "const": "gradient" },
+            "stops": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["color", "percentage"],
+                "properties": {
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "imageUrl": {
+      "type": "string"
+    },
+    "lineColor": {
+      "type": "string",
+      "default": "#4ecdc4"
+    },
+    "lineWidth": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64,
+      "default": 4
+    },
+    "lineLabel": {
+      "type": "string",
+      "default": ""
+    },
+    "tooltipText": {
+      "type": "string",
+      "default": ""
+    },
+    "tooltipImageUrl": {
+      "type": "string"
+    },
+    "startPoint": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "endPoint": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Must be >= startPoint."
+    }
+  }
+}

@@ -2,16 +2,20 @@ import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
 export default [
   index("routes/_index.tsx"),
-  route("list", "routes/list.tsx"),
   route("journey", "routes/journey.tsx", [
     index("routes/journey._index.tsx"),
     route(":id", "routes/journey.$id.tsx"),
   ]),
   route("admin", "routes/admin.tsx", [
     index("routes/admin._index.tsx"),
-    route("list", "routes/admin.list.tsx"),
-    route("edit", "routes/admin.edit._index.tsx"),
-    route("edit/:id", "routes/admin.edit.$id.tsx"),
+    route("journeys", "routes/admin.journeys.tsx"),
+    route(":journeyId", "routes/admin.$journeyId.tsx", [
+      index("routes/admin.$journeyId._index.tsx"),
+      route("epics", "routes/admin.epics.tsx"),
+      route("epics/:epicId", "routes/admin.$journeyId.epics.$epicId.tsx"),
+      route("stories", "routes/admin.stories.tsx"),
+      route("stories/:storyId", "routes/admin.$journeyId.stories.$storyId.tsx"),
+    ]),
   ]),
   route("documentation", "routes/documentation.tsx"),
 ] satisfies RouteConfig;

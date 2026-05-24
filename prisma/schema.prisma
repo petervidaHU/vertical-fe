@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum StoryType {
+  CARD
+  LINE
+}
+
+model Journey {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  startingPoint String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  epics   Epic[]
+  stories Story[]
+}
+
+model Epic {
+  id        String   @id @default(cuid())
+  title     String
+  color     String   @default("#4ecdc4")
+  background String  @default("{\"mode\":\"color\",\"color\":\"#4ecdc4\"}")
+  startPoint Int
+  endPoint   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  journey   Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  journeyId String
+
+  @@index([journeyId, startPoint, endPoint])
+}
+
+model Story {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  extraContent String  @default("")
+  storyType   StoryType @default(CARD)
+  background  String   @default("{\"mode\":\"color\",\"color\":\"#16314c\"}")
+  imageUrl    String?
+  lineColor   String   @default("#4ecdc4")
+  lineWidth   Int      @default(4)
+  lineLabel   String   @default("")
+  tooltipText String   @default("")
+  tooltipImageUrl String?
+  startPoint  Int
+  endPoint    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  journey   Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  journeyId String
+
+  @@index([journeyId, startPoint, endPoint])
+}

@@ -1,0 +1,339 @@
+nohup: ignoring input
+
+> vertical-fe@1.0.0 dev
+> react-router dev --host 0.0.0.0 --port 3001
+
+  ➜  Local:   http://localhost:3001/
+  ➜  Network: http://10.255.255.254:3001/
+  ➜  Network: http://172.23.216.76:3001/
+  ➜  Network: http://172.18.0.1:3001/
+  ➜  Network: http://172.20.0.1:3001/
+  ➜  Network: http://172.19.0.1:3001/
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/favicon.ico" 
+Error: No route matches URL "/story/timeline"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/timeline" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/story/timeline"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/timeline" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/story/pre/100"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/100" 
+Error: No route matches URL "/story/pre/200"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/200" 
+Error: No route matches URL "/story/pre/300"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/300" 
+5:38:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:38:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:38:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:38:48 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+5:39:02 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:39:02 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:39:02 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:39:02 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+5:42:06 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:42:06 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:42:06 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:42:06 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+5:50:37 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:50:37 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:50:37 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:50:37 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+5:50:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:50:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:50:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:50:48 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+5:52:24 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:52:24 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:52:24 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+5:52:24 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+6:20:32 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:20:32 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:20:32 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:20:32 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+6:24:01 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:24:01 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:24:01 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:24:01 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+6:28:17 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:28:17 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:28:17 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:28:17 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+6:28:29 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:28:29 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:28:29 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:28:29 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+6:48:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:48:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:48:48 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:48:48 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+6:49:09 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:49:09 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:49:09 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+6:49:09 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/favicon.ico" 
+10:29:41 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:29:41 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:29:41 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:29:41 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+10:36:29 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:36:29 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:36:29 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:36:29 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+Error: No route matches URL "/story/timeline"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/timeline" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/story/timeline"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/timeline" 
+Error: No route matches URL "/story/pre/100"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/100" 
+Error: No route matches URL "/story/pre/200"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/200" 
+Error: No route matches URL "/story/pre/300"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/300" 
+Error: No route matches URL "/story/pre/400"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/400" 
+Error: No route matches URL "/story/pre/500"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/500" 
+Error: No route matches URL "/story/pre/400"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/400" 
+Error: No route matches URL "/story/pre/300"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/300" 
+Error: No route matches URL "/story/pre/200"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/200" 
+Error: No route matches URL "/story/pre/100"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/100" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/story/pre/200"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/200" 
+Error: No route matches URL "/story/pre/100"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/100" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/journeys"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/journeys" 
+10:59:32 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:59:32 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:59:32 PM [vite] (client) hmr update /app/features/admin/components/AdminJourneyMapPreview.tsx
+10:59:32 PM [vite] (ssr) page reload app/features/admin/components/AdminJourneyMapPreview.tsx
+11:04:57 PM [vite] (client) hmr update /app/features/timeline/pixi/JourneyPixiTimeline.tsx
+11:04:57 PM [vite] (client) hmr update /app/features/timeline/pixi/JourneyPixiTimeline.tsx
+11:04:57 PM [vite] (client) hmr update /app/features/timeline/pixi/JourneyPixiTimeline.tsx
+11:04:57 PM [vite] (ssr) page reload app/features/timeline/pixi/JourneyPixiTimeline.tsx
+Error: No route matches URL "/favicon.ico"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/favicon.ico" 
+Error: No route matches URL "/story/timeline"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/timeline" 
+Error: No route matches URL "/story/pre/0"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/pre/0" 
+Error: No route matches URL "/story/timeline"
+    at getInternalRouterError (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:5276:5)
+    at Object.query (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-EVOBXE3Y.mjs:3308:19)
+    at handleDocumentRequest (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1459:38)
+    at requestHandler (file:///home/petervida/vertical-fe/node_modules/react-router/dist/development/chunk-YQSHRJWW.mjs:1318:24)
+    at nodeHandler (/home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3802:30)
+    at /home/petervida/vertical-fe/node_modules/@react-router/dev/dist/vite.js:3809:17
+No routes matched location "/story/timeline" 
