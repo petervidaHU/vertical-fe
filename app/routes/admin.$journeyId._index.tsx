@@ -56,6 +56,36 @@ const AdminJourneyOverviewRoute = () => {
   return (
     <Stack>
       <Card withBorder>
+        <Form method="post" action={`/admin/${journey.id}/epics`} encType="multipart/form-data">
+          <Stack>
+            <Title order={4}>Bulk import epics and stories (JSON)</Title>
+            <Text size="sm" c="dimmed">
+              Download the schema samples, generate JSON in any AI chat using the prompt, then upload that file here.
+            </Text>
+            <Group gap="xs">
+              <Button component="a" href="/admin-import/epic.schema.json" download variant="light" size="xs">
+                Download epic schema
+              </Button>
+              <Button component="a" href="/admin-import/story.schema.json" download variant="light" size="xs">
+                Download story schema
+              </Button>
+              <Button component="a" href="/admin-import/journey-import.template.json" download variant="light" size="xs">
+                Download JSON template
+              </Button>
+              <Button component="a" href="/admin-import/ai-prompt.md" download variant="subtle" size="xs">
+                Download AI prompt
+              </Button>
+            </Group>
+            <label htmlFor="journeyJsonFileUpload">JSON file</label>
+            <input id="journeyJsonFileUpload" name="jsonFile" type="file" accept="application/json,.json" required />
+            <Button type="submit" name="intent" value="import-json">
+              Import JSON into this journey
+            </Button>
+          </Stack>
+        </Form>
+      </Card>
+
+      <Card withBorder>
         <Form method="post">
           <Stack>
             <Title order={4}>Edit Journey</Title>

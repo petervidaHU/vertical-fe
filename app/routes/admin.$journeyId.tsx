@@ -1,7 +1,7 @@
 import { Button, Group, Stack, Text, Title } from "@mantine/core";
 import { useMemo } from "react";
 import { Link, Outlet, useLoaderData, useParams } from "react-router";
-import AdminJourneyMapPreview from "../features/admin/components/AdminJourneyMapPreview";
+import AdminJourneyMapPreviewClient from "../features/admin/components/AdminJourneyMapPreviewClient";
 import { db } from "../server/db";
 
 export async function loader({ params }: { params: { journeyId?: string } }) {
@@ -54,7 +54,7 @@ const AdminJourneyLayoutRoute = () => {
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "144px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
-      <AdminJourneyMapPreview
+      <AdminJourneyMapPreviewClient
         journeyName={journey.name}
         startGround={journey.startingPoint}
         epics={journey.epics}

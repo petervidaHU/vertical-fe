@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { ActionIcon, Button, Group, Modal, ScrollArea, Stack, Text, Title } from "@mantine/core";
 import { Link, useLoaderData } from "react-router";
-import JourneyPixiTimeline from "../features/timeline/pixi/JourneyPixiTimeline";
+import JourneyPixiTimelineClient from "../features/timeline/pixi/JourneyPixiTimelineClient";
 import { db } from "../server/db";
 
 export async function loader({ params }: { params: { id?: string } }) {
@@ -49,7 +49,7 @@ export default function JourneyPage() {
 
       {/* Full-screen canvas layer */}
       <div style={{ position: "fixed", inset: 0 }}>
-        <JourneyPixiTimeline
+        <JourneyPixiTimelineClient
           title={journey.name}
           epics={journey.epics}
           stories={journey.stories}
