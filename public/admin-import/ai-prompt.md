@@ -1,10 +1,11 @@
-# Epic + Story JSON Generator Prompt
+# Altitude Info + Epic + Story JSON Generator Prompt
 
 You are generating import JSON for a timeline journey admin tool.
 
 Output must be valid JSON only, with this exact root shape:
 
 {
+  "altitudeInfos": [ ... ],
   "epics": [ ... ],
   "stories": [ ... ]
 }
@@ -13,11 +14,42 @@ Do not include markdown fences. Do not include comments. Do not include extra to
 
 ## Domain meaning
 
+- Altitude info is persistent environmental or system information tied to altitude ranges, independent from epics and stories.
 - An epic is a major thematic segment on a journey timeline (usually broad, strategic, and long-range).
 - A story is a concrete item that appears on the timeline and is tied to a position range.
 - Story types:
   - CARD: rich card-style story content (can include image and background).
   - LINE: lightweight marker/checkpoint style story represented by line settings.
+
+## Altitude info properties
+
+Each altitude info object supports:
+- title: string, required, non-empty. Long label shown in the hover tooltip.
+- icon: string, optional icon key. Available keys:
+  - "thermometer"
+  - "wind"
+  - "oxygen"
+  - "droplet"
+  - "sun"
+  - "snowflake"
+  - "gauge"
+  - "leaf"
+  - "warning"
+  - "info"
+- order: integer, optional. Lower numbers render first.
+- values: array, required, at least one item. Each item supports:
+  - value: string, required. Example: "12 C" or "7.2 mol/m3".
+  - startPoint: integer, required, >= 0.
+  - endPoint: integer, required, >= 0 and must be >= startPoint.
+
+Rules for altitude info values:
+- Value bands inside the same altitude info series must not overlap.
+- Gaps are allowed.
+- Use multiple value bands when the displayed value changes with altitude.
+
+- tags: string array, optional. 3-100 characters per tag, max 20 tags per item.
+  Tags help users filter altitude info series by topic.
+  Example tags: "climate", "science", "survival", "basics".
 
 ## Epic properties
 
@@ -52,18 +84,41 @@ Each story object supports:
 - tooltipImageUrl: string, optional.
 - startPoint: integer, required, >= 0.
 - endPoint: integer, required, >= 0 and must be >= startPoint.
+- tags: string array, optional. 3-100 characters per tag, max 20 tags per item.
+  Tags help users filter stories by topic. Use consistent tag names across related stories and altitude info.
+  Example tags: "history", "biology", "geography", "culture", "planning", "milestones".
 
 ## Output quality rules
 
-- Return at least 1 epic and at least 1 story unless asked otherwise.
+- Return arrays for altitudeInfos, epics, and stories.
+- Return at least one meaningful item overall unless asked otherwise.
 - Keep ranges realistic and mostly coherent with progression.
 - Use CARD for narrative entries, LINE for milestone/checkpoint markers.
 - Keep text concise and production-safe.
 - Ensure final output is strict JSON parsable by JSON.parse.
+- Suggest relevant tags (3-100 character names) for stories and altitude info.
+- Use consistent tag names across related items (e.g., assign "climate" to both temperature altitude info and climate-related stories).
+- Maximum 20 unique tag names per journey preferred, but each item can have up to 20 tags.
+- Apply same tags to related stories and altitude info so users can filter by topic.
 
 ## Example output structure (adapt content, keep shape)
 
 {
+  "altitudeInfos": [
+    {
+      "title": "Temperature",
+      "icon": "thermometer",
+      "order": 0,
+      "tags": ["climate", "basics"],
+      "values": [
+        {
+          "value": "18 C",
+          "startPoint": 0,
+          "endPoint": 120
+        }
+      ]
+    }
+  ],
   "epics": [
     {
       "title": "Epic Name",
@@ -77,6 +132,7 @@ Each story object supports:
       "title": "Story Name",
       "storyType": "CARD",
       "description": "Short description",
+      "tags": ["planning", "basics"],
       "startPoint": 10,
       "endPoint": 40
     },

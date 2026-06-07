@@ -52,6 +52,9 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Journey: 'Journey',
+  Tag: 'Tag',
+  AltitudeInfo: 'AltitudeInfo',
+  AltitudeInfoValue: 'AltitudeInfoValue',
   Epic: 'Epic',
   Story: 'Story'
 } as const
@@ -84,11 +87,54 @@ export const JourneyScalarFieldEnum = {
 export type JourneyScalarFieldEnum = (typeof JourneyScalarFieldEnum)[keyof typeof JourneyScalarFieldEnum]
 
 
+export const TagScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  journeyId: 'journeyId'
+} as const
+
+export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const AltitudeInfoScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  icon: 'icon',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  journeyId: 'journeyId'
+} as const
+
+export type AltitudeInfoScalarFieldEnum = (typeof AltitudeInfoScalarFieldEnum)[keyof typeof AltitudeInfoScalarFieldEnum]
+
+
+export const AltitudeInfoValueScalarFieldEnum = {
+  id: 'id',
+  value: 'value',
+  startPoint: 'startPoint',
+  endPoint: 'endPoint',
+  useGradient: 'useGradient',
+  startValue: 'startValue',
+  endValue: 'endValue',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  altitudeInfoId: 'altitudeInfoId'
+} as const
+
+export type AltitudeInfoValueScalarFieldEnum = (typeof AltitudeInfoValueScalarFieldEnum)[keyof typeof AltitudeInfoValueScalarFieldEnum]
+
+
 export const EpicScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  description: 'description',
   color: 'color',
   background: 'background',
+  backgroundImage: 'backgroundImage',
+  backgroundPatternConfig: 'backgroundPatternConfig',
   startPoint: 'startPoint',
   endPoint: 'endPoint',
   createdAt: 'createdAt',
@@ -130,6 +176,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -144,4 +198,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

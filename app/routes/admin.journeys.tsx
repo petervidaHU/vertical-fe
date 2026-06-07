@@ -1,8 +1,9 @@
-import { Alert, Button, Card, Group, Stack, Table, Text, TextInput, Title } from "@mantine/core";
+import { Alert, Button, Group, Paper, Stack, Text, TextInput } from "@mantine/core";
 import { db } from "../server/db";
 import { Form, Link, redirect, useActionData, useLoaderData } from "react-router";
 import { useEffect, useMemo, useState } from "react";
 import BackgroundField from "../features/admin/components/BackgroundField";
+import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
 import { backgroundToCss, parseStoredBackground, serializeBackground, tryParseBackgroundInput } from "../shared/domain/background";
 
 type ActionData = { error?: string };
@@ -94,15 +95,35 @@ const AdminJourneysRoute = () => {
     () => journeys.filter((journey) => !optimisticDeletedIds.includes(journey.id)),
     [journeys, optimisticDeletedIds],
   );
+  const totalEpics = journeys.reduce((sum, journey) => sum + journey._count.epics, 0);
+  const totalStories = journeys.reduce((sum, journey) => sum + journey._count.stories, 0);
+  const emptyJourneys = journeys.filter((journey) => journey._count.epics === 0 && journey._count.stories === 0).length;
 
   return (
-    <Stack>
-      <Title order={3}>Journeys</Title>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Journeys"
+        title="Create the containers for your timelines"
+        description="Every journey becomes a focused workspace where altitude info, epics, stories, and tags can be edited with the shared map in view."
+        breadcrumbs={[
+          { label: "Admin", to: "/admin" },
+          { label: "Journeys" },
+        ]}
+      />
 
-      <Card withBorder>
+      <AdminStatGrid>
+        <AdminStatCard label="Journeys" value={journeys.length} description="Total editable timeline containers in the system." />
+        <AdminStatCard label="Epics" value={totalEpics} description="Major vertical bands defined across all journeys." />
+        <AdminStatCard label="Stories" value={totalStories} description="Cards and line events currently attached to journeys." />
+        <AdminStatCard label="Empty journeys" value={emptyJourneys} description="Journeys that still need content structure." />
+      </AdminStatGrid>
+
+      <AdminSection
+        title="Create a new journey"
+        description="Start with a name, URL slug, and ground styling. Once created, open the journey workspace to add timeline content."
+      >
         <Form method="post">
           <Stack>
-            <Title order={4}>Create journey</Title>
             <TextInput label="Name" name="name" required placeholder="Mountain Launch" />
             <TextInput label="Slug" name="slug" required placeholder="mountain-launch" />
             <BackgroundField
@@ -111,92 +132,115 @@ const AdminJourneysRoute = () => {
               defaultValue={serializeBackground({ mode: "color", color: "#4b3726" })}
               defaultColor="#4b3726"
             />
-            <Button type="submit" name="intent" value="create">Create Journey</Button>
+            <Group justify="flex-end">
+              <Button type="submit" name="intent" value="create" color="teal">Create journey</Button>
+            </Group>
           </Stack>
         </Form>
-      </Card>
+      </AdminSection>
 
       {success ? <Alert color="green">{success}</Alert> : null}
       {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
 
-      <Card withBorder>
-        <Stack>
-          <Title order={4}>Existing journeys</Title>
-          {visibleJourneys.length === 0 ? (
-            <Text c="dimmed">No journeys yet.</Text>
-          ) : (
-            <Table striped withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Name</Table.Th>
-                  <Table.Th>Slug</Table.Th>
-                  <Table.Th>Starting point</Table.Th>
-                  <Table.Th>Epics</Table.Th>
-                  <Table.Th>Stories</Table.Th>
-                  <Table.Th>Actions</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {visibleJourneys.map((journey) => (
-                  <Table.Tr key={journey.id}>
-                    <Table.Td>{journey.name}</Table.Td>
-                    <Table.Td>{journey.slug}</Table.Td>
-                    <Table.Td>
-                      <div
-                        style={{
-                          width: 56,
-                          height: 10,
-                          borderRadius: 2,
-                          border: "1px solid rgba(120, 120, 120, 0.5)",
-                          background: backgroundToCss(parseStoredBackground(journey.startingPoint, "#4b3726")),
-                        }}
-                      />
-                    </Table.Td>
-                    <Table.Td>{journey._count.epics}</Table.Td>
-                    <Table.Td>{journey._count.stories}</Table.Td>
-                    <Table.Td>
+      <AdminSection
+        title="Existing journeys"
+        description="Open a journey workspace to edit content in context, or jump directly into epics and stories if you already know the task."
+      >
+        {visibleJourneys.length === 0 ? (
+          <Text c="dimmed">No journeys yet.</Text>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+              gap: 16,
+            }}
+          >
+            {visibleJourneys.map((journey) => (
+              <Paper
+                key={journey.id}
+                radius="22px"
+                p="lg"
+                style={{
+                  border: "1px solid rgba(111, 134, 145, 0.14)",
+                  background: "linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 251, 0.94) 100%)",
+                }}
+              >
+                <Stack gap="md">
+                  <Stack gap={4}>
+                    <Text size="xs" tt="uppercase" fw={800} c="teal.8" style={{ letterSpacing: "0.12em" }}>
+                      {journey.slug}
+                    </Text>
+                    <Text fw={700} size="lg">
+                      {journey.name}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                      {journey._count.epics} epics and {journey._count.stories} stories currently attached.
+                    </Text>
+                  </Stack>
+
+                  <div>
+                    <Text size="xs" tt="uppercase" fw={700} c="dimmed" mb={6}>
+                      Ground style
+                    </Text>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: 16,
+                        borderRadius: 999,
+                        border: "1px solid rgba(120, 120, 120, 0.32)",
+                        background: backgroundToCss(parseStoredBackground(journey.startingPoint, "#4b3726")),
+                      }}
+                    />
+                  </div>
+
+                  <Group gap="xs">
+                    <Button component={Link} to={`/admin/${journey.id}`} color="teal">
+                      Open workspace
+                    </Button>
+                    <Button component={Link} to={`/admin/${journey.id}/epics`} variant="light">
+                      Epics
+                    </Button>
+                    <Button component={Link} to={`/admin/${journey.id}/stories`} variant="light" color="teal">
+                      Stories
+                    </Button>
+                  </Group>
+
+                  {confirmDeleteId === journey.id ? (
+                    <Group gap="xs" justify="space-between">
+                      <Text size="sm" c="red.7">Delete this journey and all of its content?</Text>
                       <Group gap="xs">
-                        <Link to={`/admin/${journey.id}`}>Edit</Link>
-                        <Link to={`/admin/${journey.id}/epics`}>Epics</Link>
-                        <Link to={`/admin/${journey.id}/stories`}>Stories</Link>
-                        {confirmDeleteId === journey.id ? (
-                          <Group gap="xs">
-                            <Form
-                              method="post"
-                              onSubmit={() => {
-                                setOptimisticDeletedIds((prev) => [...prev, journey.id]);
-                                setConfirmDeleteId(null);
-                              }}
-                            >
-                              <input type="hidden" name="id" value={journey.id} />
-                              <Button size="xs" color="red" type="submit" name="intent" value="delete">
-                                Confirm
-                              </Button>
-                            </Form>
-                            <Button size="xs" variant="subtle" onClick={() => setConfirmDeleteId(null)}>
-                              Cancel
-                            </Button>
-                          </Group>
-                        ) : (
-                          <Button
-                            size="xs"
-                            color="red"
-                            variant="light"
-                            onClick={() => setConfirmDeleteId(journey.id)}
-                          >
-                            Delete
+                        <Form
+                          method="post"
+                          onSubmit={() => {
+                            setOptimisticDeletedIds((prev) => [...prev, journey.id]);
+                            setConfirmDeleteId(null);
+                          }}
+                        >
+                          <input type="hidden" name="id" value={journey.id} />
+                          <Button size="xs" color="red" type="submit" name="intent" value="delete">
+                            Confirm delete
                           </Button>
-                        )}
+                        </Form>
+                        <Button size="xs" variant="subtle" onClick={() => setConfirmDeleteId(null)}>
+                          Cancel
+                        </Button>
                       </Group>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
-        </Stack>
-      </Card>
-    </Stack>
+                    </Group>
+                  ) : (
+                    <Group justify="flex-end">
+                      <Button size="xs" color="red" variant="subtle" onClick={() => setConfirmDeleteId(journey.id)}>
+                        Delete journey
+                      </Button>
+                    </Group>
+                  )}
+                </Stack>
+              </Paper>
+            ))}
+          </div>
+        )}
+      </AdminSection>
+    </AdminPage>
   );
 };
 

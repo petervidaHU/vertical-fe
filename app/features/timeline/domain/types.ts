@@ -8,6 +8,8 @@ export interface TimelineItem {
   type: TimelineItemType;
   title: string;
   description: string;
+  extraContent?: string;
+  imageUrl?: string;
   startPoint: number;
   endPoint: number;
 }

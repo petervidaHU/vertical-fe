@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vertical-fe.local/schemas/altitude-info.schema.json",
+  "title": "AltitudeInfoImport",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "values"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Long label shown in the hover tooltip for this altitude-based info series."
+    },
+    "icon": {
+      "type": "string",
+      "enum": ["thermometer", "wind", "oxygen", "droplet", "sun", "snowflake", "gauge", "leaf", "warning", "info"],
+      "default": "info",
+      "description": "Icon key shown in the top-of-page indicator."
+    },
+    "order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Display order when multiple altitude info indicators are active at the same time."
+    },
+    "tags": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 100
+      },
+      "default": [],
+      "description": "Optional tags for filtering. 3-100 characters each, max 20 unique tags per item."
+    },
+    "values": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Non-overlapping altitude bands for this series.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["value", "startPoint", "endPoint"],
+        "properties": {
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Rendered value for the active altitude band, for example '12 C' or '7.2 mol/m3'."
+          },
+          "startPoint": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Inclusive start altitude for this value band."
+          },
+          "endPoint": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Inclusive end altitude for this value band. Must be >= startPoint and must not overlap other value bands in the same series."
+          }
+        }
+      }
+    }
+  }
+}

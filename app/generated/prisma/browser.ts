@@ -23,6 +23,21 @@ export * from './enums';
  */
 export type Journey = Prisma.JourneyModel
 /**
+ * Model Tag
+ * 
+ */
+export type Tag = Prisma.TagModel
+/**
+ * Model AltitudeInfo
+ * 
+ */
+export type AltitudeInfo = Prisma.AltitudeInfoModel
+/**
+ * Model AltitudeInfoValue
+ * 
+ */
+export type AltitudeInfoValue = Prisma.AltitudeInfoValueModel
+/**
  * Model Epic
  * 
  */

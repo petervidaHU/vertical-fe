@@ -1,97 +1,70 @@
-import { Alert, Box, Loader, Stack, Text } from "@mantine/core";
-import TimelineAltitudeDisplay from "../features/timeline/components/TimelineAltitudeDisplay";
-import TimelineEpicBadge from "../features/timeline/components/TimelineEpicBadge";
-import TimelineStoryCard from "../features/timeline/components/TimelineStoryCard";
-import { useTimelineScroll } from "../features/timeline/services/useTimelineScroll";
+import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
+import { Link, useLoaderData } from "react-router";
+import { db } from "../server/db";
+import { backgroundToCss, parseStoredBackground } from "../shared/domain/background";
 
-const IndexRoute = () => {
-  const {
-    altitude,
-    naturalAltitude,
-    pace,
-    setPace,
-    storiesVisible,
-    epicsVisible,
-    isLoading,
-    error,
-  } = useTimelineScroll();
+export async function loader() {
+  const journeys = await db.journey.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      _count: {
+        select: {
+          epics: true,
+          stories: true,
+        },
+      },
+    },
+  });
+
+  return { journeys };
+}
+
+export default function IndexRoute() {
+  const { journeys } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
 
   return (
-    <Box
-      style={{
-        display: "flex",
-        height: "calc(100vh - 80px)",
-        overflow: "hidden",
-        position: "relative",
-        background: "linear-gradient(to bottom, #1a1a2e 0%, #16213e 40%, #0f3460 100%)",
-        borderRadius: 8,
-      }}
-    >
-      {/* Story cards column — scrolls with altitude */}
-      <Box style={{ flex: "1 1 60%", position: "relative", overflow: "hidden" }}>
-        {storiesVisible.map((story) => (
-          <TimelineStoryCard
-            key={story.id}
-            story={story}
-            naturalAltitude={naturalAltitude}
-          />
-        ))}
-        {storiesVisible.length === 0 && !isLoading && (
-          <Box style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }}>
-            <Text c="dimmed" size="sm">
-              Scroll up to gain altitude
-            </Text>
-          </Box>
-        )}
-      </Box>
+    <Stack p="md">
+      <Title order={2}>Select Journey</Title>
+      <Text c="dimmed">Choose a journey to open its timeline view.</Text>
 
-      {/* Right panel — altitude + epics */}
-      <Box
-        style={{
-          flex: "0 0 280px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: "1rem",
-          borderLeft: "1px solid rgba(255,255,255,0.1)",
-        }}
-      >
-        <TimelineAltitudeDisplay
-          altitude={altitude}
-          pace={pace}
-          onPaceChange={setPace}
-        />
+      {journeys.length === 0 ? (
+        <Card withBorder>
+          <Stack>
+            <Text>No journeys available yet.</Text>
+            <Button component={Link} to="/admin/journeys" variant="light">
+              Create your first journey
+            </Button>
+          </Stack>
+        </Card>
+      ) : (
+        journeys.map((journey) => (
+          <Card key={journey.id} withBorder>
+            <Group justify="space-between" align="center" wrap="wrap">
+              <Stack gap={4}>
+                <Title order={4}>{journey.name}</Title>
+                <Text c="dimmed" size="sm">/{journey.slug}</Text>
+                <div
+                  style={{
+                    width: 64,
+                    height: 10,
+                    borderRadius: 2,
+                    border: "1px solid rgba(120, 120, 120, 0.5)",
+                    background: backgroundToCss(parseStoredBackground(journey.startingPoint, "#4b3726")),
+                  }}
+                />
+                <Text size="sm">
+                  {journey._count.epics} epics • {journey._count.stories} stories
+                </Text>
+              </Stack>
 
-        <Stack gap="sm" style={{ flex: 1, marginTop: "2rem", overflow: "auto" }}>
-          {epicsVisible.map((epic) => (
-            <TimelineEpicBadge key={epic.id} epic={epic} altitude={altitude} />
-          ))}
-          {epicsVisible.length === 0 && (
-            <Text c="dimmed" size="xs">
-              No active epic at this altitude
-            </Text>
-          )}
-        </Stack>
-
-        {isLoading && (
-          <Box style={{ display: "flex", justifyContent: "center", padding: "0.5rem" }}>
-            <Loader size="xs" color="teal" />
-          </Box>
-        )}
-      </Box>
-
-      {error && (
-        <Alert
-          color="red"
-          title="Load error"
-          style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}
-        >
-          {error}
-        </Alert>
+              <Button component={Link} to={`/journey/${journey.id}`}>
+                Open Journey
+              </Button>
+            </Group>
+          </Card>
+        ))
       )}
-    </Box>
+    </Stack>
   );
-};
-
-export default IndexRoute;
+}
 

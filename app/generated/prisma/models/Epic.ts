@@ -39,8 +39,10 @@ export type EpicSumAggregateOutputType = {
 export type EpicMinAggregateOutputType = {
   id: string | null
   title: string | null
+  description: string | null
   color: string | null
   background: string | null
+  backgroundImage: string | null
   startPoint: number | null
   endPoint: number | null
   createdAt: Date | null
@@ -51,8 +53,10 @@ export type EpicMinAggregateOutputType = {
 export type EpicMaxAggregateOutputType = {
   id: string | null
   title: string | null
+  description: string | null
   color: string | null
   background: string | null
+  backgroundImage: string | null
   startPoint: number | null
   endPoint: number | null
   createdAt: Date | null
@@ -63,8 +67,11 @@ export type EpicMaxAggregateOutputType = {
 export type EpicCountAggregateOutputType = {
   id: number
   title: number
+  description: number
   color: number
   background: number
+  backgroundImage: number
+  backgroundPatternConfig: number
   startPoint: number
   endPoint: number
   createdAt: number
@@ -87,8 +94,10 @@ export type EpicSumAggregateInputType = {
 export type EpicMinAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   color?: true
   background?: true
+  backgroundImage?: true
   startPoint?: true
   endPoint?: true
   createdAt?: true
@@ -99,8 +108,10 @@ export type EpicMinAggregateInputType = {
 export type EpicMaxAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   color?: true
   background?: true
+  backgroundImage?: true
   startPoint?: true
   endPoint?: true
   createdAt?: true
@@ -111,8 +122,11 @@ export type EpicMaxAggregateInputType = {
 export type EpicCountAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   color?: true
   background?: true
+  backgroundImage?: true
+  backgroundPatternConfig?: true
   startPoint?: true
   endPoint?: true
   createdAt?: true
@@ -210,8 +224,11 @@ export type EpicGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type EpicGroupByOutputType = {
   id: string
   title: string
+  description: string
   color: string
   background: string
+  backgroundImage: string | null
+  backgroundPatternConfig: runtime.JsonValue | null
   startPoint: number
   endPoint: number
   createdAt: Date
@@ -245,8 +262,11 @@ export type EpicWhereInput = {
   NOT?: Prisma.EpicWhereInput | Prisma.EpicWhereInput[]
   id?: Prisma.StringFilter<"Epic"> | string
   title?: Prisma.StringFilter<"Epic"> | string
+  description?: Prisma.StringFilter<"Epic"> | string
   color?: Prisma.StringFilter<"Epic"> | string
   background?: Prisma.StringFilter<"Epic"> | string
+  backgroundImage?: Prisma.StringNullableFilter<"Epic"> | string | null
+  backgroundPatternConfig?: Prisma.JsonNullableFilter<"Epic">
   startPoint?: Prisma.IntFilter<"Epic"> | number
   endPoint?: Prisma.IntFilter<"Epic"> | number
   createdAt?: Prisma.DateTimeFilter<"Epic"> | Date | string
@@ -258,8 +278,11 @@ export type EpicWhereInput = {
 export type EpicOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   color?: Prisma.SortOrder
   background?: Prisma.SortOrder
+  backgroundImage?: Prisma.SortOrderInput | Prisma.SortOrder
+  backgroundPatternConfig?: Prisma.SortOrderInput | Prisma.SortOrder
   startPoint?: Prisma.SortOrder
   endPoint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -274,8 +297,11 @@ export type EpicWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.EpicWhereInput[]
   NOT?: Prisma.EpicWhereInput | Prisma.EpicWhereInput[]
   title?: Prisma.StringFilter<"Epic"> | string
+  description?: Prisma.StringFilter<"Epic"> | string
   color?: Prisma.StringFilter<"Epic"> | string
   background?: Prisma.StringFilter<"Epic"> | string
+  backgroundImage?: Prisma.StringNullableFilter<"Epic"> | string | null
+  backgroundPatternConfig?: Prisma.JsonNullableFilter<"Epic">
   startPoint?: Prisma.IntFilter<"Epic"> | number
   endPoint?: Prisma.IntFilter<"Epic"> | number
   createdAt?: Prisma.DateTimeFilter<"Epic"> | Date | string
@@ -287,8 +313,11 @@ export type EpicWhereUniqueInput = Prisma.AtLeast<{
 export type EpicOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   color?: Prisma.SortOrder
   background?: Prisma.SortOrder
+  backgroundImage?: Prisma.SortOrderInput | Prisma.SortOrder
+  backgroundPatternConfig?: Prisma.SortOrderInput | Prisma.SortOrder
   startPoint?: Prisma.SortOrder
   endPoint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -307,8 +336,11 @@ export type EpicScalarWhereWithAggregatesInput = {
   NOT?: Prisma.EpicScalarWhereWithAggregatesInput | Prisma.EpicScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Epic"> | string
   title?: Prisma.StringWithAggregatesFilter<"Epic"> | string
+  description?: Prisma.StringWithAggregatesFilter<"Epic"> | string
   color?: Prisma.StringWithAggregatesFilter<"Epic"> | string
   background?: Prisma.StringWithAggregatesFilter<"Epic"> | string
+  backgroundImage?: Prisma.StringNullableWithAggregatesFilter<"Epic"> | string | null
+  backgroundPatternConfig?: Prisma.JsonNullableWithAggregatesFilter<"Epic">
   startPoint?: Prisma.IntWithAggregatesFilter<"Epic"> | number
   endPoint?: Prisma.IntWithAggregatesFilter<"Epic"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Epic"> | Date | string
@@ -319,8 +351,11 @@ export type EpicScalarWhereWithAggregatesInput = {
 export type EpicCreateInput = {
   id?: string
   title: string
+  description?: string
   color?: string
   background?: string
+  backgroundImage?: string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint: number
   endPoint: number
   createdAt?: Date | string
@@ -331,8 +366,11 @@ export type EpicCreateInput = {
 export type EpicUncheckedCreateInput = {
   id?: string
   title: string
+  description?: string
   color?: string
   background?: string
+  backgroundImage?: string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint: number
   endPoint: number
   createdAt?: Date | string
@@ -343,8 +381,11 @@ export type EpicUncheckedCreateInput = {
 export type EpicUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint?: Prisma.IntFieldUpdateOperationsInput | number
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -355,8 +396,11 @@ export type EpicUpdateInput = {
 export type EpicUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint?: Prisma.IntFieldUpdateOperationsInput | number
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -367,8 +411,11 @@ export type EpicUncheckedUpdateInput = {
 export type EpicCreateManyInput = {
   id?: string
   title: string
+  description?: string
   color?: string
   background?: string
+  backgroundImage?: string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint: number
   endPoint: number
   createdAt?: Date | string
@@ -379,8 +426,11 @@ export type EpicCreateManyInput = {
 export type EpicUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint?: Prisma.IntFieldUpdateOperationsInput | number
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -390,8 +440,11 @@ export type EpicUpdateManyMutationInput = {
 export type EpicUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint?: Prisma.IntFieldUpdateOperationsInput | number
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -412,8 +465,11 @@ export type EpicOrderByRelationAggregateInput = {
 export type EpicCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   color?: Prisma.SortOrder
   background?: Prisma.SortOrder
+  backgroundImage?: Prisma.SortOrder
+  backgroundPatternConfig?: Prisma.SortOrder
   startPoint?: Prisma.SortOrder
   endPoint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -429,8 +485,10 @@ export type EpicAvgOrderByAggregateInput = {
 export type EpicMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   color?: Prisma.SortOrder
   background?: Prisma.SortOrder
+  backgroundImage?: Prisma.SortOrder
   startPoint?: Prisma.SortOrder
   endPoint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -441,8 +499,10 @@ export type EpicMaxOrderByAggregateInput = {
 export type EpicMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   color?: Prisma.SortOrder
   background?: Prisma.SortOrder
+  backgroundImage?: Prisma.SortOrder
   startPoint?: Prisma.SortOrder
   endPoint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -497,19 +557,18 @@ export type EpicUncheckedUpdateManyWithoutJourneyNestedInput = {
   deleteMany?: Prisma.EpicScalarWhereInput | Prisma.EpicScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type EpicCreateWithoutJourneyInput = {
   id?: string
   title: string
+  description?: string
   color?: string
   background?: string
+  backgroundImage?: string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint: number
   endPoint: number
   createdAt?: Date | string
@@ -519,8 +578,11 @@ export type EpicCreateWithoutJourneyInput = {
 export type EpicUncheckedCreateWithoutJourneyInput = {
   id?: string
   title: string
+  description?: string
   color?: string
   background?: string
+  backgroundImage?: string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint: number
   endPoint: number
   createdAt?: Date | string
@@ -559,8 +621,11 @@ export type EpicScalarWhereInput = {
   NOT?: Prisma.EpicScalarWhereInput | Prisma.EpicScalarWhereInput[]
   id?: Prisma.StringFilter<"Epic"> | string
   title?: Prisma.StringFilter<"Epic"> | string
+  description?: Prisma.StringFilter<"Epic"> | string
   color?: Prisma.StringFilter<"Epic"> | string
   background?: Prisma.StringFilter<"Epic"> | string
+  backgroundImage?: Prisma.StringNullableFilter<"Epic"> | string | null
+  backgroundPatternConfig?: Prisma.JsonNullableFilter<"Epic">
   startPoint?: Prisma.IntFilter<"Epic"> | number
   endPoint?: Prisma.IntFilter<"Epic"> | number
   createdAt?: Prisma.DateTimeFilter<"Epic"> | Date | string
@@ -571,8 +636,11 @@ export type EpicScalarWhereInput = {
 export type EpicCreateManyJourneyInput = {
   id?: string
   title: string
+  description?: string
   color?: string
   background?: string
+  backgroundImage?: string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint: number
   endPoint: number
   createdAt?: Date | string
@@ -582,8 +650,11 @@ export type EpicCreateManyJourneyInput = {
 export type EpicUpdateWithoutJourneyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint?: Prisma.IntFieldUpdateOperationsInput | number
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -593,8 +664,11 @@ export type EpicUpdateWithoutJourneyInput = {
 export type EpicUncheckedUpdateWithoutJourneyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint?: Prisma.IntFieldUpdateOperationsInput | number
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -604,8 +678,11 @@ export type EpicUncheckedUpdateWithoutJourneyInput = {
 export type EpicUncheckedUpdateManyWithoutJourneyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
   background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   startPoint?: Prisma.IntFieldUpdateOperationsInput | number
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -617,8 +694,11 @@ export type EpicUncheckedUpdateManyWithoutJourneyInput = {
 export type EpicSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   color?: boolean
   background?: boolean
+  backgroundImage?: boolean
+  backgroundPatternConfig?: boolean
   startPoint?: boolean
   endPoint?: boolean
   createdAt?: boolean
@@ -630,8 +710,11 @@ export type EpicSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type EpicSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   color?: boolean
   background?: boolean
+  backgroundImage?: boolean
+  backgroundPatternConfig?: boolean
   startPoint?: boolean
   endPoint?: boolean
   createdAt?: boolean
@@ -643,8 +726,11 @@ export type EpicSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type EpicSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   color?: boolean
   background?: boolean
+  backgroundImage?: boolean
+  backgroundPatternConfig?: boolean
   startPoint?: boolean
   endPoint?: boolean
   createdAt?: boolean
@@ -656,8 +742,11 @@ export type EpicSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type EpicSelectScalar = {
   id?: boolean
   title?: boolean
+  description?: boolean
   color?: boolean
   background?: boolean
+  backgroundImage?: boolean
+  backgroundPatternConfig?: boolean
   startPoint?: boolean
   endPoint?: boolean
   createdAt?: boolean
@@ -665,7 +754,7 @@ export type EpicSelectScalar = {
   journeyId?: boolean
 }
 
-export type EpicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "color" | "background" | "startPoint" | "endPoint" | "createdAt" | "updatedAt" | "journeyId", ExtArgs["result"]["epic"]>
+export type EpicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "color" | "background" | "backgroundImage" | "backgroundPatternConfig" | "startPoint" | "endPoint" | "createdAt" | "updatedAt" | "journeyId", ExtArgs["result"]["epic"]>
 export type EpicInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
 }
@@ -684,8 +773,11 @@ export type $EpicPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     title: string
+    description: string
     color: string
     background: string
+    backgroundImage: string | null
+    backgroundPatternConfig: runtime.JsonValue | null
     startPoint: number
     endPoint: number
     createdAt: Date
@@ -1117,8 +1209,11 @@ export interface Prisma__EpicClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface EpicFieldRefs {
   readonly id: Prisma.FieldRef<"Epic", 'String'>
   readonly title: Prisma.FieldRef<"Epic", 'String'>
+  readonly description: Prisma.FieldRef<"Epic", 'String'>
   readonly color: Prisma.FieldRef<"Epic", 'String'>
   readonly background: Prisma.FieldRef<"Epic", 'String'>
+  readonly backgroundImage: Prisma.FieldRef<"Epic", 'String'>
+  readonly backgroundPatternConfig: Prisma.FieldRef<"Epic", 'Json'>
   readonly startPoint: Prisma.FieldRef<"Epic", 'Int'>
   readonly endPoint: Prisma.FieldRef<"Epic", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Epic", 'DateTime'>

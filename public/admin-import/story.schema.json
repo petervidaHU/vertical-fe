@@ -105,6 +105,19 @@
       "type": "integer",
       "minimum": 0,
       "description": "Must be >= startPoint."
+    },
+    "tags": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 100
+      },
+      "default": [],
+      "description": "Optional tags for filtering. 3-100 characters each, max 20 unique tags per item."
     }
   }
 }

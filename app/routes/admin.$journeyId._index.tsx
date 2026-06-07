@@ -1,10 +1,10 @@
-import { Alert, Button, Card, Group, Stack, Table, Text, TextInput, Title } from "@mantine/core";
-import { Form, Link, useActionData, useOutletContext } from "react-router";
+import { Alert, Button, Group, Paper, SimpleGrid, Stack, Text, TextInput, Textarea } from "@mantine/core";
+import { Form, Link, useActionData, useNavigate, useOutletContext } from "react-router";
+import { resolveAltitudeInfoIconSymbol } from "../features/altitude-info/domain/altitudeInfo";
 import BackgroundField from "../features/admin/components/BackgroundField";
+import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
 import {
-  backgroundToCss,
-  parseStoredBackground,
   serializeBackground,
   tryParseBackgroundInput,
 } from "../shared/domain/background";
@@ -52,17 +52,83 @@ export async function action({
 const AdminJourneyOverviewRoute = () => {
   const { journey } = useOutletContext<AdminJourneyOutletContext>();
   const actionData = useActionData() as ActionData | undefined;
+  const navigate = useNavigate();
+  const managementCards = [
+    {
+      label: "Altitude info",
+      description: "Series and value bands used by the indicator strip.",
+      countLabel: `${journey.altitudeInfos.length} series`,
+      preview: journey.altitudeInfos.slice(0, 3).map((item) => item.title).join(", ") || "No series yet.",
+      to: `/admin/${journey.id}/altitude-info`,
+      tone: "blue",
+    },
+    {
+      label: "Epics",
+      description: "Large vertical bands that frame the journey story arc.",
+      countLabel: `${journey.epics.length} epics`,
+      preview: journey.epics.slice(0, 3).map((item) => item.title).join(", ") || "No epics yet.",
+      to: `/admin/${journey.id}/epics`,
+      tone: "teal",
+    },
+    {
+      label: "Stories",
+      description: "Cards and line events rendered inside the timeline.",
+      countLabel: `${journey.stories.length} stories`,
+      preview: journey.stories.slice(0, 3).map((item) => item.title).join(", ") || "No stories yet.",
+      to: `/admin/${journey.id}/stories`,
+      tone: "green",
+    },
+    {
+      label: "Tags",
+      description: "Shared labels for filtering and grouping timeline content.",
+      countLabel: `${journey.tags?.length ?? 0} tags`,
+      preview: (journey.tags ?? []).slice(0, 4).map((item) => item.name).join(", ") || "No tags yet.",
+      to: `/admin/${journey.id}/tags`,
+      tone: "grape",
+    },
+  ] as const;
 
   return (
-    <Stack>
-      <Card withBorder>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Overview"
+        title="Control this journey"
+        description="Use overview for imports and settings, then jump into the right workflow card below to manage structured content."
+        actions={(
+          <>
+            <Button component={Link} to={`/admin/${journey.id}/altitude-info`} variant="light" color="blue">
+              Altitude info
+            </Button>
+            <Button component={Link} to={`/admin/${journey.id}/epics`} variant="light">
+              Epics
+            </Button>
+            <Button component={Link} to={`/admin/${journey.id}/stories`} variant="light" color="teal">
+              Stories
+            </Button>
+            <Button component={Link} to={`/admin/${journey.id}/tags`} variant="light" color="grape">
+              Tags
+            </Button>
+          </>
+        )}
+      />
+
+      <AdminStatGrid>
+        <AdminStatCard label="Altitude info" value={journey.altitudeInfos.length} description="Indicator series available in this journey." />
+        <AdminStatCard label="Epics" value={journey.epics.length} description="Major timeline bands already defined." />
+        <AdminStatCard label="Stories" value={journey.stories.length} description="Cards and line events in the timeline." />
+        <AdminStatCard label="Tags" value={journey.tags?.length ?? 0} description="Shared labels used for editing and filtering." />
+      </AdminStatGrid>
+
+      <AdminSection
+        title="Import content into this journey"
+        description="Bulk import altitude info, epics, and stories from JSON when you already have structured content ready to load."
+      >
         <Form method="post" action={`/admin/${journey.id}/epics`} encType="multipart/form-data">
           <Stack>
-            <Title order={4}>Bulk import epics and stories (JSON)</Title>
-            <Text size="sm" c="dimmed">
-              Download the schema samples, generate JSON in any AI chat using the prompt, then upload that file here.
-            </Text>
             <Group gap="xs">
+              <Button component="a" href="/admin-import/altitude-info.schema.json" download variant="light" size="xs">
+                Download altitude info schema
+              </Button>
               <Button component="a" href="/admin-import/epic.schema.json" download variant="light" size="xs">
                 Download epic schema
               </Button>
@@ -76,19 +142,35 @@ const AdminJourneyOverviewRoute = () => {
                 Download AI prompt
               </Button>
             </Group>
+            <Textarea
+              label="Paste JSON"
+              name="jsonText"
+              placeholder='{"altitudeInfos": [...], "epics": [...], "stories": [...]}'
+              description="Optional. If JSON is pasted here, it will be imported instead of the uploaded file."
+              autosize
+              minRows={8}
+              maxRows={18}
+              spellCheck={false}
+              styles={{ input: { fontFamily: "monospace" } }}
+            />
+            <Text size="xs" c="dimmed" ta="center">or</Text>
             <label htmlFor="journeyJsonFileUpload">JSON file</label>
-            <input id="journeyJsonFileUpload" name="jsonFile" type="file" accept="application/json,.json" required />
-            <Button type="submit" name="intent" value="import-json">
-              Import JSON into this journey
-            </Button>
+            <input id="journeyJsonFileUpload" name="jsonFile" type="file" accept="application/json,.json" />
+            <Group justify="flex-end">
+              <Button type="submit" name="intent" value="import-json" color="teal">
+                Import JSON into this journey
+              </Button>
+            </Group>
           </Stack>
         </Form>
-      </Card>
+      </AdminSection>
 
-      <Card withBorder>
+      <AdminSection
+        title="Journey settings"
+        description="Edit the core identity and the base ground styling for this journey."
+      >
         <Form method="post">
           <Stack>
-            <Title order={4}>Edit Journey</Title>
             <TextInput label="Name" name="name" required defaultValue={journey.name} />
             <TextInput label="Slug" name="slug" required defaultValue={journey.slug} />
             <BackgroundField
@@ -97,98 +179,58 @@ const AdminJourneyOverviewRoute = () => {
               defaultValue={journey.startingPoint}
               defaultColor="#4b3726"
             />
-            <Button type="submit">Update Journey</Button>
+            <Group justify="flex-end">
+              <Button type="submit">Update journey</Button>
+            </Group>
           </Stack>
         </Form>
-      </Card>
+      </AdminSection>
 
       {actionData?.success ? <Alert color="green">{actionData.success}</Alert> : null}
       {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
 
-      <Card withBorder>
-        <Stack>
-          <Group justify="space-between">
-            <Title order={4}>Epics in Journey</Title>
-            <Button component={Link} to={`/admin/${journey.id}/epics`} variant="light" size="xs">
-              Manage epics
-            </Button>
-          </Group>
-          {journey.epics.length === 0 ? (
-            <Text c="dimmed">No epics yet.</Text>
-          ) : (
-            <Table striped withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Title</Table.Th>
-                  <Table.Th>Background</Table.Th>
-                  <Table.Th>Range</Table.Th>
-                  <Table.Th>Action</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {journey.epics.map((epic) => (
-                  <Table.Tr key={epic.id}>
-                    <Table.Td>{epic.title}</Table.Td>
-                    <Table.Td>
-                      <div
-                        style={{
-                          width: 72,
-                          height: 18,
-                          borderRadius: 6,
-                          border: "1px solid rgba(120, 120, 120, 0.5)",
-                          background: backgroundToCss(parseStoredBackground(epic.background, epic.color)),
-                        }}
-                      />
-                    </Table.Td>
-                    <Table.Td>{epic.startPoint} - {epic.endPoint}</Table.Td>
-                    <Table.Td>
-                      <Link to={`/admin/${journey.id}/epics/${epic.id}`}>Edit on map</Link>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
-        </Stack>
-      </Card>
-
-      <Card withBorder>
-        <Stack>
-          <Group justify="space-between">
-            <Title order={4}>Stories in Journey</Title>
-            <Button component={Link} to={`/admin/${journey.id}/stories`} variant="light" color="teal" size="xs">
-              Manage stories
-            </Button>
-          </Group>
-          {journey.stories.length === 0 ? (
-            <Text c="dimmed">No stories yet.</Text>
-          ) : (
-            <Table striped withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Title</Table.Th>
-                  <Table.Th>Type</Table.Th>
-                  <Table.Th>Range</Table.Th>
-                  <Table.Th>Action</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {journey.stories.map((story) => (
-                  <Table.Tr key={story.id}>
-                    <Table.Td>{story.title}</Table.Td>
-                    <Table.Td>{story.storyType}</Table.Td>
-                    <Table.Td>{story.startPoint} - {story.endPoint}</Table.Td>
-                    <Table.Td>
-                      <Link to={`/admin/${journey.id}/stories/${story.id}`}>Edit on map</Link>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
-        </Stack>
-      </Card>
-    </Stack>
+      <AdminSection
+        title="Management shortcuts"
+        description="Jump straight into the next editing area without scanning long tables from the overview page."
+      >
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+          {managementCards.map((card) => (
+            <Paper
+              key={card.label}
+              radius="22px"
+              p="lg"
+              style={{
+                border: "1px solid rgba(111, 134, 145, 0.14)",
+                background: "linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 251, 0.94) 100%)",
+              }}
+            >
+              <Stack gap="sm">
+                <Text size="xs" tt="uppercase" fw={800} c={`${card.tone}.7`} style={{ letterSpacing: "0.12em" }}>
+                  {card.countLabel}
+                </Text>
+                <Text fw={700} size="lg">
+                  {card.label}
+                </Text>
+                <Text size="sm" c="dimmed">
+                  {card.description}
+                </Text>
+                <Text size="sm">{card.preview}</Text>
+                <Group justify="space-between" align="center">
+                  <Button variant="light" color={card.tone} onClick={() => navigate(card.to)}>
+                    Manage {card.label.toLowerCase()}
+                  </Button>
+                  {card.label === "Altitude info" && journey.altitudeInfos[0] ? (
+                    <Text size="xs" c="dimmed">
+                      First icon: {resolveAltitudeInfoIconSymbol(journey.altitudeInfos[0].icon)}
+                    </Text>
+                  ) : null}
+                </Group>
+              </Stack>
+            </Paper>
+          ))}
+        </SimpleGrid>
+      </AdminSection>
+    </AdminPage>
   );
 };
 

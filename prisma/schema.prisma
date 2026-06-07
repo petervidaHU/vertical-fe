@@ -20,15 +20,69 @@ model Journey {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  epics   Epic[]
-  stories Story[]
+  altitudeInfos AltitudeInfo[]
+  epics         Epic[]
+  stories       Story[]
+  tags          Tag[]
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  journey   Journey  @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  journeyId String
+
+  stories       Story[]
+  altitudeInfos AltitudeInfo[]
+
+  @@index([journeyId])
+  @@index([name])
+}
+
+model AltitudeInfo {
+  id        String   @id @default(cuid())
+  title     String
+  icon      String   @default("info")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  journey   Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  journeyId String
+  values    AltitudeInfoValue[]
+  tags      Tag[]
+
+  @@index([journeyId, order])
+}
+
+model AltitudeInfoValue {
+  id             String   @id @default(cuid())
+  value          String
+  startPoint     Int
+  endPoint       Int
+  useGradient    Boolean  @default(false)
+  startValue     Float?
+  endValue       Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  altitudeInfo   AltitudeInfo @relation(fields: [altitudeInfoId], references: [id], onDelete: Cascade)
+  altitudeInfoId String
+
+  @@index([altitudeInfoId, startPoint, endPoint])
 }
 
 model Epic {
   id        String   @id @default(cuid())
   title     String
+  description String   @default("")
   color     String   @default("#4ecdc4")
   background String  @default("{\"mode\":\"color\",\"color\":\"#4ecdc4\"}")
+  backgroundImage String?
+  backgroundPatternConfig Json?
   startPoint Int
   endPoint   Int
   createdAt DateTime @default(now())
@@ -46,7 +100,7 @@ model Story {
   description String   @default("")
   extraContent String  @default("")
   storyType   StoryType @default(CARD)
-  background  String   @default("{\"mode\":\"color\",\"color\":\"#16314c\"}")
+  background  String?
   imageUrl    String?
   lineColor   String   @default("#4ecdc4")
   lineWidth   Int      @default(4)
@@ -60,6 +114,7 @@ model Story {
 
   journey   Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
   journeyId String
+  tags      Tag[]
 
   @@index([journeyId, startPoint, endPoint])
 }

@@ -190,8 +190,10 @@ export type JourneyWhereInput = {
   startingPoint?: Prisma.StringFilter<"Journey"> | string
   createdAt?: Prisma.DateTimeFilter<"Journey"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Journey"> | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoListRelationFilter
   epics?: Prisma.EpicListRelationFilter
   stories?: Prisma.StoryListRelationFilter
+  tags?: Prisma.TagListRelationFilter
 }
 
 export type JourneyOrderByWithRelationInput = {
@@ -201,8 +203,10 @@ export type JourneyOrderByWithRelationInput = {
   startingPoint?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  altitudeInfos?: Prisma.AltitudeInfoOrderByRelationAggregateInput
   epics?: Prisma.EpicOrderByRelationAggregateInput
   stories?: Prisma.StoryOrderByRelationAggregateInput
+  tags?: Prisma.TagOrderByRelationAggregateInput
 }
 
 export type JourneyWhereUniqueInput = Prisma.AtLeast<{
@@ -215,8 +219,10 @@ export type JourneyWhereUniqueInput = Prisma.AtLeast<{
   startingPoint?: Prisma.StringFilter<"Journey"> | string
   createdAt?: Prisma.DateTimeFilter<"Journey"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Journey"> | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoListRelationFilter
   epics?: Prisma.EpicListRelationFilter
   stories?: Prisma.StoryListRelationFilter
+  tags?: Prisma.TagListRelationFilter
 }, "id" | "slug">
 
 export type JourneyOrderByWithAggregationInput = {
@@ -250,8 +256,10 @@ export type JourneyCreateInput = {
   startingPoint?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  altitudeInfos?: Prisma.AltitudeInfoCreateNestedManyWithoutJourneyInput
   epics?: Prisma.EpicCreateNestedManyWithoutJourneyInput
   stories?: Prisma.StoryCreateNestedManyWithoutJourneyInput
+  tags?: Prisma.TagCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateInput = {
@@ -261,8 +269,10 @@ export type JourneyUncheckedCreateInput = {
   startingPoint?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedCreateNestedManyWithoutJourneyInput
   epics?: Prisma.EpicUncheckedCreateNestedManyWithoutJourneyInput
   stories?: Prisma.StoryUncheckedCreateNestedManyWithoutJourneyInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUpdateInput = {
@@ -272,8 +282,10 @@ export type JourneyUpdateInput = {
   startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUpdateManyWithoutJourneyNestedInput
   epics?: Prisma.EpicUpdateManyWithoutJourneyNestedInput
   stories?: Prisma.StoryUpdateManyWithoutJourneyNestedInput
+  tags?: Prisma.TagUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateInput = {
@@ -283,8 +295,10 @@ export type JourneyUncheckedUpdateInput = {
   startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedUpdateManyWithoutJourneyNestedInput
   epics?: Prisma.EpicUncheckedUpdateManyWithoutJourneyNestedInput
   stories?: Prisma.StoryUncheckedUpdateManyWithoutJourneyNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyCreateManyInput = {
@@ -354,6 +368,34 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type JourneyCreateNestedOneWithoutTagsInput = {
+  create?: Prisma.XOR<Prisma.JourneyCreateWithoutTagsInput, Prisma.JourneyUncheckedCreateWithoutTagsInput>
+  connectOrCreate?: Prisma.JourneyCreateOrConnectWithoutTagsInput
+  connect?: Prisma.JourneyWhereUniqueInput
+}
+
+export type JourneyUpdateOneRequiredWithoutTagsNestedInput = {
+  create?: Prisma.XOR<Prisma.JourneyCreateWithoutTagsInput, Prisma.JourneyUncheckedCreateWithoutTagsInput>
+  connectOrCreate?: Prisma.JourneyCreateOrConnectWithoutTagsInput
+  upsert?: Prisma.JourneyUpsertWithoutTagsInput
+  connect?: Prisma.JourneyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JourneyUpdateToOneWithWhereWithoutTagsInput, Prisma.JourneyUpdateWithoutTagsInput>, Prisma.JourneyUncheckedUpdateWithoutTagsInput>
+}
+
+export type JourneyCreateNestedOneWithoutAltitudeInfosInput = {
+  create?: Prisma.XOR<Prisma.JourneyCreateWithoutAltitudeInfosInput, Prisma.JourneyUncheckedCreateWithoutAltitudeInfosInput>
+  connectOrCreate?: Prisma.JourneyCreateOrConnectWithoutAltitudeInfosInput
+  connect?: Prisma.JourneyWhereUniqueInput
+}
+
+export type JourneyUpdateOneRequiredWithoutAltitudeInfosNestedInput = {
+  create?: Prisma.XOR<Prisma.JourneyCreateWithoutAltitudeInfosInput, Prisma.JourneyUncheckedCreateWithoutAltitudeInfosInput>
+  connectOrCreate?: Prisma.JourneyCreateOrConnectWithoutAltitudeInfosInput
+  upsert?: Prisma.JourneyUpsertWithoutAltitudeInfosInput
+  connect?: Prisma.JourneyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JourneyUpdateToOneWithWhereWithoutAltitudeInfosInput, Prisma.JourneyUpdateWithoutAltitudeInfosInput>, Prisma.JourneyUncheckedUpdateWithoutAltitudeInfosInput>
+}
+
 export type JourneyCreateNestedOneWithoutEpicsInput = {
   create?: Prisma.XOR<Prisma.JourneyCreateWithoutEpicsInput, Prisma.JourneyUncheckedCreateWithoutEpicsInput>
   connectOrCreate?: Prisma.JourneyCreateOrConnectWithoutEpicsInput
@@ -382,6 +424,134 @@ export type JourneyUpdateOneRequiredWithoutStoriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.JourneyUpdateToOneWithWhereWithoutStoriesInput, Prisma.JourneyUpdateWithoutStoriesInput>, Prisma.JourneyUncheckedUpdateWithoutStoriesInput>
 }
 
+export type JourneyCreateWithoutTagsInput = {
+  id?: string
+  slug: string
+  name: string
+  startingPoint?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  altitudeInfos?: Prisma.AltitudeInfoCreateNestedManyWithoutJourneyInput
+  epics?: Prisma.EpicCreateNestedManyWithoutJourneyInput
+  stories?: Prisma.StoryCreateNestedManyWithoutJourneyInput
+}
+
+export type JourneyUncheckedCreateWithoutTagsInput = {
+  id?: string
+  slug: string
+  name: string
+  startingPoint?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedCreateNestedManyWithoutJourneyInput
+  epics?: Prisma.EpicUncheckedCreateNestedManyWithoutJourneyInput
+  stories?: Prisma.StoryUncheckedCreateNestedManyWithoutJourneyInput
+}
+
+export type JourneyCreateOrConnectWithoutTagsInput = {
+  where: Prisma.JourneyWhereUniqueInput
+  create: Prisma.XOR<Prisma.JourneyCreateWithoutTagsInput, Prisma.JourneyUncheckedCreateWithoutTagsInput>
+}
+
+export type JourneyUpsertWithoutTagsInput = {
+  update: Prisma.XOR<Prisma.JourneyUpdateWithoutTagsInput, Prisma.JourneyUncheckedUpdateWithoutTagsInput>
+  create: Prisma.XOR<Prisma.JourneyCreateWithoutTagsInput, Prisma.JourneyUncheckedCreateWithoutTagsInput>
+  where?: Prisma.JourneyWhereInput
+}
+
+export type JourneyUpdateToOneWithWhereWithoutTagsInput = {
+  where?: Prisma.JourneyWhereInput
+  data: Prisma.XOR<Prisma.JourneyUpdateWithoutTagsInput, Prisma.JourneyUncheckedUpdateWithoutTagsInput>
+}
+
+export type JourneyUpdateWithoutTagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUpdateManyWithoutJourneyNestedInput
+  epics?: Prisma.EpicUpdateManyWithoutJourneyNestedInput
+  stories?: Prisma.StoryUpdateManyWithoutJourneyNestedInput
+}
+
+export type JourneyUncheckedUpdateWithoutTagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedUpdateManyWithoutJourneyNestedInput
+  epics?: Prisma.EpicUncheckedUpdateManyWithoutJourneyNestedInput
+  stories?: Prisma.StoryUncheckedUpdateManyWithoutJourneyNestedInput
+}
+
+export type JourneyCreateWithoutAltitudeInfosInput = {
+  id?: string
+  slug: string
+  name: string
+  startingPoint?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  epics?: Prisma.EpicCreateNestedManyWithoutJourneyInput
+  stories?: Prisma.StoryCreateNestedManyWithoutJourneyInput
+  tags?: Prisma.TagCreateNestedManyWithoutJourneyInput
+}
+
+export type JourneyUncheckedCreateWithoutAltitudeInfosInput = {
+  id?: string
+  slug: string
+  name: string
+  startingPoint?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  epics?: Prisma.EpicUncheckedCreateNestedManyWithoutJourneyInput
+  stories?: Prisma.StoryUncheckedCreateNestedManyWithoutJourneyInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutJourneyInput
+}
+
+export type JourneyCreateOrConnectWithoutAltitudeInfosInput = {
+  where: Prisma.JourneyWhereUniqueInput
+  create: Prisma.XOR<Prisma.JourneyCreateWithoutAltitudeInfosInput, Prisma.JourneyUncheckedCreateWithoutAltitudeInfosInput>
+}
+
+export type JourneyUpsertWithoutAltitudeInfosInput = {
+  update: Prisma.XOR<Prisma.JourneyUpdateWithoutAltitudeInfosInput, Prisma.JourneyUncheckedUpdateWithoutAltitudeInfosInput>
+  create: Prisma.XOR<Prisma.JourneyCreateWithoutAltitudeInfosInput, Prisma.JourneyUncheckedCreateWithoutAltitudeInfosInput>
+  where?: Prisma.JourneyWhereInput
+}
+
+export type JourneyUpdateToOneWithWhereWithoutAltitudeInfosInput = {
+  where?: Prisma.JourneyWhereInput
+  data: Prisma.XOR<Prisma.JourneyUpdateWithoutAltitudeInfosInput, Prisma.JourneyUncheckedUpdateWithoutAltitudeInfosInput>
+}
+
+export type JourneyUpdateWithoutAltitudeInfosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  epics?: Prisma.EpicUpdateManyWithoutJourneyNestedInput
+  stories?: Prisma.StoryUpdateManyWithoutJourneyNestedInput
+  tags?: Prisma.TagUpdateManyWithoutJourneyNestedInput
+}
+
+export type JourneyUncheckedUpdateWithoutAltitudeInfosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  epics?: Prisma.EpicUncheckedUpdateManyWithoutJourneyNestedInput
+  stories?: Prisma.StoryUncheckedUpdateManyWithoutJourneyNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutJourneyNestedInput
+}
+
 export type JourneyCreateWithoutEpicsInput = {
   id?: string
   slug: string
@@ -389,7 +559,9 @@ export type JourneyCreateWithoutEpicsInput = {
   startingPoint?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  altitudeInfos?: Prisma.AltitudeInfoCreateNestedManyWithoutJourneyInput
   stories?: Prisma.StoryCreateNestedManyWithoutJourneyInput
+  tags?: Prisma.TagCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateWithoutEpicsInput = {
@@ -399,7 +571,9 @@ export type JourneyUncheckedCreateWithoutEpicsInput = {
   startingPoint?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedCreateNestedManyWithoutJourneyInput
   stories?: Prisma.StoryUncheckedCreateNestedManyWithoutJourneyInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyCreateOrConnectWithoutEpicsInput = {
@@ -425,7 +599,9 @@ export type JourneyUpdateWithoutEpicsInput = {
   startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUpdateManyWithoutJourneyNestedInput
   stories?: Prisma.StoryUpdateManyWithoutJourneyNestedInput
+  tags?: Prisma.TagUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateWithoutEpicsInput = {
@@ -435,7 +611,9 @@ export type JourneyUncheckedUpdateWithoutEpicsInput = {
   startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedUpdateManyWithoutJourneyNestedInput
   stories?: Prisma.StoryUncheckedUpdateManyWithoutJourneyNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyCreateWithoutStoriesInput = {
@@ -445,7 +623,9 @@ export type JourneyCreateWithoutStoriesInput = {
   startingPoint?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  altitudeInfos?: Prisma.AltitudeInfoCreateNestedManyWithoutJourneyInput
   epics?: Prisma.EpicCreateNestedManyWithoutJourneyInput
+  tags?: Prisma.TagCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyUncheckedCreateWithoutStoriesInput = {
@@ -455,7 +635,9 @@ export type JourneyUncheckedCreateWithoutStoriesInput = {
   startingPoint?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedCreateNestedManyWithoutJourneyInput
   epics?: Prisma.EpicUncheckedCreateNestedManyWithoutJourneyInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutJourneyInput
 }
 
 export type JourneyCreateOrConnectWithoutStoriesInput = {
@@ -481,7 +663,9 @@ export type JourneyUpdateWithoutStoriesInput = {
   startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUpdateManyWithoutJourneyNestedInput
   epics?: Prisma.EpicUpdateManyWithoutJourneyNestedInput
+  tags?: Prisma.TagUpdateManyWithoutJourneyNestedInput
 }
 
 export type JourneyUncheckedUpdateWithoutStoriesInput = {
@@ -491,7 +675,9 @@ export type JourneyUncheckedUpdateWithoutStoriesInput = {
   startingPoint?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedUpdateManyWithoutJourneyNestedInput
   epics?: Prisma.EpicUncheckedUpdateManyWithoutJourneyNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutJourneyNestedInput
 }
 
 
@@ -500,13 +686,17 @@ export type JourneyUncheckedUpdateWithoutStoriesInput = {
  */
 
 export type JourneyCountOutputType = {
+  altitudeInfos: number
   epics: number
   stories: number
+  tags: number
 }
 
 export type JourneyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  altitudeInfos?: boolean | JourneyCountOutputTypeCountAltitudeInfosArgs
   epics?: boolean | JourneyCountOutputTypeCountEpicsArgs
   stories?: boolean | JourneyCountOutputTypeCountStoriesArgs
+  tags?: boolean | JourneyCountOutputTypeCountTagsArgs
 }
 
 /**
@@ -517,6 +707,13 @@ export type JourneyCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exte
    * Select specific fields to fetch from the JourneyCountOutputType
    */
   select?: Prisma.JourneyCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * JourneyCountOutputType without action
+ */
+export type JourneyCountOutputTypeCountAltitudeInfosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AltitudeInfoWhereInput
 }
 
 /**
@@ -533,6 +730,13 @@ export type JourneyCountOutputTypeCountStoriesArgs<ExtArgs extends runtime.Types
   where?: Prisma.StoryWhereInput
 }
 
+/**
+ * JourneyCountOutputType without action
+ */
+export type JourneyCountOutputTypeCountTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TagWhereInput
+}
+
 
 export type JourneySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -541,8 +745,10 @@ export type JourneySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   startingPoint?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  altitudeInfos?: boolean | Prisma.Journey$altitudeInfosArgs<ExtArgs>
   epics?: boolean | Prisma.Journey$epicsArgs<ExtArgs>
   stories?: boolean | Prisma.Journey$storiesArgs<ExtArgs>
+  tags?: boolean | Prisma.Journey$tagsArgs<ExtArgs>
   _count?: boolean | Prisma.JourneyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["journey"]>
 
@@ -575,8 +781,10 @@ export type JourneySelectScalar = {
 
 export type JourneyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "name" | "startingPoint" | "createdAt" | "updatedAt", ExtArgs["result"]["journey"]>
 export type JourneyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  altitudeInfos?: boolean | Prisma.Journey$altitudeInfosArgs<ExtArgs>
   epics?: boolean | Prisma.Journey$epicsArgs<ExtArgs>
   stories?: boolean | Prisma.Journey$storiesArgs<ExtArgs>
+  tags?: boolean | Prisma.Journey$tagsArgs<ExtArgs>
   _count?: boolean | Prisma.JourneyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type JourneyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -585,8 +793,10 @@ export type JourneyIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 export type $JourneyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Journey"
   objects: {
+    altitudeInfos: Prisma.$AltitudeInfoPayload<ExtArgs>[]
     epics: Prisma.$EpicPayload<ExtArgs>[]
     stories: Prisma.$StoryPayload<ExtArgs>[]
+    tags: Prisma.$TagPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -989,8 +1199,10 @@ readonly fields: JourneyFieldRefs;
  */
 export interface Prisma__JourneyClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  altitudeInfos<T extends Prisma.Journey$altitudeInfosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Journey$altitudeInfosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AltitudeInfoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   epics<T extends Prisma.Journey$epicsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Journey$epicsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EpicPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stories<T extends Prisma.Journey$storiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Journey$storiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tags<T extends Prisma.Journey$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Journey$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1419,6 +1631,30 @@ export type JourneyDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
+ * Journey.altitudeInfos
+ */
+export type Journey$altitudeInfosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AltitudeInfo
+   */
+  select?: Prisma.AltitudeInfoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AltitudeInfo
+   */
+  omit?: Prisma.AltitudeInfoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AltitudeInfoInclude<ExtArgs> | null
+  where?: Prisma.AltitudeInfoWhereInput
+  orderBy?: Prisma.AltitudeInfoOrderByWithRelationInput | Prisma.AltitudeInfoOrderByWithRelationInput[]
+  cursor?: Prisma.AltitudeInfoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AltitudeInfoScalarFieldEnum | Prisma.AltitudeInfoScalarFieldEnum[]
+}
+
+/**
  * Journey.epics
  */
 export type Journey$epicsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1464,6 +1700,30 @@ export type Journey$storiesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.StoryScalarFieldEnum | Prisma.StoryScalarFieldEnum[]
+}
+
+/**
+ * Journey.tags
+ */
+export type Journey$tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Tag
+   */
+  select?: Prisma.TagSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Tag
+   */
+  omit?: Prisma.TagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
+  where?: Prisma.TagWhereInput
+  orderBy?: Prisma.TagOrderByWithRelationInput | Prisma.TagOrderByWithRelationInput[]
+  cursor?: Prisma.TagWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TagScalarFieldEnum | Prisma.TagScalarFieldEnum[]
 }
 
 /**

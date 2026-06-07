@@ -1,15 +1,10 @@
-import { Alert, Button, Card, Group, Stack, Table, Text, TextInput, Title } from "@mantine/core";
+import { Alert, Badge, Button, Group, Paper, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
 import { db } from "../server/db";
 import { Form, Link, redirect, useActionData, useLoaderData } from "react-router";
 import { useEffect, useMemo, useState } from "react";
-import BackgroundField from "../features/admin/components/BackgroundField";
 import StoryExtraContentEditor from "../features/admin/components/StoryExtraContentEditor";
-import {
-  backgroundToCss,
-  parseStoredBackground,
-  tryParseBackgroundInput,
-  serializeBackground,
-} from "../shared/domain/background";
+import { STORY_IMAGE_ACCEPT, STORY_IMAGE_MAX_BYTES } from "../features/admin/domain/storyImage.shared";
+import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
 import { parseStoryExtraContent } from "../shared/validation/storySchemas";
 
 type ActionData = { error?: string };
@@ -61,11 +56,13 @@ export async function action({ request, params }: { request: Request; params: { 
   const journeyId = params.journeyId?.trim() ?? "";
 
   if (intent === "create") {
+    const {
+      deleteManagedStoryImage,
+      saveStoryImage,
+    } = await import("../features/admin/domain/storyImage.server");
     const title = String(formData.get("title") ?? "").trim();
     const description = String(formData.get("description") ?? "").trim();
     const storyType = parseStoryType(formData.get("storyType"));
-    const backgroundInput = String(formData.get("background") ?? "").trim();
-    const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
     const lineColor = String(formData.get("lineColor") ?? "#4ecdc4").trim() || "#4ecdc4";
     const lineWidth = parsePoint(formData.get("lineWidth"));
     const lineLabel = String(formData.get("lineLabel") ?? "").trim();
@@ -87,20 +84,21 @@ export async function action({ request, params }: { request: Request; params: { 
       return { error: "Line width must be between 1 and 64." };
     }
 
-    const parsedBackground = tryParseBackgroundInput(backgroundInput);
-    if (!parsedBackground.background) {
-      return { error: parsedBackground.error ?? "Invalid background." };
-    }
+    let uploadedStoryImage: string | null = null;
 
     try {
+      uploadedStoryImage = await saveStoryImage(formData.get("storyImageFile"), {
+        fileNamePrefix: title,
+      });
+
       await db.story.create({
         data: {
           title,
           description,
           extraContent,
           storyType,
-          background: serializeBackground(parsedBackground.background),
-          imageUrl,
+          background: null,
+          imageUrl: uploadedStoryImage,
           lineColor,
           lineWidth,
           lineLabel,
@@ -113,12 +111,21 @@ export async function action({ request, params }: { request: Request; params: { 
       });
 
       return redirect(`/admin/${journeyId}/stories?success=Story+created`);
-    } catch {
+    } catch (error) {
+      if (uploadedStoryImage) {
+        await deleteManagedStoryImage(uploadedStoryImage);
+      }
+
+      if (error instanceof Error) {
+        return { error: error.message };
+      }
+
       return { error: "Unable to create story." };
     }
   }
 
   if (intent === "delete") {
+    const { deleteManagedStoryImage } = await import("../features/admin/domain/storyImage.server");
     const id = String(formData.get("id") ?? "").trim();
 
     if (!id) {
@@ -126,7 +133,14 @@ export async function action({ request, params }: { request: Request; params: { 
     }
 
     try {
+      const existingStory = await db.story.findUnique({
+        where: { id },
+        select: { imageUrl: true },
+      });
+
       await db.story.delete({ where: { id } });
+      await deleteManagedStoryImage(existingStory?.imageUrl);
+
       const suffix = journeyId ? `?success=Story+deleted` : "?success=Story+deleted";
       return redirect(`/admin/${journeyId}/stories${suffix}`);
     } catch {
@@ -159,34 +173,151 @@ const AdminStoriesRoute = () => {
     () => stories.filter((story) => !optimisticDeletedIds.includes(story.id)),
     [stories, optimisticDeletedIds],
   );
+  const lineStories = stories.filter((story) => story.storyType === "LINE").length;
+  const storiesWithImages = stories.filter((story) => Boolean(story.imageUrl)).length;
 
   return (
-    <Stack>
-      <Title order={3}>Stories</Title>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Stories"
+        title="Create the moments that appear in the journey"
+        description="Stories are either cards or line events. Create them here, then open a story to refine visuals, imagery, tags, and range details."
+        actions={(
+          <Button component={Link} to={`/admin/${selectedJourney?.id ?? ""}`} variant="default">
+            Back to overview
+          </Button>
+        )}
+      />
 
-      <Card withBorder>
-        <Stack>
-          <Title order={4}>Journey scope</Title>
-          <Text size="sm" c="dimmed">
-            Managing {selectedJourney?.name ?? "this journey"}.
-          </Text>
-          {selectedJourney ? (
-            <Group>
-              <Button component={Link} to="/admin/journeys" variant="light">
-                Change journey
-              </Button>
-              <Button component={Link} to={`/admin/${selectedJourney.id}`} variant="subtle">
-                Open journey
-              </Button>
-            </Group>
-          ) : null}
-        </Stack>
-      </Card>
+      <AdminStatGrid>
+        <AdminStatCard label="Stories" value={visibleStories.length} description={`Managing ${selectedJourney?.name ?? "this journey"}.`} />
+        <AdminStatCard label="Line stories" value={lineStories} description="Stories rendered as line events instead of cards." />
+        <AdminStatCard label="With images" value={storiesWithImages} description="Stories already carrying an uploaded journey image." />
+        <AdminStatCard label="Epics in scope" value={epics.length} description="Reference count for overlap planning while authoring stories." />
+      </AdminStatGrid>
 
-      <Card withBorder>
-        <Form method="post">
+      <AdminSection
+        title="Existing stories"
+        description="Review the current story inventory first, then create a new one underneath when you need to add more content."
+      >
+        {visibleStories.length === 0 ? (
+          <Text c="dimmed">No stories for this journey yet.</Text>
+        ) : (
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+            {visibleStories.map((story) => {
+              const overlappingEpics = epics.filter(
+                (epic) =>
+                  epic.journeyId === story.journeyId
+                  && epic.startPoint <= story.endPoint
+                  && epic.endPoint >= story.startPoint,
+              );
+
+              return (
+                <Paper
+                  key={story.id}
+                  radius="22px"
+                  p="lg"
+                  style={{
+                    border: "1px solid rgba(111, 134, 145, 0.14)",
+                    background: "linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 251, 0.94) 100%)",
+                    display: "flex",
+                    gap: "lg",
+                  }}
+                >
+                  {/* Image on the left */}
+                  <div
+                    style={{
+                      flex: "0 0 120px",
+                      minHeight: 120,
+                      borderRadius: 12,
+                      background: "#f0f0f0",
+                      overflow: "hidden",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {story.imageUrl ? (
+                      <img
+                        src={story.imageUrl}
+                        alt={story.title}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <Text size="xs" c="dimmed" ta="center">
+                        No image
+                      </Text>
+                    )}
+                  </div>
+
+                  {/* Content on the right */}
+                  <Stack gap="sm" style={{ flex: 1 }}>
+                    <Group justify="space-between" align="flex-start">
+                      <div style={{ flex: 1 }}>
+                        <Text fw={700} size="lg">{story.title}</Text>
+                        <Text size="sm" c="dimmed">
+                          {story.startPoint} - {story.endPoint} m
+                        </Text>
+                      </div>
+                      <Badge color={story.storyType === "LINE" ? "teal" : "orange"} variant="light">
+                        {story.storyType}
+                      </Badge>
+                    </Group>
+
+                    <Text size="sm">
+                      {story.description || "No description yet."}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      Overlapping epics: {overlappingEpics.map((epic) => epic.title).join(", ") || "None"}
+                    </Text>
+
+                    <Group gap="xs">
+                      <Button component={Link} to={`/admin/${selectedJourney?.id ?? ""}/stories/${story.id}`} size="sm">
+                        Open story
+                      </Button>
+                      {confirmDeleteId === story.id ? (
+                        <Group gap="xs">
+                          <Form
+                            method="post"
+                            onSubmit={() => {
+                              setOptimisticDeletedIds((prev) => [...prev, story.id]);
+                              setConfirmDeleteId(null);
+                            }}
+                          >
+                            <input type="hidden" name="id" value={story.id} />
+                            <input type="hidden" name="journeyId" value={selectedJourney?.id ?? ""} />
+                            <Button size="sm" color="red" type="submit" name="intent" value="delete">
+                              Confirm delete
+                            </Button>
+                          </Form>
+                          <Button size="sm" variant="subtle" onClick={() => setConfirmDeleteId(null)}>
+                            Cancel
+                          </Button>
+                        </Group>
+                      ) : (
+                        <Button size="sm" color="red" variant="subtle" onClick={() => setConfirmDeleteId(story.id)}>
+                          Delete
+                        </Button>
+                      )}
+                    </Group>
+                  </Stack>
+                </Paper>
+              );
+            })}
+          </SimpleGrid>
+        )}
+      </AdminSection>
+
+      <AdminSection
+        title="Create story"
+        description="Choose whether the story is a card or a line event, then define its visuals and the altitude range where it appears."
+      >
+        <Form method="post" encType="multipart/form-data">
           <Stack>
-            <Title order={4}>Create story</Title>
             {selectedJourney ? <Text size="sm" c="dimmed">Journey: {selectedJourney.name}</Text> : null}
             <TextInput label="Title" name="title" required />
             <label>
@@ -202,17 +333,20 @@ const AdminStoriesRoute = () => {
             </label>
             <TextInput label="Description" name="description" />
             <StoryExtraContentEditor name="extraContent" />
+            <label htmlFor="createStoryImageFile">Story image</label>
+            <input
+              id="createStoryImageFile"
+              name="storyImageFile"
+              type="file"
+              accept={STORY_IMAGE_ACCEPT}
+            />
+            <Text size="xs" c="dimmed">
+              Optional. Upload a PNG, JPEG, or WebP up to {Math.round(STORY_IMAGE_MAX_BYTES / (1024 * 1024))} MB.
+              Images are resized and optimized to WebP for timeline rendering.
+            </Text>
 
             {storyType === "CARD" ? (
               <>
-                <TextInput label="Card image URL (mock for now)" name="imageUrl" placeholder="https://example.com/mock-image.png" />
-                <BackgroundField
-                  name="background"
-                  label="Card background"
-                  defaultValue={serializeBackground({ mode: "color", color: "#ffd8a8" })}
-                  defaultColor="#ffd8a8"
-                  allowGradient={false}
-                />
                 <input type="hidden" name="lineColor" value="#4ecdc4" />
                 <input type="hidden" name="lineWidth" value="4" />
                 <input type="hidden" name="lineLabel" value="" />
@@ -226,110 +360,23 @@ const AdminStoriesRoute = () => {
                 <TextInput label="Line label" name="lineLabel" placeholder="Checkpoint" />
                 <TextInput label="Tooltip text" name="tooltipText" placeholder="Reached checkpoint" />
                 <TextInput label="Tooltip image URL (mock)" name="tooltipImageUrl" placeholder="https://example.com/mock-tooltip-image.png" />
-                <input type="hidden" name="imageUrl" value="" />
-                <input type="hidden" name="background" value={serializeBackground({ mode: "color", color: "#ffd8a8" })} />
               </>
             )}
 
-            <TextInput label="Start point" name="startPoint" type="number" inputMode="numeric" required defaultValue="0" min={0} />
-            <TextInput label="End point" name="endPoint" type="number" inputMode="numeric" required defaultValue="100" min={0} />
-            <Button type="submit" name="intent" value="create" disabled={!selectedJourney}>Create Story</Button>
+            <Group grow>
+              <TextInput label="Start point" name="startPoint" type="number" inputMode="numeric" required defaultValue="0" min={0} />
+              <TextInput label="End point" name="endPoint" type="number" inputMode="numeric" required defaultValue="100" min={0} />
+            </Group>
+            <Group justify="flex-end">
+              <Button type="submit" name="intent" value="create" disabled={!selectedJourney}>Create story</Button>
+            </Group>
           </Stack>
         </Form>
-      </Card>
+      </AdminSection>
 
       {success ? <Alert color="green">{success}</Alert> : null}
       {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
-
-      <Card withBorder>
-        <Stack>
-          <Title order={4}>Existing stories</Title>
-          {visibleStories.length === 0 ? (
-            <Text c="dimmed">No stories for this journey yet.</Text>
-          ) : (
-            <Table striped withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Title</Table.Th>
-                  <Table.Th>Type</Table.Th>
-                  <Table.Th>Background</Table.Th>
-                  <Table.Th>Overlapping epics</Table.Th>
-                  <Table.Th>Range</Table.Th>
-                  <Table.Th>Actions</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {visibleStories.map((story) => (
-                  <Table.Tr key={story.id}>
-                    <Table.Td>{story.title}</Table.Td>
-                    <Table.Td>{story.storyType}</Table.Td>
-                    <Table.Td>
-                      <div
-                        style={{
-                          width: 72,
-                          height: 18,
-                          borderRadius: 6,
-                          border: "1px solid rgba(120, 120, 120, 0.5)",
-                          background: backgroundToCss(parseStoredBackground(story.background, "#ffd8a8")),
-                        }}
-                      />
-                    </Table.Td>
-                    <Table.Td>
-                      {epics
-                        .filter(
-                          (epic) =>
-                            epic.journeyId === story.journeyId
-                            && epic.startPoint <= story.endPoint
-                            && epic.endPoint >= story.startPoint,
-                        )
-                        .map((epic) => epic.title)
-                        .join(", ") || "None"}
-                    </Table.Td>
-                    <Table.Td>
-                      {story.startPoint} - {story.endPoint}
-                    </Table.Td>
-                    <Table.Td>
-                      <Group gap="xs">
-                        <Link to={`/admin/${selectedJourney?.id ?? ""}/stories/${story.id}`}>Edit</Link>
-                        {confirmDeleteId === story.id ? (
-                          <Group gap="xs">
-                            <Form
-                              method="post"
-                              onSubmit={() => {
-                                setOptimisticDeletedIds((prev) => [...prev, story.id]);
-                                setConfirmDeleteId(null);
-                              }}
-                            >
-                              <input type="hidden" name="id" value={story.id} />
-                              <input type="hidden" name="journeyId" value={selectedJourney?.id ?? ""} />
-                              <Button size="xs" color="red" type="submit" name="intent" value="delete">
-                                Confirm
-                              </Button>
-                            </Form>
-                            <Button size="xs" variant="subtle" onClick={() => setConfirmDeleteId(null)}>
-                              Cancel
-                            </Button>
-                          </Group>
-                        ) : (
-                          <Button
-                            size="xs"
-                            color="red"
-                            variant="light"
-                            onClick={() => setConfirmDeleteId(story.id)}
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </Group>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
-          )}
-        </Stack>
-      </Card>
-    </Stack>
+    </AdminPage>
   );
 };
 

@@ -1,10 +1,14 @@
+import type { MutableRefObject } from "react";
 import { useEffect, useState } from "react";
+import type { BackgroundPatternConfig } from "./layout/epicBackgroundPattern";
 
 type EpicItem = {
   id: string;
   title: string;
   color: string;
   background: string;
+  backgroundImage: string | null;
+  backgroundPatternConfig: BackgroundPatternConfig | null;
   startPoint: number;
   endPoint: number;
 };
@@ -27,13 +31,15 @@ type StoryItem = {
 };
 
 type JourneyPixiTimelineProps = {
-  title: string;
   epics: EpicItem[];
   stories: StoryItem[];
   startGround: string;
-  wheelMultiplier: number;
+  targetAltitudeRef: MutableRefObject<number>;
+  scrollMultiplier?: number;
   viewMode?: "full" | "line-only";
   onStoryCardClick?: (story: StoryItem) => void;
+  onScrollMultiplierChange?: (nextMultiplier: number) => void;
+  onRenderedAltitudeChange?: (altitude: number) => void;
 };
 
 type JourneyPixiTimelineComponent = (props: JourneyPixiTimelineProps) => JSX.Element;

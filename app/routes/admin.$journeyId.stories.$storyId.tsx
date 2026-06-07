@@ -1,11 +1,15 @@
-import { Alert, Button, Card, Group, Stack, Text, TextInput, Title } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { Alert, Badge, Button, Checkbox, Group, Stack, Text, TextInput } from "@mantine/core";
+import { useEffect, useMemo, useState } from "react";
 import { Form, Link, useActionData, useOutletContext, useParams } from "react-router";
-import BackgroundField from "../features/admin/components/BackgroundField";
 import StoryExtraContentEditor from "../features/admin/components/StoryExtraContentEditor";
+import { STORY_IMAGE_ACCEPT, STORY_IMAGE_MAX_BYTES } from "../features/admin/domain/storyImage.shared";
+import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
-import { serializeBackground, tryParseBackgroundInput } from "../shared/domain/background";
 import { parseStoryExtraContent } from "../shared/validation/storySchemas";
+import TagSelector from "../features/tags/admin/TagSelector";
+import { TAG_SYSTEM_MAX_COUNT, type TagLike } from "../features/tags/domain/tags";
+import type { TagSuggestion } from "../features/tags/admin/TagSelector";
+import { resolveJourneyTagIds } from "../server/api/tags";
 import { db } from "../server/db";
 
 type ActionData = { error?: string; success?: string };
@@ -30,12 +34,24 @@ export async function action({
     return { error: "Missing journey or story id." };
   }
 
+  const {
+    deleteManagedStoryImage,
+    isStoryImageClearRequested,
+    saveStoryImage,
+  } = await import("../features/admin/domain/storyImage.server");
+
   const formData = await request.formData();
+  const existingStory = await db.story.findUnique({
+    where: { id: params.storyId },
+  });
+
+  if (!existingStory || existingStory.journeyId !== params.journeyId) {
+    return { error: "Story not found." };
+  }
+
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const storyType = parseStoryType(formData.get("storyType"));
-  const backgroundInput = String(formData.get("background") ?? "").trim();
-  const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
   const lineColor = String(formData.get("lineColor") ?? "#4ecdc4").trim() || "#4ecdc4";
   const lineWidth = parsePoint(formData.get("lineWidth"));
   const lineLabel = String(formData.get("lineLabel") ?? "").trim();
@@ -44,6 +60,7 @@ export async function action({
   const extraContent = parseStoryExtraContent(formData);
   const startPoint = parsePoint(formData.get("startPoint"));
   const endPoint = parsePoint(formData.get("endPoint"));
+  const clearStoryImage = isStoryImageClearRequested(formData);
 
   if (!title || Number.isNaN(startPoint) || Number.isNaN(endPoint)) {
     return { error: "Title, start, and end are required." };
@@ -57,30 +74,61 @@ export async function action({
     return { error: "Line width must be between 1 and 64." };
   }
 
-  const parsedBackground = tryParseBackgroundInput(backgroundInput);
-  if (!parsedBackground.background) {
-    return { error: parsedBackground.error ?? "Invalid background." };
+  // Resolve tag IDs before updating
+  const tagIds = await resolveJourneyTagIds(formData, params.journeyId);
+
+  let nextImageUrl = existingStory.imageUrl;
+  let uploadedStoryImage: string | null = null;
+
+  try {
+    uploadedStoryImage = await saveStoryImage(formData.get("storyImageFile"), {
+      fileNamePrefix: params.storyId,
+    });
+
+    if (uploadedStoryImage) {
+      nextImageUrl = uploadedStoryImage;
+    } else if (clearStoryImage) {
+      nextImageUrl = null;
+    }
+
+    await db.story.update({
+      where: { id: params.storyId },
+      data: {
+        title,
+        description,
+        extraContent,
+        storyType,
+        imageUrl: nextImageUrl,
+        lineColor,
+        lineWidth,
+        lineLabel,
+        tooltipText,
+        tooltipImageUrl,
+        journeyId: params.journeyId,
+        startPoint,
+        endPoint,
+        tags: {
+          set: tagIds.map((id) => ({ id })),
+        },
+      },
+    });
+  } catch (error) {
+    if (uploadedStoryImage) {
+      await deleteManagedStoryImage(uploadedStoryImage);
+    }
+
+    return {
+      error: error instanceof Error ? error.message : "Unable to update story.",
+    };
   }
 
-  await db.story.update({
-    where: { id: params.storyId },
-    data: {
-      title,
-      description,
-      extraContent,
-      storyType,
-      background: serializeBackground(parsedBackground.background),
-      imageUrl,
-      lineColor,
-      lineWidth,
-      lineLabel,
-      tooltipText,
-      tooltipImageUrl,
-      journeyId: params.journeyId,
-      startPoint,
-      endPoint,
-    },
-  });
+  if (uploadedStoryImage && existingStory.imageUrl && existingStory.imageUrl !== uploadedStoryImage) {
+    await deleteManagedStoryImage(existingStory.imageUrl);
+  }
+
+  if (!uploadedStoryImage && clearStoryImage && existingStory.imageUrl) {
+    await deleteManagedStoryImage(existingStory.imageUrl);
+  }
 
   return { success: "Story updated." };
 }
@@ -91,10 +139,23 @@ const AdminJourneyStoryEditorRoute = () => {
   const actionData = useActionData() as ActionData | undefined;
   const story = journey.stories.find((item) => item.id === storyId);
   const [storyType, setStoryType] = useState<StoryTypeValue>((story?.storyType as StoryTypeValue) ?? "CARD");
+  const [selectedTags, setSelectedTags] = useState<TagLike[]>(() =>
+    (story?.tags ?? []).map((tag) => ({ id: tag.id, name: tag.name })),
+  );
+
+  const allTags: TagSuggestion[] = useMemo(
+    () =>
+      (journey.tags ?? []).map((tag) => ({
+        id: tag.id,
+        name: tag.name,
+      })),
+    [journey.tags],
+  );
 
   useEffect(() => {
     if (story) {
       setStoryType(story.storyType as StoryTypeValue);
+      setSelectedTags((story.tags ?? []).map((tag) => ({ id: tag.id, name: tag.name })));
     }
   }, [story]);
 
@@ -103,16 +164,35 @@ const AdminJourneyStoryEditorRoute = () => {
   }
 
   return (
-    <Stack>
-      <Group justify="space-between">
-        <Title order={3}>Edit Story</Title>
-        <Button component={Link} to={`/admin/${journey.id}`} variant="subtle" size="xs">
-          Back to journey
-        </Button>
-      </Group>
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Story editor"
+        title={`Edit ${story.title}`}
+        description="Adjust the story type, copy, visuals, imagery, tags, and altitude range from one focused editing surface."
+        actions={(
+          <>
+            <Button component={Link} to={`/admin/${journey.id}/stories`} variant="default">
+              Back to stories
+            </Button>
+            <Button component={Link} to={`/admin/${journey.id}`} variant="light">
+              Journey overview
+            </Button>
+          </>
+        )}
+      />
 
-      <Card withBorder>
-        <Form method="post" key={story.id}>
+      <AdminStatGrid>
+        <AdminStatCard label="Story type" value={story.storyType} description="Card stories use a card background; line stories use line styling and tooltip fields." />
+        <AdminStatCard label="Range" value={`${story.startPoint} - ${story.endPoint}`} description="Altitude span where this story becomes active." />
+        <AdminStatCard label="Tags" value={selectedTags.length} description="Shared labels currently attached to this story." />
+        <AdminStatCard label="Image" value={story.imageUrl ? "Attached" : "None"} description="Uploaded story image rendered in the journey UI." />
+      </AdminStatGrid>
+
+      <AdminSection
+        title="Story settings"
+        description="Use this form for all story-specific settings, including visuals, rich content, tags, and altitude range."
+      >
+        <Form method="post" encType="multipart/form-data" key={story.id}>
           <Stack>
             <Text size="sm" c="dimmed">Journey: {journey.name}</Text>
             <TextInput label="Title" name="title" required defaultValue={story.title} />
@@ -130,16 +210,42 @@ const AdminJourneyStoryEditorRoute = () => {
             <TextInput label="Description" name="description" defaultValue={story.description} />
             <StoryExtraContentEditor name="extraContent" initialValue={story.extraContent} />
 
+            {story.imageUrl ? (
+              <Stack gap={6}>
+                <Text size="sm" fw={600}>Current story image</Text>
+                <img
+                  src={story.imageUrl}
+                  alt=""
+                  style={{
+                    maxHeight: 160,
+                    maxWidth: 240,
+                    objectFit: "contain",
+                  }}
+                />
+                <Text size="xs" c="dimmed">{story.imageUrl}</Text>
+                <Checkbox
+                  name="removeImage"
+                  value="1"
+                  label="Remove the current story image"
+                />
+              </Stack>
+            ) : (
+              <Text size="xs" c="dimmed">No story image uploaded yet.</Text>
+            )}
+            <label htmlFor="storyImageFile">Story image</label>
+            <input
+              id="storyImageFile"
+              name="storyImageFile"
+              type="file"
+              accept={STORY_IMAGE_ACCEPT}
+            />
+            <Text size="xs" c="dimmed">
+              Optional. Upload a PNG, JPEG, or WebP up to {Math.round(STORY_IMAGE_MAX_BYTES / (1024 * 1024))} MB.
+              Images are resized and optimized to WebP for timeline rendering.
+            </Text>
+
             {storyType === "CARD" ? (
               <>
-                <TextInput label="Card image URL (mock for now)" name="imageUrl" defaultValue={story.imageUrl ?? ""} />
-                <BackgroundField
-                  name="background"
-                  label="Card background"
-                  defaultValue={story.background}
-                  defaultColor="#ffd8a8"
-                  allowGradient={false}
-                />
                 <input type="hidden" name="lineColor" value="#4ecdc4" />
                 <input type="hidden" name="lineWidth" value="4" />
                 <input type="hidden" name="lineLabel" value="" />
@@ -153,21 +259,39 @@ const AdminJourneyStoryEditorRoute = () => {
                 <TextInput label="Line label" name="lineLabel" defaultValue={story.lineLabel} />
                 <TextInput label="Tooltip text" name="tooltipText" defaultValue={story.tooltipText} />
                 <TextInput label="Tooltip image URL (mock)" name="tooltipImageUrl" defaultValue={story.tooltipImageUrl ?? ""} />
-                <input type="hidden" name="imageUrl" value="" />
-                <input type="hidden" name="background" value={story.background || serializeBackground({ mode: "color", color: "#ffd8a8" })} />
               </>
             )}
 
-            <TextInput label="Start point" name="startPoint" type="number" inputMode="numeric" required defaultValue={String(story.startPoint)} min={0} />
-            <TextInput label="End point" name="endPoint" type="number" inputMode="numeric" required defaultValue={String(story.endPoint)} min={0} />
-            <Button type="submit">Update Story</Button>
+            <TagSelector
+              selected={selectedTags}
+              allTags={allTags}
+              maxTags={TAG_SYSTEM_MAX_COUNT}
+              onChange={setSelectedTags}
+            />
+
+            <Group justify="space-between" align="center">
+              <Badge color="teal" variant="light">
+                {selectedTags.length} tag{selectedTags.length === 1 ? "" : "s"} selected
+              </Badge>
+              <Text size="sm" c="dimmed">
+                Story will appear from {story.startPoint} to {story.endPoint} until you update the range below.
+              </Text>
+            </Group>
+
+            <Group grow>
+              <TextInput label="Start point" name="startPoint" type="number" inputMode="numeric" required defaultValue={String(story.startPoint)} min={0} />
+              <TextInput label="End point" name="endPoint" type="number" inputMode="numeric" required defaultValue={String(story.endPoint)} min={0} />
+            </Group>
+            <Group justify="flex-end">
+              <Button type="submit">Update story</Button>
+            </Group>
           </Stack>
         </Form>
-      </Card>
+      </AdminSection>
 
       {actionData?.success ? <Alert color="green">{actionData.success}</Alert> : null}
       {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
-    </Stack>
+    </AdminPage>
   );
 };
 

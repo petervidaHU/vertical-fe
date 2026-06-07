@@ -5,12 +5,14 @@ import { useWheelAltitude } from "./useWheelAltitude";
 
 type HookProps = {
   pace: number;
-  scaledValue: number;
-  naturalValue: number;
+  scaledValue?: number;
+  naturalValue?: number;
   minValue?: number;
   enabled?: boolean;
   target: HTMLElement;
   onChange: ReturnType<typeof jest.fn>;
+  scaledValueRef?: { current: number };
+  naturalValueRef?: { current: number };
 };
 
 const HookHarness = ({
@@ -21,11 +23,15 @@ const HookHarness = ({
   enabled,
   target,
   onChange,
+  scaledValueRef,
+  naturalValueRef,
 }: HookProps) => {
   useWheelAltitude({
     pace,
     scaledValue,
     naturalValue,
+    scaledValueRef,
+    naturalValueRef,
     minValue,
     enabled,
     target,
@@ -102,5 +108,32 @@ describe("useWheelAltitude", () => {
     fireEvent.wheel(target, { deltaY: -20 });
 
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("reads from refs without requiring rerenders", () => {
+    const target = document.createElement("div");
+    const onChange = jest.fn(({ nextScaled, nextNatural }) => {
+      scaledValueRef.current = nextScaled;
+      naturalValueRef.current = nextNatural;
+    });
+    const scaledValueRef = { current: 10 };
+    const naturalValueRef = { current: 10 };
+
+    render(
+      <HookHarness
+        pace={1}
+        target={target}
+        onChange={onChange}
+        scaledValueRef={scaledValueRef}
+        naturalValueRef={naturalValueRef}
+      />,
+    );
+
+    fireEvent.wheel(target, { deltaY: -15 });
+    fireEvent.wheel(target, { deltaY: -5 });
+
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange.mock.calls[0][0]).toMatchObject({ nextScaled: 25, nextNatural: 25 });
+    expect(onChange.mock.calls[1][0]).toMatchObject({ nextScaled: 30, nextNatural: 30 });
   });
 });

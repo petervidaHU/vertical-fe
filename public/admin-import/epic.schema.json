@@ -69,6 +69,48 @@
           }
         }
       ]
+    },
+    "backgroundImage": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional repeating image URL for this epic's scrolling background pattern. Existing imports can omit it."
+    },
+    "backgroundPatternConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional controls for image scatter density, scale range, and horizontal spread.",
+      "properties": {
+        "density": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "0 is sparse, 1 is dense."
+        },
+        "minScale": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 3,
+          "description": "Minimum sprite scale multiplier."
+        },
+        "maxScale": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 3,
+          "description": "Maximum sprite scale multiplier."
+        },
+        "minXRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Left-most horizontal ratio."
+        },
+        "maxXRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Right-most horizontal ratio."
+        }
+      }
     }
   }
 }

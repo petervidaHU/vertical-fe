@@ -1,5 +1,9 @@
 import { useEffect } from 'react';
 
+type NumberRef = {
+  current: number;
+};
+
 type WheelAltitudeChange = {
   nextScaled: number;
   nextNatural: number;
@@ -9,8 +13,10 @@ type WheelAltitudeChange = {
 
 type UseWheelAltitudeOptions = {
   pace: number;
-  scaledValue: number;
-  naturalValue: number;
+  scaledValue?: number;
+  naturalValue?: number;
+  scaledValueRef?: NumberRef | null;
+  naturalValueRef?: NumberRef | null;
   onChange: (change: WheelAltitudeChange) => void;
   minValue?: number;
   enabled?: boolean;
@@ -21,6 +27,8 @@ export const useWheelAltitude = ({
   pace,
   scaledValue,
   naturalValue,
+  scaledValueRef,
+  naturalValueRef,
   onChange,
   minValue = 0,
   enabled = true,
@@ -39,8 +47,10 @@ export const useWheelAltitude = ({
       }
 
       const deltaY = -event.deltaY;
-      const nextScaled = Math.max(minValue, scaledValue + deltaY * pace);
-      const nextNatural = Math.max(minValue, naturalValue + deltaY);
+      const currentScaled = scaledValueRef?.current ?? scaledValue ?? 0;
+      const currentNatural = naturalValueRef?.current ?? naturalValue ?? currentScaled;
+      const nextScaled = Math.max(minValue, currentScaled + deltaY * pace);
+      const nextNatural = Math.max(minValue, currentNatural + deltaY);
 
       onChange({
         nextScaled,
@@ -55,5 +65,5 @@ export const useWheelAltitude = ({
     return () => {
       eventTarget.removeEventListener('wheel', handleWheel as EventListener);
     };
-  }, [enabled, minValue, naturalValue, onChange, pace, scaledValue, target]);
+  }, [enabled, minValue, naturalValue, naturalValueRef, onChange, pace, scaledValue, scaledValueRef, target]);
 };

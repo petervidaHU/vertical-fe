@@ -385,6 +385,9 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Journey: 'Journey',
+  Tag: 'Tag',
+  AltitudeInfo: 'AltitudeInfo',
+  AltitudeInfoValue: 'AltitudeInfoValue',
   Epic: 'Epic',
   Story: 'Story'
 } as const
@@ -402,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "journey" | "epic" | "story"
+    modelProps: "journey" | "tag" | "altitudeInfo" | "altitudeInfoValue" | "epic" | "story"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -477,6 +480,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.JourneyCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.JourneyCountAggregateOutputType> | number
+        }
+      }
+    }
+    Tag: {
+      payload: Prisma.$TagPayload<ExtArgs>
+      fields: Prisma.TagFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TagFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TagFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>
+        }
+        findFirst: {
+          args: Prisma.TagFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TagFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>
+        }
+        findMany: {
+          args: Prisma.TagFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>[]
+        }
+        create: {
+          args: Prisma.TagCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>
+        }
+        createMany: {
+          args: Prisma.TagCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TagCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>[]
+        }
+        delete: {
+          args: Prisma.TagDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>
+        }
+        update: {
+          args: Prisma.TagUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>
+        }
+        deleteMany: {
+          args: Prisma.TagDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TagUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TagUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>[]
+        }
+        upsert: {
+          args: Prisma.TagUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagPayload>
+        }
+        aggregate: {
+          args: Prisma.TagAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTag>
+        }
+        groupBy: {
+          args: Prisma.TagGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TagGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TagCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TagCountAggregateOutputType> | number
+        }
+      }
+    }
+    AltitudeInfo: {
+      payload: Prisma.$AltitudeInfoPayload<ExtArgs>
+      fields: Prisma.AltitudeInfoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AltitudeInfoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AltitudeInfoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>
+        }
+        findFirst: {
+          args: Prisma.AltitudeInfoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AltitudeInfoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>
+        }
+        findMany: {
+          args: Prisma.AltitudeInfoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>[]
+        }
+        create: {
+          args: Prisma.AltitudeInfoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>
+        }
+        createMany: {
+          args: Prisma.AltitudeInfoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AltitudeInfoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>[]
+        }
+        delete: {
+          args: Prisma.AltitudeInfoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>
+        }
+        update: {
+          args: Prisma.AltitudeInfoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>
+        }
+        deleteMany: {
+          args: Prisma.AltitudeInfoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AltitudeInfoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AltitudeInfoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>[]
+        }
+        upsert: {
+          args: Prisma.AltitudeInfoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoPayload>
+        }
+        aggregate: {
+          args: Prisma.AltitudeInfoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAltitudeInfo>
+        }
+        groupBy: {
+          args: Prisma.AltitudeInfoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AltitudeInfoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoCountAggregateOutputType> | number
+        }
+      }
+    }
+    AltitudeInfoValue: {
+      payload: Prisma.$AltitudeInfoValuePayload<ExtArgs>
+      fields: Prisma.AltitudeInfoValueFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AltitudeInfoValueFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AltitudeInfoValueFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>
+        }
+        findFirst: {
+          args: Prisma.AltitudeInfoValueFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AltitudeInfoValueFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>
+        }
+        findMany: {
+          args: Prisma.AltitudeInfoValueFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>[]
+        }
+        create: {
+          args: Prisma.AltitudeInfoValueCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>
+        }
+        createMany: {
+          args: Prisma.AltitudeInfoValueCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AltitudeInfoValueCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>[]
+        }
+        delete: {
+          args: Prisma.AltitudeInfoValueDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>
+        }
+        update: {
+          args: Prisma.AltitudeInfoValueUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>
+        }
+        deleteMany: {
+          args: Prisma.AltitudeInfoValueDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AltitudeInfoValueUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AltitudeInfoValueUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>[]
+        }
+        upsert: {
+          args: Prisma.AltitudeInfoValueUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValuePayload>
+        }
+        aggregate: {
+          args: Prisma.AltitudeInfoValueAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAltitudeInfoValue>
+        }
+        groupBy: {
+          args: Prisma.AltitudeInfoValueGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoValueGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AltitudeInfoValueCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoValueCountAggregateOutputType> | number
         }
       }
     }
@@ -679,11 +904,54 @@ export const JourneyScalarFieldEnum = {
 export type JourneyScalarFieldEnum = (typeof JourneyScalarFieldEnum)[keyof typeof JourneyScalarFieldEnum]
 
 
+export const TagScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  journeyId: 'journeyId'
+} as const
+
+export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const AltitudeInfoScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  icon: 'icon',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  journeyId: 'journeyId'
+} as const
+
+export type AltitudeInfoScalarFieldEnum = (typeof AltitudeInfoScalarFieldEnum)[keyof typeof AltitudeInfoScalarFieldEnum]
+
+
+export const AltitudeInfoValueScalarFieldEnum = {
+  id: 'id',
+  value: 'value',
+  startPoint: 'startPoint',
+  endPoint: 'endPoint',
+  useGradient: 'useGradient',
+  startValue: 'startValue',
+  endValue: 'endValue',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  altitudeInfoId: 'altitudeInfoId'
+} as const
+
+export type AltitudeInfoValueScalarFieldEnum = (typeof AltitudeInfoValueScalarFieldEnum)[keyof typeof AltitudeInfoValueScalarFieldEnum]
+
+
 export const EpicScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  description: 'description',
   color: 'color',
   background: 'background',
+  backgroundImage: 'backgroundImage',
+  backgroundPatternConfig: 'backgroundPatternConfig',
   startPoint: 'startPoint',
   endPoint: 'endPoint',
   createdAt: 'createdAt',
@@ -725,6 +993,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -739,6 +1015,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -790,16 +1075,9 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'StoryType'
+ * Reference to a field of type 'Boolean'
  */
-export type EnumStoryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StoryType'>
-    
-
-
-/**
- * Reference to a field of type 'StoryType[]'
- */
-export type ListEnumStoryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StoryType[]'>
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -814,6 +1092,34 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'StoryType'
+ */
+export type EnumStoryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StoryType'>
+    
+
+
+/**
+ * Reference to a field of type 'StoryType[]'
+ */
+export type ListEnumStoryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StoryType[]'>
     
 
 /**
@@ -927,6 +1233,9 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   journey?: Prisma.JourneyOmit
+  tag?: Prisma.TagOmit
+  altitudeInfo?: Prisma.AltitudeInfoOmit
+  altitudeInfoValue?: Prisma.AltitudeInfoValueOmit
   epic?: Prisma.EpicOmit
   story?: Prisma.StoryOmit
 }
