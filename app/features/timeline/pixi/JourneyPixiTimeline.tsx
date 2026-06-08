@@ -18,6 +18,7 @@ import {
   formatScrollMultiplierValue,
   stepScrollMultiplier,
 } from "../domain/scrollMultiplier";
+import { drawChevronIcon } from "./icons/chevron";
 
 type EpicItem = {
   id: string;
@@ -63,17 +64,32 @@ type JourneyPixiTimelineProps = {
 const DISPLAY_FONT = "Trebuchet MS";
 const BODY_FONT = "Avenir Next, Trebuchet MS, sans-serif";
 const SERIF_FONT = "Georgia";
-const CARD_WIDTH = 468;
-const CARD_HEIGHT = 170;
-const CARD_STACK_GAP = 24;
-const CARD_COLUMN_GAP = 28;
-const CARD_SIDE_PADDING = 24;
-const CARD_AVATAR_SIZE = 112;
-const CARD_AVATAR_X = 18;
-const CARD_AVATAR_Y = (CARD_HEIGHT - CARD_AVATAR_SIZE) / 2;
-const CARD_CONTENT_X = CARD_AVATAR_X + CARD_AVATAR_SIZE + 22;
-const CARD_CONTENT_WIDTH = CARD_WIDTH - CARD_CONTENT_X - 22;
+const CARD_WIDTH = 408;
+const CARD_HEIGHT = 146;
+const CARD_COLLAPSED_WIDTH = 240;
+const CARD_COLLAPSED_HEIGHT = 52;
+const CARD_COLLAPSED_IMAGE_SIZE = 58;
+const CARD_COLLAPSED_IMAGE_RADIUS = 8;
+const CARD_CHEVRON_SIZE = 24;
+const CARD_CHEVRON_MARGIN = 8;
+const CARD_COLLAPSED_SIDE_PADDING = 6;
+const CARD_COLLAPSE_HALF_LIFE_MS = 110;
+const CARD_STACK_GAP = 20;
+const CARD_COLUMN_GAP = 24;
+const CARD_SIDE_PADDING = 16;
+const CARD_SHELL_X = 28;
+const CARD_SHELL_RADIUS = 12;
+const CARD_IMAGE_SIZE = 118;
+const CARD_IMAGE_RADIUS = 10;
+const CARD_IMAGE_X = 0;
+const CARD_IMAGE_Y = 14;
+const CARD_CONTENT_X_WITH_IMAGE = 142;
+const CARD_CONTENT_X_NO_IMAGE = 22;
+const CARD_CONTENT_WIDTH_WITH_IMAGE = CARD_WIDTH - CARD_CONTENT_X_WITH_IMAGE - 24;
+const CARD_CONTENT_WIDTH_NO_IMAGE = CARD_WIDTH - CARD_CONTENT_X_NO_IMAGE - 22;
 const CARD_SCALE_MIN = 0.8;
+const CARD_PADDING_TOP = 14;
+const CARD_PADDING_BOTTOM = 12;
 const EPIC_HEADER_WIDTH = 236;
 const EPIC_HEADER_HEIGHT = 86;
 const EPIC_PANEL_WIDTH = 420;
@@ -90,6 +106,28 @@ type CardLayoutState = {
 type CardStackLayout = {
   x: number;
   y: number;
+};
+
+type CardCollapseState = {
+  current: number;
+  target: number;
+};
+
+type CardFrameMetrics = {
+  progress: number;
+  width: number;
+  height: number;
+  shellX: number;
+  shellWidth: number;
+  shellHeight: number;
+  imageX: number;
+  imageY: number;
+  imageSize: number;
+  imageRadius: number;
+  chevronX: number;
+  chevronY: number;
+  collapsedTitleX: number;
+  collapsedTitleWidth: number;
 };
 
 function parseColor(value: string, fallback = 0x4ecdc4): number {
@@ -172,6 +210,196 @@ function truncateText(value: string, maxLength: number): string {
   return `${normalized.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
 }
 
+function fitTextToHeight(textNode: Text, value: string, maxHeight: number, minLength = 12): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+
+  if (!normalized || maxHeight <= 0) {
+    textNode.text = "";
+    return "";
+  }
+
+  textNode.text = normalized;
+  if (textNode.height <= maxHeight) {
+    return normalized;
+  }
+
+  const words = normalized.split(" ").filter(Boolean);
+  for (let index = words.length - 1; index > 0; index -= 1) {
+    const candidate = `${words.slice(0, index).join(" ").trimEnd()}…`;
+    textNode.text = candidate;
+    if (textNode.height <= maxHeight) {
+      return candidate;
+    }
+  }
+
+  let shortened = normalized;
+  while (shortened.length > Math.max(1, minLength)) {
+    shortened = shortened.slice(0, -1).trimEnd();
+    const candidate = `${shortened}…`;
+    textNode.text = candidate;
+    if (textNode.height <= maxHeight) {
+      return candidate;
+    }
+  }
+
+  const fallback = truncateText(normalized, Math.max(1, minLength));
+  textNode.text = fallback;
+  return fallback;
+}
+
+function fitTextToWidth(textNode: Text, value: string, maxWidth: number, minLength = 12): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+
+  if (!normalized || maxWidth <= 0) {
+    textNode.text = "";
+    return "";
+  }
+
+  textNode.text = normalized;
+  if (textNode.width <= maxWidth) {
+    return normalized;
+  }
+
+  const words = normalized.split(" ").filter(Boolean);
+  for (let index = words.length - 1; index > 0; index -= 1) {
+    const candidate = `${words.slice(0, index).join(" ").trimEnd()}…`;
+    textNode.text = candidate;
+    if (textNode.width <= maxWidth) {
+      return candidate;
+    }
+  }
+
+  let shortened = normalized;
+  while (shortened.length > Math.max(1, minLength)) {
+    shortened = shortened.slice(0, -1).trimEnd();
+    const candidate = `${shortened}…`;
+    textNode.text = candidate;
+    if (textNode.width <= maxWidth) {
+      return candidate;
+    }
+  }
+
+  const fallback = truncateText(normalized, Math.max(1, minLength));
+  textNode.text = fallback;
+  return fallback;
+}
+
+function smoothstep(value: number): number {
+  const t = clamp01(value);
+  return t * t * (3 - 2 * t);
+}
+
+function rotatePoint(x: number, y: number, centerX: number, centerY: number, angle: number): { x: number; y: number } {
+  const dx = x - centerX;
+  const dy = y - centerY;
+  const cosAngle = Math.cos(angle);
+  const sinAngle = Math.sin(angle);
+
+  return {
+    x: centerX + dx * cosAngle - dy * sinAngle,
+    y: centerY + dx * sinAngle + dy * cosAngle,
+  };
+}
+
+function getCardFrameMetrics(collapseProgress: number, hasStoryImage: boolean): CardFrameMetrics {
+  const progress = smoothstep(collapseProgress);
+  const width = lerp(CARD_WIDTH, CARD_COLLAPSED_WIDTH, progress);
+  const height = lerp(CARD_HEIGHT, CARD_COLLAPSED_HEIGHT, progress);
+  const shellX = hasStoryImage ? lerp(CARD_SHELL_X, 0, progress) : 0;
+  const expandedShellWidth = hasStoryImage ? CARD_WIDTH - CARD_SHELL_X : CARD_WIDTH;
+  const shellWidth = lerp(expandedShellWidth, width, progress);
+  const imageSize = hasStoryImage ? lerp(CARD_IMAGE_SIZE, CARD_COLLAPSED_IMAGE_SIZE, progress) : 0;
+  const imageRadius = lerp(CARD_IMAGE_RADIUS, CARD_COLLAPSED_IMAGE_RADIUS, progress);
+  // Image positioned at left edge to overflow like expanded state, positioned to overflow top and bottom
+  const imageX = hasStoryImage ? lerp(CARD_IMAGE_X, -8, progress) : 0;
+  const imageY = hasStoryImage ? lerp(CARD_IMAGE_Y, -4, progress) : 0;
+  const chevronX = width - CARD_CHEVRON_SIZE - CARD_CHEVRON_MARGIN;
+  const chevronY = lerp(CARD_CHEVRON_MARGIN, CARD_COLLAPSED_SIDE_PADDING, progress);
+  // Position title after image area to avoid overlap (image is 58px wide at -8 position, so visible 0-50, start title after)
+  const collapsedTitleX = hasStoryImage ? 54 : CARD_COLLAPSED_SIDE_PADDING;
+  const collapsedTitleWidth = Math.max(30, chevronX - collapsedTitleX - 4);
+
+  return {
+    progress,
+    width,
+    height,
+    shellX,
+    shellWidth,
+    shellHeight: height,
+    imageX,
+    imageY,
+    imageSize,
+    imageRadius,
+    chevronX,
+    chevronY,
+    collapsedTitleX,
+    collapsedTitleWidth,
+  };
+}
+
+function drawCardLiftShadow(
+  graphics: Graphics,
+  options: {
+    shellX: number;
+    shellWidth: number;
+    shellHeight: number;
+    imageX: number;
+    imageY: number;
+    imageSize: number;
+    imageRadius: number;
+    offsetX: number;
+    offsetY: number;
+    spread: number;
+    softAlpha: number;
+    coreAlpha: number;
+    hasImage: boolean;
+  },
+) {
+  const spreadInset = options.spread / 2;
+
+  graphics.clear();
+
+  graphics.roundRect(
+    options.shellX + options.offsetX - spreadInset,
+    options.offsetY - spreadInset,
+    options.shellWidth + options.spread,
+    options.shellHeight + options.spread,
+    CARD_SHELL_RADIUS + 3,
+  );
+  graphics.fill({ color: 0x000000, alpha: options.softAlpha });
+
+  graphics.roundRect(
+    options.shellX + options.offsetX,
+    options.offsetY,
+    options.shellWidth,
+    options.shellHeight,
+    CARD_SHELL_RADIUS + 1,
+  );
+  graphics.fill({ color: 0x000000, alpha: options.coreAlpha });
+
+  if (!options.hasImage) {
+    return;
+  }
+
+  graphics.roundRect(
+    options.imageX + options.offsetX - spreadInset,
+    options.imageY + options.offsetY - spreadInset,
+    options.imageSize + options.spread,
+    options.imageSize + options.spread,
+    options.imageRadius + 3,
+  );
+  graphics.fill({ color: 0x000000, alpha: Math.min(0.22, options.softAlpha + 0.03) });
+
+  graphics.roundRect(
+    options.imageX + options.offsetX,
+    options.imageY + options.offsetY,
+    options.imageSize,
+    options.imageSize,
+    options.imageRadius + 1,
+  );
+  graphics.fill({ color: 0x000000, alpha: Math.min(0.28, options.coreAlpha + 0.03) });
+}
+
 function summarizeEpicTitles(epics: EpicItem[]): string {
   if (epics.length === 0) {
     return "Open sky";
@@ -195,13 +423,12 @@ function getCardScale(rendererWidth: number, leftInset: number, rightInset: numb
 }
 
 function resolveStackedCardColumnYs(
-  preferredYs: number[],
+  items: Array<{ preferredY: number; height: number }>,
   minY: number,
   maxY: number,
-  cardHeight: number,
   stackGap: number,
 ): number[] {
-  if (preferredYs.length === 0) {
+  if (items.length === 0) {
     return [];
   }
 
@@ -209,16 +436,15 @@ function resolveStackedCardColumnYs(
   const positions: number[] = [];
   let lastBottom = minY - stackGap;
 
-  preferredYs.forEach((preferredY) => {
+  items.forEach(({ preferredY, height }) => {
     const clampedPreferredY = Math.max(minY, Math.min(maxTopY, preferredY));
     const nextY = Math.max(clampedPreferredY, lastBottom + stackGap);
 
     positions.push(nextY);
-    lastBottom = nextY + cardHeight;
+    lastBottom = nextY + height;
   });
 
-  const maxBottom = maxY + cardHeight;
-  const overflow = positions[positions.length - 1] + cardHeight - maxBottom;
+  const overflow = positions[positions.length - 1] - maxTopY;
 
   if (overflow > 0) {
     for (let index = 0; index < positions.length; index += 1) {
@@ -229,7 +455,7 @@ function resolveStackedCardColumnYs(
   for (let index = positions.length - 2; index >= 0; index -= 1) {
     positions[index] = Math.min(
       positions[index],
-      positions[index + 1] - cardHeight - stackGap,
+      positions[index + 1] - items[index].height - stackGap,
     );
   }
 
@@ -244,7 +470,7 @@ function resolveStackedCardColumnYs(
 }
 
 function buildCardStackLayouts(
-  items: Array<{ id: string; preferredY: number }>,
+  items: Array<{ id: string; preferredY: number; height?: number }>,
   rendererWidth: number,
   topDockY: number,
   bottomDockY: number,
@@ -270,32 +496,56 @@ function buildCardStackLayouts(
     return layouts;
   }
 
-  const availableHeight = Math.max(cardHeight, bottomDockY - topDockY + cardHeight);
-  const columnCapacity = Math.max(1, Math.floor((availableHeight + stackGap) / (cardHeight + stackGap)));
   const availableWidth = Math.max(cardWidth, rendererWidth - leftInset - rightInset);
   const maxColumnsThatFit = Math.max(
     1,
     Math.floor((Math.max(cardWidth, availableWidth) + columnGap) / (cardWidth + columnGap)),
   );
-  const columnCount = Math.max(1, Math.min(maxColumnsThatFit, items.length));
-  const totalWidth = columnCount * cardWidth + (columnCount - 1) * columnGap;
-  const startX = leftInset + Math.max(0, Math.floor((availableWidth - totalWidth) / 2));
-  const columns = Array.from({ length: columnCount }, () => [] as Array<{ id: string; preferredY: number }>);
+  const normalizedItems = [...items]
+    .map((item) => ({
+      ...item,
+      height: item.height ?? cardHeight,
+    }))
+    .sort((a, b) => a.preferredY - b.preferredY);
+  const columns: Array<{
+    items: Array<{ id: string; preferredY: number; height: number }>;
+    lastPreferredBottom: number;
+  }> = [];
 
-  items.forEach((item, index) => {
-    columns[index % columnCount].push(item);
+  normalizedItems.forEach((item) => {
+    let columnIndex = columns.findIndex((column) => item.preferredY >= column.lastPreferredBottom + stackGap);
+
+    if (columnIndex === -1 && columns.length < maxColumnsThatFit) {
+      columns.push({
+        items: [],
+        lastPreferredBottom: Number.NEGATIVE_INFINITY,
+      });
+      columnIndex = columns.length - 1;
+    }
+
+    if (columnIndex === -1) {
+      columnIndex = columns.reduce((bestIndex, column, index, collection) => {
+        if (index === 0) {
+          return 0;
+        }
+
+        return column.lastPreferredBottom < collection[bestIndex].lastPreferredBottom ? index : bestIndex;
+      }, 0);
+    }
+
+    columns[columnIndex].items.push(item);
+    columns[columnIndex].lastPreferredBottom = item.preferredY + item.height;
   });
 
-  for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
-    const columnItems = [...columns[columnIndex]].sort((a, b) => a.preferredY - b.preferredY);
+  for (let columnIndex = 0; columnIndex < columns.length; columnIndex += 1) {
+    const columnItems = columns[columnIndex].items;
     const columnYs = resolveStackedCardColumnYs(
-      columnItems.map((item) => item.preferredY),
+      columnItems.map((item) => ({ preferredY: item.preferredY, height: item.height })),
       topDockY,
       bottomDockY,
-      cardHeight,
       stackGap,
     );
-    const x = startX + columnIndex * (cardWidth + columnGap);
+    const x = leftInset + columnIndex * (cardWidth + columnGap);
 
     columnItems.forEach((item, itemIndex) => {
       layouts.set(item.id, {
@@ -447,10 +697,8 @@ function buildEpicPanelHtml(epic: EpicVisual, stories: StoryVisual[]): string {
   const overlappingStories = stories.filter(
     (story) => epic.startPoint <= story.endPoint && epic.endPoint >= story.startPoint,
   );
-  const cardStories = overlappingStories.filter((story) => story.storyType === "CARD");
-  const lineStories = overlappingStories.filter((story) => story.storyType === "LINE");
   const visibleStories = overlappingStories.slice(0, 6);
-  const remainingCount = Math.max(0, overlappingStories.length - visibleStories.length);
+  const hasAdditionalStories = overlappingStories.length > visibleStories.length;
 
   const highlightMarkup = visibleStories.length > 0
     ? [
@@ -463,7 +711,7 @@ function buildEpicPanelHtml(epic: EpicVisual, stories: StoryVisual[]): string {
         "</li>",
       ].join("")),
       "</ul>",
-      remainingCount > 0 ? `<p>Plus ${remainingCount} more story moments in this altitude band.</p>` : "",
+      hasAdditionalStories ? "<p>Additional story moments continue through this altitude band.</p>" : "",
     ].join("")
     : "<p>No stories overlap this epic yet.</p>";
 
@@ -471,11 +719,11 @@ function buildEpicPanelHtml(epic: EpicVisual, stories: StoryVisual[]): string {
     '<div style="line-height:1.55;">',
     `<p><strong>${escapeHtml(epic.title)}</strong></p>`,
     `<p><strong>Altitude band</strong><br/>${escapeHtml(formatAltitude(epic.startPoint))} to ${escapeHtml(formatAltitude(epic.endPoint))}</p>`,
-    `<p>This layer currently contains <strong>${overlappingStories.length}</strong> story moments, with ${cardStories.length} card stories and ${lineStories.length} line markers.</p>`,
+    epic.description ? `<p>${escapeHtml(epic.description)}</p>` : "",
     "<p><strong>Highlights</strong></p>",
     highlightMarkup,
     "</div>",
-  ].join("");
+  ].filter(Boolean).join("");
 }
 
 type EpicBackgroundNode = {
@@ -606,29 +854,12 @@ export default function JourneyPixiTimeline({
     });
     const speedDecreaseButton = new Container();
     const speedDecreaseBg = new Graphics();
-    const speedDecreaseLabel = new Text({
-      text: "<",
-      style: {
-        fill: 0x34424f,
-        fontFamily: DISPLAY_FONT,
-        fontSize: 18,
-        fontWeight: "700",
-      },
-    });
-    speedDecreaseButton.eventMode = "static";
-    speedDecreaseButton.cursor = "pointer";
-
+    const speedDecreaseChevron = new Graphics();
     const speedIncreaseButton = new Container();
     const speedIncreaseBg = new Graphics();
-    const speedIncreaseLabel = new Text({
-      text: ">",
-      style: {
-        fill: 0x34424f,
-        fontFamily: DISPLAY_FONT,
-        fontSize: 18,
-        fontWeight: "700",
-      },
-    });
+    const speedIncreaseChevron = new Graphics();
+    speedDecreaseButton.eventMode = "static";
+    speedDecreaseButton.cursor = "pointer";
     speedIncreaseButton.eventMode = "static";
     speedIncreaseButton.cursor = "pointer";
 
@@ -649,9 +880,9 @@ export default function JourneyPixiTimeline({
     });
 
     speedDecreaseButton.addChild(speedDecreaseBg);
-    speedDecreaseButton.addChild(speedDecreaseLabel);
+    speedDecreaseButton.addChild(speedDecreaseChevron);
     speedIncreaseButton.addChild(speedIncreaseBg);
-    speedIncreaseButton.addChild(speedIncreaseLabel);
+    speedIncreaseButton.addChild(speedIncreaseChevron);
 
     speedControlContainer.addChild(speedBackground);
     speedControlContainer.addChild(speedValue);
@@ -746,9 +977,7 @@ export default function JourneyPixiTimeline({
     const epicPanelContainer = new Container();
     const epicPanelShadow = new Graphics();
     const epicPanelBackground = new Graphics();
-    const epicPanelDivider = new Graphics();
     const epicPanelHeaderHitArea = new Graphics();
-    const epicPanelAccent = new Graphics();
     const epicPanelTitle = new Text({
       text: "",
       style: {
@@ -763,37 +992,11 @@ export default function JourneyPixiTimeline({
       style: {
         fill: 0x66788c,
         fontFamily: BODY_FONT,
-        fontSize: 11,
-        fontWeight: "700",
-      },
-    });
-    const epicPanelCue = new Text({
-      text: "Tap to expand",
-      style: {
-        fill: 0x6d7e90,
-        fontFamily: BODY_FONT,
-        fontSize: 11,
-        fontWeight: "700",
-      },
-    });
-    const epicPanelChevron = new Text({
-      text: "+",
-      style: {
-        fill: 0x2a3846,
-        fontFamily: DISPLAY_FONT,
-        fontSize: 24,
-        fontWeight: "700",
-      },
-    });
-    const epicPanelBodyLabel = new Text({
-      text: "Inside this layer",
-      style: {
-        fill: 0x8a6f4c,
-        fontFamily: SERIF_FONT,
         fontSize: 12,
-        fontWeight: "700",
+        fontWeight: "600",
       },
     });
+    const epicPanelChevron = new Graphics();
     const epicPanelBody = new HTMLText({
       text: "",
       style: {
@@ -812,17 +1015,13 @@ export default function JourneyPixiTimeline({
     epicPanelHeaderHitArea.on("pointertap", () => {
       epicAccordionOpenRef.current = !epicAccordionOpenRef.current;
     });
-    epicPanelBody.position.set(24, 112);
+    epicPanelBody.position.set(24, 86);
     epicPanelContainer.addChild(epicPanelShadow);
     epicPanelContainer.addChild(epicPanelBackground);
-    epicPanelContainer.addChild(epicPanelDivider);
     epicPanelContainer.addChild(epicPanelHeaderHitArea);
-    epicPanelContainer.addChild(epicPanelAccent);
     epicPanelContainer.addChild(epicPanelTitle);
     epicPanelContainer.addChild(epicPanelMeta);
-    epicPanelContainer.addChild(epicPanelCue);
     epicPanelContainer.addChild(epicPanelChevron);
-    epicPanelContainer.addChild(epicPanelBodyLabel);
     epicPanelContainer.addChild(epicPanelBody);
 
     topInfoContainer.addChild(speedControlContainer);
@@ -906,23 +1105,33 @@ export default function JourneyPixiTimeline({
     const hoveredLineIdRef = { current: "" };
     const pointerPosRef = { current: { x: 0, y: 0 } };
 
+    const cardCollapseStates = new Map<string, CardCollapseState>();
+    const getCardCollapseState = (storyId: string): CardCollapseState => {
+      const existingState = cardCollapseStates.get(storyId);
+      if (existingState) {
+        return existingState;
+      }
+
+      const nextState: CardCollapseState = { current: 0, target: 0 };
+      cardCollapseStates.set(storyId, nextState);
+      return nextState;
+    };
+
     const cardNodes = storyVisuals
       .filter((story) => story.storyType === "CARD")
       .map((story) => {
-        const overlappingEpics = epics.filter(
-          (epic) => epic.startPoint <= story.endPoint && epic.endPoint >= story.startPoint,
-        );
-        const primaryEpic = overlappingEpics[0];
-        const primaryEpicColor = primaryEpic
-          ? (epicVisualById.get(primaryEpic.id)?.primaryColor ?? parseColor("#4ecdc4"))
-          : parseColor("#4ecdc4");
-        const epicLabel = `Epics: ${summarizeEpicTitles(overlappingEpics)}`;
-
         const container = new Container();
         container.eventMode = "static";
         container.cursor = "pointer";
+        container.hitArea = new Rectangle(0, 0, CARD_WIDTH, CARD_HEIGHT);
         let hovered = false;
         let hoverAmount = 0;
+        let chevronHovered = false;
+        const hasStoryImage = Boolean(story.imageUrl?.trim());
+        const shellX = hasStoryImage ? CARD_SHELL_X : 0;
+        const shellWidth = CARD_WIDTH - shellX;
+        const contentX = hasStoryImage ? CARD_CONTENT_X_WITH_IMAGE : CARD_CONTENT_X_NO_IMAGE;
+        const contentWidth = hasStoryImage ? CARD_CONTENT_WIDTH_WITH_IMAGE : CARD_CONTENT_WIDTH_NO_IMAGE;
 
         container.on("pointerenter", () => {
           hovered = true;
@@ -931,225 +1140,166 @@ export default function JourneyPixiTimeline({
           hovered = false;
         });
         container.visible = false;
-        container.on("pointertap", () => {
+        container.on("pointertap", (event) => {
+          // Don't trigger card click if chevron was clicked
+          const hitTarget = event.target as any;
+          if (hitTarget === chevronHitArea) {
+            return;
+          }
           onStoryCardClick?.(story);
         });
 
-        const cardBaseColor = mixColorNumbers(0xfff5e5, story.cardColor, 0.14);
-        const cardTextColor = 0x1f262d;
-        const cardSubtleTextColor = 0x63584c;
+        // Card shell sits slightly right so the image can break out on the left edge.
+        const cardLiftShadow = new Graphics();
+        const cardBg = new Graphics();
+        cardBg.roundRect(shellX, 0, shellWidth, CARD_HEIGHT, CARD_SHELL_RADIUS);
+        cardBg.fill({ color: 0xfafaf8, alpha: 0.95 });
+        cardBg.stroke({ color: 0xe0dbd5, width: 1, alpha: 0.6 });
 
-        // Outer shadow - deep layer for depth
-        const shadowDeep = new Graphics();
-        shadowDeep.roundRect(12, 18, CARD_WIDTH - 12, CARD_HEIGHT - 8, CARD_HEIGHT / 2);
-        shadowDeep.fill({ color: mixColorNumbers(0x705734, primaryEpicColor, 0.22), alpha: 0.42 });
+        // Keep a subtle fixed shell shadow; the stronger lift shadow is driven per-frame.
+        const cardShadow = new Graphics();
+        cardShadow.roundRect(shellX + 6, 10, shellWidth - 4, CARD_HEIGHT - 10, CARD_SHELL_RADIUS + 2);
+        cardShadow.fill({ color: 0x000000, alpha: 0.04 });
+        cardShadow.roundRect(shellX + 2, 4, shellWidth - 2, CARD_HEIGHT - 6, CARD_SHELL_RADIUS);
+        cardShadow.fill({ color: 0x000000, alpha: 0.08 });
 
-        // Outer shadow - medium layer
-        const shadow = new Graphics();
-        shadow.roundRect(8, 12, CARD_WIDTH - 8, CARD_HEIGHT - 4, CARD_HEIGHT / 2);
-        shadow.fill({ color: mixColorNumbers(0x8a7040, primaryEpicColor, 0.18), alpha: 0.28 });
-
-        // Outer shadow - soft layer
-        const shadowSoft = new Graphics();
-        shadowSoft.roundRect(3, 6, CARD_WIDTH - 2, CARD_HEIGHT - 2, CARD_HEIGHT / 2);
-        shadowSoft.fill({ color: mixColorNumbers(0x9a8a5a, primaryEpicColor, 0.14), alpha: 0.16 });
-
-        // Main card body with pill shape
-        const card = new Graphics();
-        card.roundRect(0, 0, CARD_WIDTH, CARD_HEIGHT, CARD_HEIGHT / 2);
-        card.fill({ color: cardBaseColor, alpha: 0.98 });
-        card.stroke({ color: 0xfffbf4, width: 2, alpha: 0.82 });
-
-        // Inner shadow for inset depth effect
-        const innerShadow = new Graphics();
-        innerShadow.roundRect(2, 2, CARD_WIDTH - 4, CARD_HEIGHT - 4, CARD_HEIGHT / 2 - 2);
-        innerShadow.stroke({
-          color: mixColorNumbers(0x8a6a42, primaryEpicColor, 0.3),
-          width: 1.5,
-          alpha: 0.12,
+        // Chevron icon in top-right
+        const chevronGraphic = new Graphics();
+        const chevronHitArea = new Graphics();
+        chevronHitArea.eventMode = "static";
+        chevronHitArea.cursor = "pointer";
+        chevronHitArea.rect(CARD_WIDTH - CARD_CHEVRON_SIZE - CARD_CHEVRON_MARGIN, CARD_CHEVRON_MARGIN, CARD_CHEVRON_SIZE, CARD_CHEVRON_SIZE);
+        chevronHitArea.fill({ color: 0xffffff, alpha: 0.001 });
+        chevronHitArea.on("pointertap", (event) => {
+          event.stopPropagation();
+          const collapseState = getCardCollapseState(story.id);
+          collapseState.target = collapseState.target > 0.5 ? 0 : 1;
+        });
+        chevronHitArea.on("pointerenter", () => {
+          chevronHovered = true;
+        });
+        chevronHitArea.on("pointerleave", () => {
+          chevronHovered = false;
         });
 
-        // Top highlight for glossy effect
-        const cardHighlight = new Graphics();
-        cardHighlight.roundRect(20, 10, 116, 16, 8);
-        cardHighlight.fill({ color: 0xffffff, alpha: 0.12 });
+        let imageContainer: Container | null = null;
+        let imageBg: Graphics | null = null;
+        let imageMask: Graphics | null = null;
 
-        const avatarBackdrop = new Graphics();
-        avatarBackdrop.circle(
-          CARD_AVATAR_X + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_Y + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_SIZE / 2 + 6,
-        );
-        avatarBackdrop.fill({ color: mixColorNumbers(0xf8e6c7, primaryEpicColor, 0.24), alpha: 0.9 });
+        if (hasStoryImage) {
+          imageContainer = new Container();
+          imageContainer.position.set(CARD_IMAGE_X, CARD_IMAGE_Y);
 
-        const avatarMask = new Graphics();
-        avatarMask.circle(
-          CARD_AVATAR_X + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_Y + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_SIZE / 2,
-        );
-        avatarMask.fill({ color: 0xffffff, alpha: 1 });
-        avatarMask.visible = false;
+          imageBg = new Graphics();
+          imageBg.roundRect(0, 0, CARD_IMAGE_SIZE, CARD_IMAGE_SIZE, CARD_IMAGE_RADIUS);
+          imageBg.fill({ color: 0xf0ebe5, alpha: 0.92 });
+          imageBg.stroke({ color: 0xffffff, width: 2, alpha: 0.88 });
+          imageContainer.addChild(imageBg);
 
-        const avatarPlaceholder = new Graphics();
-        avatarPlaceholder.circle(
-          CARD_AVATAR_X + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_Y + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_SIZE / 2,
-        );
-        avatarPlaceholder.fill({ color: mixColorNumbers(0xfff5e2, primaryEpicColor, 0.3), alpha: 1 });
-
-        const avatarInitials = new Text({
-          text: getStoryInitials(story.title),
-          style: {
-            fill: mixColorNumbers(0x6c5534, primaryEpicColor, 0.38),
-            fontFamily: DISPLAY_FONT,
-            fontSize: 30,
-            fontWeight: "700",
-          },
-        });
-        avatarInitials.anchor.set(0.5);
-        avatarInitials.position.set(
-          CARD_AVATAR_X + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_Y + CARD_AVATAR_SIZE / 2,
-        );
-
-        const avatarRing = new Graphics();
-        avatarRing.circle(
-          CARD_AVATAR_X + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_Y + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_SIZE / 2 + 2,
-        );
-        avatarRing.stroke({ color: 0xffffff, width: 6, alpha: 0.7 });
-        avatarRing.circle(
-          CARD_AVATAR_X + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_Y + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_SIZE / 2 + 2,
-        );
-        avatarRing.stroke({ color: primaryEpicColor, width: 1.5, alpha: 0.4 });
+          imageMask = new Graphics();
+          imageMask.roundRect(0, 0, CARD_IMAGE_SIZE, CARD_IMAGE_SIZE, CARD_IMAGE_RADIUS);
+          imageMask.fill({ color: 0xffffff });
+          imageContainer.addChild(imageMask);
+        }
 
         const titleText = new Text({
-          text: truncateText(story.title, 46),
+          text: story.title,
           style: {
-            fill: cardTextColor,
-            breakWords: true,
+            fill: 0x2c2c28,
             fontFamily: DISPLAY_FONT,
-            fontSize: 26,
+            fontSize: 19,
             fontWeight: "700",
-            lineHeight: 28,
+            lineHeight: 22,
             wordWrap: true,
-            wordWrapWidth: CARD_CONTENT_WIDTH,
+            wordWrapWidth: contentWidth,
           },
         });
-        titleText.position.set(CARD_CONTENT_X, 24);
+        titleText.position.set(contentX, CARD_PADDING_TOP);
+        fitTextToHeight(titleText, story.title, 48, 18);
 
-        const epicText = new Text({
-          text: epicLabel,
+        // Collapsed state title - single line, truncated
+        const collapsedTitleText = new Text({
+          text: story.title,
           style: {
-            fill: cardSubtleTextColor,
-            breakWords: true,
-            fontFamily: BODY_FONT,
-            fontSize: 12,
-            fontWeight: "600",
-            lineHeight: 16,
-            wordWrap: true,
-            wordWrapWidth: CARD_CONTENT_WIDTH,
+            fill: 0x2c2c28,
+            fontFamily: DISPLAY_FONT,
+            fontSize: 14,
+            fontWeight: "700",
+            lineHeight: 18,
+            wordWrap: false,
           },
         });
-        epicText.position.set(CARD_CONTENT_X, 82);
+        collapsedTitleText.position.set(CARD_CHEVRON_MARGIN + CARD_COLLAPSED_IMAGE_SIZE + 12, (CARD_COLLAPSED_HEIGHT - collapsedTitleText.height) / 2);
 
         const descText = new Text({
-          text: truncateText(story.description || (story.lineLabel || "No description added yet."), 78),
+          text: story.description || "No description",
           style: {
-            fill: cardSubtleTextColor,
-            breakWords: true,
+            fill: 0x6b6560,
             fontFamily: BODY_FONT,
-            fontSize: 13,
-            lineHeight: 19,
+            fontSize: 12,
+            lineHeight: 17,
             wordWrap: true,
-            wordWrapWidth: CARD_CONTENT_WIDTH,
+            wordWrapWidth: contentWidth,
           },
         });
-        descText.position.set(CARD_CONTENT_X, 102);
 
-        const footerText = new Text({
-          text: `${formatAltitude(story.startPoint)} -> ${formatAltitude(story.endPoint)}`,
+        const altitudeText = new Text({
+          text: `${formatAltitude(story.startPoint)} → ${formatAltitude(story.endPoint)}`,
           style: {
-            fill: mixColorNumbers(0x7a6141, primaryEpicColor, 0.36),
-            fontFamily: SERIF_FONT,
-            fontSize: 13,
+            fill: 0x43362c,
+            fontFamily: BODY_FONT,
+            fontSize: 15,
             fontWeight: "700",
+            letterSpacing: 0.2,
           },
         });
-        footerText.position.set(CARD_CONTENT_X, CARD_HEIGHT - 24);
+        const altitudeY = CARD_HEIGHT - CARD_PADDING_BOTTOM - altitudeText.height - 6;
+        altitudeText.position.set(contentX, altitudeY);
 
-        const footerRule = new Graphics();
-        footerRule.roundRect(CARD_CONTENT_X, CARD_HEIGHT - 30, 84, 2, 1);
-        footerRule.fill({ color: primaryEpicColor, alpha: 0.28 });
+        const descY = titleText.y + titleText.height + 8;
+        descText.position.set(contentX, descY);
+        fitTextToHeight(descText, story.description || "No description", altitudeY - descY - 10, 24);
+        descText.visible = descText.text.length > 0;
 
-        // Image container - will be added only if image exists
-        const imageContainer = new Container();
-        imageContainer.position.set(CARD_AVATAR_X, CARD_AVATAR_Y);
-        
-        // Image frame background - circular
-        const imageFrame = new Graphics();
-        const avatarRadius = CARD_AVATAR_SIZE / 2;
-        imageFrame.circle(avatarRadius, avatarRadius, avatarRadius);
-        imageFrame.fill({ color: mixColorNumbers(0xf0e6d0, primaryEpicColor, 0.16), alpha: 0.7 });
-        imageFrame.stroke({ color: mixColorNumbers(0xdcc9b0, primaryEpicColor, 0.24), width: 1, alpha: 0.6 });
-        imageContainer.addChild(imageFrame);
-
-        // Create circular mask for images (applied when image is added)
-        const circularMask = new Graphics();
-        circularMask.circle(avatarRadius, avatarRadius, avatarRadius);
-        circularMask.fill({ color: 0xffffff });
-        imageContainer.addChild(circularMask);
-
-        let imageContainerAdded = false;
-
-        container.addChild(shadowDeep);
-        container.addChild(shadow);
-        container.addChild(shadowSoft);
-        container.addChild(card);
-        container.addChild(innerShadow);
-        container.addChild(cardHighlight);
-        container.addChild(avatarBackdrop);
-        container.addChild(avatarMask);
-        container.addChild(avatarPlaceholder);
-        container.addChild(avatarInitials);
-        container.addChild(avatarRing);
+        container.addChild(cardLiftShadow);
+        container.addChild(cardShadow);
+        container.addChild(cardBg);
+        if (imageContainer) {
+          container.addChild(imageContainer);
+        }
         container.addChild(titleText);
-        container.addChild(epicText);
         container.addChild(descText);
-        container.addChild(footerRule);
-        container.addChild(footerText);
+        container.addChild(altitudeText);
+        container.addChild(chevronGraphic);
+        container.addChild(chevronHitArea);
+        container.addChild(collapsedTitleText);
 
         cardsLayer.addChild(container);
 
         return {
-          avatarBackdrop,
-          avatarInitials,
-          avatarMask,
-          avatarPlaceholder,
-          avatarRing,
-          circularMask,
+          cardLiftShadow,
+          chevronHitArea,
+          imageBg,
+          imageMask,
           container,
-          footerText,
           imageContainer,
-          imageFrame,
-          imageContainerAdded: () => imageContainerAdded,
-          setImageContainerAdded: (val: boolean) => {
-            imageContainerAdded = val;
-          },
-          shadow,
-          shadowDeep,
-          shadowSoft,
+          hasStoryImage,
+          shellWidth,
+          shellX,
           hovered: () => hovered,
           hoverAmount: () => hoverAmount,
           setHoverAmount: (value: number) => {
             hoverAmount = value;
           },
+          chevronHovered: () => chevronHovered,
           story,
+          chevronGraphic,
+          collapsedTitleText,
+          titleText,
+          descText,
+          altitudeText,
+          cardShadow,
+          cardBg,
         };
     });
 
@@ -1362,7 +1512,15 @@ export default function JourneyPixiTimeline({
       speedDecreaseBg.circle(10, 10, 10);
       speedDecreaseBg.fill({ color: canDecreaseSpeed ? 0xfbf4e6 : 0xf1f4f7, alpha: 1 });
       speedDecreaseBg.stroke({ color: canDecreaseSpeed ? 0xe8d6ba : 0xd8e1ea, width: 1, alpha: 0.9 });
-      speedDecreaseLabel.position.set(10 - speedDecreaseLabel.width / 2, 10 - speedDecreaseLabel.height / 2 - 1);
+      drawChevronIcon(speedDecreaseChevron, {
+        x: 4,
+        y: 4,
+        size: 12,
+        progress: 0,
+        color: canDecreaseSpeed ? 0x34424f : 0x8895a8,
+        alpha: 0.9,
+        direction: "horizontal",
+      });
 
       speedIncreaseButton.alpha = canIncreaseSpeed ? 1 : 0.45;
       speedIncreaseButton.cursor = canIncreaseSpeed ? "pointer" : "default";
@@ -1371,7 +1529,15 @@ export default function JourneyPixiTimeline({
       speedIncreaseBg.circle(10, 10, 10);
       speedIncreaseBg.fill({ color: canIncreaseSpeed ? 0xfbf4e6 : 0xf1f4f7, alpha: 1 });
       speedIncreaseBg.stroke({ color: canIncreaseSpeed ? 0xe8d6ba : 0xd8e1ea, width: 1, alpha: 0.9 });
-      speedIncreaseLabel.position.set(10 - speedIncreaseLabel.width / 2, 10 - speedIncreaseLabel.height / 2 - 1);
+      drawChevronIcon(speedIncreaseChevron, {
+        x: 4,
+        y: 4,
+        size: 12,
+        progress: 1,
+        color: canIncreaseSpeed ? 0x34424f : 0x8895a8,
+        alpha: 0.9,
+        direction: "horizontal",
+      });
 
       const uiTopBoundary = lineOnly ? 8 : topInfoY + topInfoHeight + 20;
       const epicPanelProgress = smoothToward(
@@ -1474,6 +1640,7 @@ export default function JourneyPixiTimeline({
       const cardScale = getCardScale(rendererWidth, 72, reservedRightInset);
       const scaledCardWidth = CARD_WIDTH * cardScale;
       const scaledCardHeight = CARD_HEIGHT * cardScale;
+      const scaledCollapsedCardHeight = CARD_COLLAPSED_HEIGHT * cardScale;
       const topDockY = uiTopBoundary + 14;
       const bottomDockY = rendererHeight - scaledCardHeight - 110;
       const offscreenDistance = scaledCardHeight + 28;
@@ -1490,11 +1657,30 @@ export default function JourneyPixiTimeline({
           }),
         ]),
       );
+      const cardCollapseProgressById = new Map<string, number>();
+
+      cardNodes.forEach(({ story }) => {
+        const collapseState = getCardCollapseState(story.id);
+        const nextProgress = smoothToward(
+          collapseState.current,
+          collapseState.target,
+          CARD_COLLAPSE_HALF_LIFE_MS,
+          frameDeltaMs,
+        );
+        collapseState.current = Math.abs(nextProgress - collapseState.target) <= 0.001 ? collapseState.target : nextProgress;
+        cardCollapseProgressById.set(story.id, collapseState.current);
+      });
+
       const visibleCardLayouts = buildCardStackLayouts(
         cardNodes
           .map(({ story }) => ({
             id: story.id,
             preferredY: cardPresentations.get(story.id)?.y ?? topDockY,
+            height: lerp(
+              scaledCardHeight,
+              scaledCollapsedCardHeight,
+              smoothstep(cardCollapseProgressById.get(story.id) ?? 0),
+            ),
           }))
           .filter(({ id }) => cardPresentations.get(id)?.visible),
         rendererWidth,
@@ -1508,7 +1694,7 @@ export default function JourneyPixiTimeline({
         },
       );
 
-      cardNodes.forEach(({ avatarBackdrop, avatarInitials, avatarMask, avatarPlaceholder, avatarRing, circularMask, container, hovered, hoverAmount, setHoverAmount, shadow, shadowDeep, shadowSoft, story, imageContainer, imageFrame, imageContainerAdded, setImageContainerAdded }) => {
+      cardNodes.forEach(({ cardLiftShadow, chevronHitArea, imageBg, imageMask, container, hovered, hoverAmount, setHoverAmount, story, imageContainer, hasStoryImage, chevronGraphic, collapsedTitleText, titleText, descText, altitudeText, cardShadow, cardBg, chevronHovered }) => {
         if (lineOnly) {
           cardLayoutStates.delete(story.id);
           container.visible = false;
@@ -1538,52 +1724,134 @@ export default function JourneyPixiTimeline({
         }
 
         const layoutState = cardLayoutStates.get(story.id);
+        const collapseProgress = cardCollapseProgressById.get(story.id) ?? 0;
+        const frameMetrics = getCardFrameMetrics(collapseProgress, hasStoryImage);
 
         const nextHoverAmount = smoothToward(hoverAmount(), hovered() ? 1 : 0, 0.01, frameDeltaMs);
         setHoverAmount(nextHoverAmount);
         const resolvedX = layoutState?.x ?? targetLayout.x;
         const resolvedY = layoutState?.y ?? targetLayout.y;
-        const cardCenterX = resolvedX + scaledCardWidth / 2;
-        const cardCenterY = resolvedY + scaledCardHeight / 2;
-        const centerDistance = Math.hypot(cardCenterX - rendererWidth / 2, cardCenterY - rendererHeight / 2);
-        const maxCenterDistance = Math.hypot(rendererWidth / 2, rendererHeight / 2);
-        const centerLift = 1 - clamp01(centerDistance / Math.max(1, maxCenterDistance));
-        const shadowEmphasis = clamp01(centerLift + nextHoverAmount * 0.22);
 
-        shadowSoft.alpha = lerp(0.72, 1, shadowEmphasis);
-        shadow.alpha = lerp(0.76, 1, shadowEmphasis);
-        shadowDeep.alpha = lerp(0.82, 1, shadowEmphasis);
-
-        // Eased scale transition on hover (120ms half-life for smooth response)
-        const targetCardScale = cardScale * (1 + nextHoverAmount * 0.025);
+        // Eased scale transition on hover
+        const targetCardScale = cardScale * (1 + nextHoverAmount * 0.08);
         const currentCardScale = cardScaleStates.get(story.id) ?? cardScale;
         const easedCardScale = smoothToward(currentCardScale, targetCardScale, 120, frameDeltaMs);
         cardScaleStates.set(story.id, easedCardScale);
 
+        const cardCenterY = resolvedY + frameMetrics.height * easedCardScale / 2;
+        const centerDistanceRatio = clamp01(Math.abs(cardCenterY - rendererHeight / 2) / Math.max(1, rendererHeight * 0.44));
+        const centerLift = 1 - centerDistanceRatio;
+
+        container.hitArea = new Rectangle(0, 0, frameMetrics.width, frameMetrics.height);
+
         container.position.set(resolvedX, resolvedY);
         container.alpha = clampNumber(presentation.alpha + nextHoverAmount * 0.08, 0, 1);
         container.rotation = presentation.rotation * (1 - nextHoverAmount * 0.72);
-        container.zIndex = Math.round(centerLift * 100) + Math.round(nextHoverAmount * 200);
+        container.zIndex = Math.round(nextHoverAmount * 200);
         container.scale.set(easedCardScale);
 
-        // Render card image if available, hide avatar when image exists
+        const expandedAlpha = clamp01(1 - frameMetrics.progress * 1.45);
+        const collapsedAlpha = clamp01((frameMetrics.progress - 0.16) / 0.84);
+
+        chevronHitArea.clear();
+        chevronHitArea.rect(
+          frameMetrics.chevronX - 6,
+          frameMetrics.chevronY - 6,
+          CARD_CHEVRON_SIZE + 12,
+          CARD_CHEVRON_SIZE + 12,
+        );
+        chevronHitArea.fill({ color: 0xffffff, alpha: 0.001 });
+
+        drawChevronIcon(chevronGraphic, {
+          x: frameMetrics.chevronX,
+          y: frameMetrics.chevronY,
+          size: CARD_CHEVRON_SIZE,
+          progress: frameMetrics.progress,
+          color: 0x8b7d72,
+          alpha: 0.7,
+          hovered: chevronHovered(),
+        });
+
+        titleText.alpha = expandedAlpha;
+        descText.alpha = expandedAlpha;
+        altitudeText.alpha = expandedAlpha;
+        collapsedTitleText.alpha = collapsedAlpha;
+        // Fit and truncate title with ellipsis if too long
+        const fittedTitle = fitTextToWidth(collapsedTitleText, story.title, frameMetrics.collapsedTitleWidth, 8);
+        collapsedTitleText.text = fittedTitle;
+        collapsedTitleText.position.set(
+          frameMetrics.collapsedTitleX,
+          Math.max(CARD_COLLAPSED_SIDE_PADDING, (frameMetrics.height - collapsedTitleText.height) / 2),
+        );
+
+        cardBg.clear();
+        cardBg.roundRect(frameMetrics.shellX, 0, frameMetrics.shellWidth, frameMetrics.shellHeight, CARD_SHELL_RADIUS);
+        cardBg.fill({ color: 0xfafaf8, alpha: 0.95 });
+        cardBg.stroke({ color: 0xe0dbd5, width: 1, alpha: 0.6 });
+
+        cardShadow.clear();
+        cardShadow.roundRect(
+          frameMetrics.shellX + 6,
+          10,
+          Math.max(0, frameMetrics.shellWidth - 4),
+          Math.max(0, frameMetrics.shellHeight - 10),
+          CARD_SHELL_RADIUS + 2,
+        );
+        cardShadow.fill({ color: 0x000000, alpha: 0.04 * expandedAlpha });
+        cardShadow.roundRect(
+          frameMetrics.shellX + 2,
+          4,
+          Math.max(0, frameMetrics.shellWidth - 2),
+          Math.max(0, frameMetrics.shellHeight - 6),
+          CARD_SHELL_RADIUS,
+        );
+        cardShadow.fill({ color: 0x000000, alpha: 0.08 * expandedAlpha });
+
+        drawCardLiftShadow(cardLiftShadow, {
+          shellX: frameMetrics.shellX,
+          shellWidth: frameMetrics.shellWidth,
+          shellHeight: frameMetrics.shellHeight,
+          imageX: frameMetrics.imageX,
+          imageY: frameMetrics.imageY,
+          imageSize: frameMetrics.imageSize,
+          imageRadius: frameMetrics.imageRadius,
+          offsetX: 2 + centerLift * 2.5,
+          offsetY: 4 + centerLift * 7 + nextHoverAmount * 2,
+          spread: 2 + centerLift * 6,
+          softAlpha: (0.045 + centerLift * 0.055) * expandedAlpha,
+          coreAlpha: (0.055 + centerLift * 0.08) * expandedAlpha,
+          hasImage: hasStoryImage,
+        });
+
+        if (!hasStoryImage || !imageContainer || !imageBg || !imageMask) {
+          const staleSprite = cardImageSprites.get(story.id);
+          if (staleSprite) {
+            staleSprite.removeFromParent();
+            staleSprite.destroy();
+            cardImageSprites.delete(story.id);
+          }
+          return;
+        }
+
+        imageContainer.position.set(frameMetrics.imageX, frameMetrics.imageY);
+        imageContainer.scale.set(1);
+        imageContainer.alpha = 1;
+
+        imageBg.clear();
+        imageBg.roundRect(0, 0, frameMetrics.imageSize, frameMetrics.imageSize, frameMetrics.imageRadius);
+        imageBg.fill({ color: 0xf0ebe5, alpha: 0.92 });
+        imageBg.stroke({ color: 0xffffff, width: 2, alpha: 0.88 });
+
+        imageMask.clear();
+        imageMask.roundRect(0, 0, frameMetrics.imageSize, frameMetrics.imageSize, frameMetrics.imageRadius);
+        imageMask.fill({ color: 0xffffff });
+
         const cardImageUrl = story.imageUrl || "";
         const cardImageTexture = cardImageUrl ? textures.get(cardImageUrl) : undefined;
         const hasImage = !!cardImageTexture;
 
-        // Hide avatar group when image is present
-        avatarBackdrop.visible = !hasImage;
-        avatarMask.visible = !hasImage;
-        avatarPlaceholder.visible = !hasImage;
-        avatarInitials.visible = !hasImage;
-        avatarRing.visible = !hasImage;
-
         if (hasImage && cardImageTexture) {
-          // Add image container to scene if not already added
-          if (!imageContainerAdded()) {
-            container.addChild(imageContainer);
-            setImageContainerAdded(true);
-          }
+          imageContainer.visible = true;
 
           // Create or update image sprite
           let imageSprite = cardImageSprites.get(story.id);
@@ -1591,28 +1859,27 @@ export default function JourneyPixiTimeline({
             imageSprite = new Sprite(cardImageTexture);
             imageContainer.addChild(imageSprite);
             cardImageSprites.set(story.id, imageSprite);
-            // Apply circular mask to clip image to circle shape
-            imageSprite.mask = circularMask;
+            // Apply mask to clip image to rounded rect shape
+            imageSprite.mask = imageMask;
             timelineLogger.logImageLoad(story.id, cardImageUrl, true);
           } else {
             imageSprite.texture = cardImageTexture;
           }
 
-          // Scale image to fit within avatar size circle
-          const imageDims = fitDimensionsWithinBox(cardImageTexture.width, cardImageTexture.height, CARD_AVATAR_SIZE, CARD_AVATAR_SIZE);
+          const imageDims = fitDimensionsWithinBox(
+            cardImageTexture.width,
+            cardImageTexture.height,
+            frameMetrics.imageSize,
+            frameMetrics.imageSize,
+          );
           const imageScale = imageDims.width / cardImageTexture.width;
           imageSprite.scale.set(imageScale);
-          // Center within the avatar circle
           imageSprite.position.set(
-            (CARD_AVATAR_SIZE - imageDims.width) / 2,
-            (CARD_AVATAR_SIZE - imageDims.height) / 2
+            (frameMetrics.imageSize - imageDims.width) / 2,
+            (frameMetrics.imageSize - imageDims.height) / 2,
           );
         } else {
-          // Remove image container from scene if it was added
-          if (imageContainerAdded()) {
-            container.removeChild(imageContainer);
-            setImageContainerAdded(false);
-          }
+          imageContainer.visible = true;
 
           // Clean up sprite if image was removed
           const imageSprite = cardImageSprites.get(story.id);
@@ -1770,9 +2037,6 @@ export default function JourneyPixiTimeline({
       if (lineOnly || !activeEpicForBackground) {
         epicPanelContainer.visible = false;
       } else {
-        const overlappingStories = storyVisuals.filter(
-          (story) => activeEpicForBackground.startPoint <= story.endPoint && activeEpicForBackground.endPoint >= story.startPoint,
-        );
         const epicCurrentWidth = lerp(EPIC_HEADER_WIDTH, epicPanelWidth, epicPanelProgress);
         const epicCurrentHeight = lerp(EPIC_HEADER_HEIGHT, epicPanelHeight, epicPanelProgress);
         const epicPanelX = lerp(epicClosedX, epicOpenX, epicPanelProgress);
@@ -1784,15 +2048,25 @@ export default function JourneyPixiTimeline({
         epicPanelContainer.position.set(epicPanelX, EPIC_PANEL_PADDING);
         epicPanelContainer.alpha = 0.92 + epicPanelProgress * 0.08;
 
-        epicPanelTitle.text = activeEpicForBackground.title;
-        epicPanelMeta.text = `${formatAltitude(activeEpicForBackground.startPoint)} -> ${formatAltitude(activeEpicForBackground.endPoint)}  |  ${overlappingStories.length} stories`;
-        epicPanelCue.text = epicAccordionOpenRef.current ? "Tap to collapse" : "Tap to expand";
-        epicPanelChevron.text = epicAccordionOpenRef.current ? "-" : "+";
-        epicPanelBodyLabel.visible = epicBodyVisible;
-        epicPanelBodyLabel.alpha = panelBodyAlpha;
+        fitTextToWidth(epicPanelTitle, activeEpicForBackground.title, Math.max(120, epicCurrentWidth - 72), 8);
+        fitTextToWidth(
+          epicPanelMeta,
+          `${formatAltitude(activeEpicForBackground.startPoint)} -> ${formatAltitude(activeEpicForBackground.endPoint)}`,
+          Math.max(140, epicCurrentWidth - 72),
+          10,
+        );
+        drawChevronIcon(epicPanelChevron, {
+          x: 0,
+          y: 0,
+          size: 20,
+          progress: epicAccordionOpenRef.current ? 1 : 0,
+          color: 0x2a3846,
+          alpha: 0.92,
+          direction: "vertical",
+        });
         epicPanelBody.visible = epicBodyVisible;
         epicPanelBody.alpha = panelBodyAlpha;
-        epicPanelBody.position.set(24, 112 + panelBodyOffsetY);
+        epicPanelBody.position.set(24, 86 + panelBodyOffsetY);
 
         if (lastEpicPanelId !== activeEpicForBackground.id || lastEpicPanelHtml === "") {
           lastEpicPanelId = activeEpicForBackground.id;
@@ -1802,33 +2076,23 @@ export default function JourneyPixiTimeline({
         epicPanelBody.style.wordWrapWidth = Math.max(220, epicPanelWidth - 48);
 
         epicPanelShadow.clear();
-        epicPanelShadow.roundRect(10, 14, epicCurrentWidth + 4, epicCurrentHeight + 8, 30);
-        epicPanelShadow.fill({ color: mixColorNumbers(0x735732, activeEpicColor, 0.18), alpha: lerp(0.16, 0.28, epicPanelProgress) });
+        epicPanelShadow.roundRect(6, 10, Math.max(0, epicCurrentWidth - 4), Math.max(0, epicCurrentHeight - 10), 30);
+        epicPanelShadow.fill({ color: 0x000000, alpha: 0.04 });
+        epicPanelShadow.roundRect(2, 4, Math.max(0, epicCurrentWidth - 2), Math.max(0, epicCurrentHeight - 6), 28);
+        epicPanelShadow.fill({ color: 0x000000, alpha: 0.08 });
 
         epicPanelBackground.clear();
         epicPanelBackground.roundRect(0, 0, epicCurrentWidth, epicCurrentHeight, 28);
-        epicPanelBackground.fill({ color: 0xfff6e8, alpha: lerp(0.76, 0.97, epicPanelProgress) });
-        epicPanelBackground.stroke({ color: 0xffffff, width: 2, alpha: lerp(0.54, 0.8, epicPanelProgress) });
-
-        epicPanelAccent.clear();
-        epicPanelAccent.roundRect(22, 24, 8, 32, 4);
-        epicPanelAccent.fill({ color: activeEpicColor, alpha: 0.88 });
-
-        epicPanelDivider.clear();
-        if (epicBodyVisible) {
-          epicPanelDivider.roundRect(24, 92, epicCurrentWidth - 48, 2, 1);
-          epicPanelDivider.fill({ color: mixColorNumbers(0xe7d2b4, activeEpicColor, 0.16), alpha: 0.9 });
-        }
+        epicPanelBackground.fill({ color: 0xfafaf8, alpha: 0.95 });
+        epicPanelBackground.stroke({ color: 0xe0dbd5, width: 1, alpha: 0.6 });
 
         epicPanelHeaderHitArea.clear();
         epicPanelHeaderHitArea.roundRect(0, 0, epicCurrentWidth, Math.min(epicCurrentHeight, EPIC_HEADER_HEIGHT), 26);
         epicPanelHeaderHitArea.fill({ color: 0xffffff, alpha: 0.001 });
 
-        epicPanelTitle.position.set(42, 22);
-        epicPanelMeta.position.set(42, 48);
-        epicPanelCue.position.set(epicCurrentWidth - epicPanelCue.width - 54, 28);
-        epicPanelChevron.position.set(epicCurrentWidth - 44, 20);
-        epicPanelBodyLabel.position.set(24, 104);
+        epicPanelTitle.position.set(24, 20);
+        epicPanelMeta.position.set(24, 49);
+        epicPanelChevron.position.set(epicCurrentWidth - 36, 22);
       }
     };
 
@@ -1899,34 +2163,6 @@ export default function JourneyPixiTimeline({
         });
       });
 
-      cardNodes.forEach(({ avatarInitials, avatarMask, avatarPlaceholder, container, story }) => {
-        if (!story.imageUrl) {
-          return;
-        }
-
-        const texture = textures.get(story.imageUrl);
-        if (!texture) {
-          return;
-        }
-
-        const sprite = new Sprite(texture);
-        const coverScale = Math.max(
-          CARD_AVATAR_SIZE / Math.max(1, texture.width),
-          CARD_AVATAR_SIZE / Math.max(1, texture.height),
-        );
-
-        sprite.anchor.set(0.5);
-        sprite.position.set(
-          CARD_AVATAR_X + CARD_AVATAR_SIZE / 2,
-          CARD_AVATAR_Y + CARD_AVATAR_SIZE / 2,
-        );
-        sprite.scale.set(coverScale);
-        sprite.alpha = 0.96;
-        sprite.mask = avatarMask;
-        avatarPlaceholder.visible = false;
-        avatarInitials.visible = false;
-        container.addChildAt(sprite, container.getChildIndex(avatarMask));
-      });
 
       app.ticker.minFPS = 30;
       app.ticker.maxFPS = 60;
