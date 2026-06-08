@@ -79,322 +79,305 @@ Even though `storyPresentation.ts` already protects short stories with `getEffec
 
 ---
 
-## Design Conclusion
+## Revised Constraints
 
-Manual scrolling and travel pace should be decoupled.
+The previous direction was too invasive for the product.
+
+The revised plan should assume:
+
+- keep the current info area and pace control
+- do not add new hold-to-cruise controls
+- do not introduce a new assisted-travel mode
+- keep the current wheel + pace interaction model for now
+- solve the skipping problem by changing target selection, not by redesigning the UI
+
+---
+
+## Revised Design Conclusion
+
+Do not decouple pace from wheel input yet.
+
+Instead, keep the current pace model and make it story-aware.
 
 ### Recommendation
 
-Keep manual wheel and trackpad behavior constant at every setting.
+When a paced wheel step would jump past the next story, clamp that step to the next story checkpoint and stop there.
 
-If the product wants a faster pace concept, attach it to assisted travel, not to wheel sensitivity.
+That means:
 
-In practice that means:
+- the current pace control remains in place
+- the current info area remains in place
+- the wheel still uses the selected pace to compute a proposed jump
+- only the final target altitude is adjusted when a story would be skipped
+- the system stops one story at a time, then the next wheel gesture can continue
 
-- wheel input should always use the same base scroll behavior
-- pace should affect only explicit assisted movement modes
-- any assisted fast movement must become story-aware
-
----
-
-## Recommended Product Model
-
-### Manual Scroll
-
-Manual scroll should always behave the same.
-
-- one wheel gesture should always produce the same altitude delta
-- smoothing can remain, but only for normal micro-latency smoothing, not for absorbing huge pace-scaled jumps
-- this preserves muscle memory and removes the autoplay feeling
-
-### Assisted Travel
-
-If we still want a notion of pace, it should represent assisted travel speed. Examples:
-
-- press-and-hold on a dedicated up or down control
-- keyboard hold behavior
-- an autoplay or cruise mode
-- dragging the altitude rail while the system optionally animates to checkpoints
-
-This matches the meaning of pace much better than multiplying the wheel.
-
-### Naming
-
-If the current control remains tied to wheel distance, it should be renamed to something like:
-
-- `Jump size`
-- `Scroll step`
-- `Altitude step`
-
-If the product intent is really pace, the better rename is:
-
-- `Travel mode`
-- `Cruise speed`
-- `Auto travel pace`
+This is a much smaller and more practical hybrid model than introducing new movement controls.
 
 ---
 
-## Story Scrolling: How To Handle Fast Travel
+## New Hybrid Model: Story-Aware Paced Stops
 
-This is the core design question.
+### Core Rule
 
-If movement can ever be faster than manual wheel cadence, the system must not rely only on what happened to be visible on screen in a single frame. It should explicitly detect which stories were crossed.
+The current wheel event computes a proposed paced target exactly as it does today:
 
-### Principle
+```ts
+const proposedTarget = currentTarget + deltaY * pace;
+```
 
-For any movement segment from `previousAltitude` to `nextAltitude`, treat stories as encountered if that segment intersects the story visibility band.
+Before committing that target, the system checks whether the movement segment would overjump the next story in the travel direction.
 
-The visibility band already exists in `storyPresentation.ts`:
+- if no story would be skipped, keep the proposed target
+- if a story would be skipped, replace the proposed target with a stop altitude for the nearest skipped story
 
-- `entryStart`
-- `activeEnd`
-- `exitEnd`
+This preserves fast movement through empty altitude ranges, while forcing a stop only when narrative content would be lost.
 
-That is a good basis because it is broader than the raw story span and already encodes the user-facing display window.
+### Why This Fits The Product Better
 
-### Encounter Detection Rule
+- no new UI
+- no new controls
+- no semantic rewrite of the pace control
+- no info-area redesign
+- minimal change to the interaction model users already understand
 
-For each story:
+The only change is that fast paced movement becomes story-safe.
 
-- compute its visibility band
-- compute the traveled altitude segment
-- if the segment intersects `[entryStart, exitEnd]`, mark the story as crossed
+---
+
+## What Counts As An Overjump?
+
+The simplest useful rule is:
+
+- determine the scroll direction
+- compute the proposed paced target
+- find the nearest story checkpoint between the current target altitude and the proposed target altitude
+- if one exists, stop there instead of jumping farther
+
+This is intentionally simpler than full crossed-story clustering or new autoplay logic.
+
+### Story Checkpoint Choice
+
+To actually show the story, the stop should land inside the active phase rather than only at the beginning of the entry animation.
+
+Use the existing presentation helpers in `storyPresentation.ts`:
+
+- ascending stop altitude: `story.startPoint`
+- descending stop altitude: `getEffectiveStoryEndPoint(story)`
+
+Why this works:
+
+- `story.startPoint` is the beginning of the active phase when moving upward
+- `getEffectiveStoryEndPoint(story)` respects the enforced minimum active lifespan for short stories when moving downward
+- this lands the user inside a visible, stable story state rather than merely brushing the entry or exit margin
+
+### Card And Line Stories
+
+For the first version, both story types should use the same stop rule.
+
+- cards need the stop because they are dense content blocks
+- line stories need the stop because they are easy to miss at high pace
+
+If line stories still feel too subtle after this, then the line checkpoint can later be nudged slightly deeper into the active band. That should be a tuning step, not part of the initial refactor.
+
+---
+
+## Critical Detail: The Stop Must Actually Hold
+
+There is one important implementation nuance in the current code.
+
+`useWheelAltitude` updates `targetAltitudeRef.current`, while Pixi renders toward that target over time.
+
+That means a naive clamp is not enough.
+
+If we only clamp one wheel event, repeated wheel events can still queue multiple future jumps before the rendered altitude has actually reached the first stopped story. The result would still feel like autoplay.
+
+### Required Mechanism: Pending Story Stop
+
+Add a route-side pending stop lock.
 
 Conceptually:
 
-```ts
-const travelMin = Math.min(previousAltitude, nextAltitude);
-const travelMax = Math.max(previousAltitude, nextAltitude);
+- when a wheel event is clamped to a story checkpoint, store that checkpoint as a pending stop
+- while that stop is pending and the rendered altitude has not reached it yet, do not allow further same-direction wheel input to push the target beyond it
+- once the rendered altitude reaches the stop vicinity, clear the lock and let the next wheel gesture continue normally
+- if the user reverses direction, clear the pending stop immediately
 
-const crossed = stories.filter((story) => {
-  const band = getStoryVisibilityBand(story);
-  return travelMax >= band.entryStart && travelMin <= band.exitEnd;
-});
-```
-
-This is the minimum reliable logic for not losing short stories.
+This is what makes the solution actually stop at the story instead of merely queuing a brief intermediate target.
 
 ---
 
-## What Should Happen When A Story Is Crossed?
+## Suggested Algorithm
 
-There are several viable behaviors.
+### Step 1: Compute Proposed Target
 
-### Option A: Log crossed stories only
+Keep the current behavior:
 
-Behavior:
+```ts
+const proposedTarget = currentTarget + deltaY * pace;
+```
 
-- do not interrupt movement
-- add crossed stories to a recent or encountered queue
-- let the user review them after the fast movement
+### Step 2: Resolve The Next Story Stop
 
-Pros:
+Add a small domain utility that finds the nearest skipped story checkpoint.
 
-- minimal friction
-- easiest to implement on top of the existing recent stories concept
+Suggested shape:
 
-Cons:
+```ts
+type StoryStopResolution = {
+  nextTarget: number;
+  didClamp: boolean;
+  storyId: string | null;
+  stopAltitude: number | null;
+};
 
-- users can still miss the moment in context
-- line stories may feel too easy to miss even if they are logged
+function resolveStoryAwareTarget(...) => StoryStopResolution
+```
 
-### Option B: Temporary slowdown near crossed stories
+Inputs:
 
-Behavior:
+- current target altitude
+- proposed paced target altitude
+- rendered altitude or current displayed altitude
+- direction
+- filtered stories
 
-- assisted travel can run fast in empty altitude ranges
-- when entering a story visibility band, reduce motor speed automatically
+Outputs:
 
-Pros:
+- the final target to apply
+- whether the target was clamped
+- which story caused the clamp
+- the stop altitude that should remain locked until reached
 
-- preserves overview travel while still giving stories time on screen
-- feels intentional if tuned well
+### Step 3: Apply Pending Stop Lock
 
-Cons:
+Route-side logic in `journey.$id.tsx` should maintain something like:
 
-- complexity in the altitude motor
-- risk of feeling sticky or inconsistent if story density is high
-
-### Option C: Snap to meaningful checkpoints
-
-Behavior:
-
-- fast travel moves between story or epic checkpoints
-- movement pauses briefly at stories or dense clusters
-
-Pros:
-
-- strongest guarantee that content is not skipped
-- useful for keyboard or autoplay modes
-
-Cons:
-
-- less freeform
-- can feel heavy-handed for manual exploration
-
-### Option D: Hybrid model
+```ts
+type PendingStoryStop = {
+  storyId: string;
+  direction: 1 | -1;
+  altitude: number;
+};
+```
 
 Behavior:
 
-- card stories trigger slowdown or optional snap
-- line stories are always logged in an encounter queue
-- dense regions collapse into a grouped summary instead of stopping on every single item
+- if a pending stop exists in the same direction and the rendered altitude has not reached it, keep `targetAltitudeRef.current` pinned to that stop
+- if the stop has been reached, clear it
+- if direction changes, clear it
 
-Pros:
+### Step 4: Continue With Existing Motion System
 
-- best balance between continuity and discoverability
+Keep the current smoothing motor.
 
-Cons:
+This plan does not require replacing `stepAltitudeMotor(...)`. The important change is to feed it smaller, story-safe targets rather than huge pace-scaled jumps that can outrun narrative content.
 
-- requires slightly more product design
+---
 
-### Recommended Choice
+## Why This Is Still A Hybrid Model
 
-Use a hybrid model.
+It is hybrid because it combines two behaviors:
 
-- Manual scroll: no special pace logic, same behavior always.
-- Assisted fast travel: detect crossed stories.
-- Card stories: optional adaptive slowdown or soft checkpointing.
-- Line stories: always capture in a crossed-story queue, because they are the easiest to miss.
-- Dense regions: collapse multiple crossed stories into a cluster summary instead of multiple hard stops.
+- fast paced scrolling in empty spaces
+- automatic story-safe stopping only when content would be skipped
+
+It does not force every movement to be slow, and it does not introduce a separate autopilot mode.
+
+This is the simplest version of hybrid behavior that still respects the existing UI.
 
 ---
 
 ## Proposed Refactor Direction
 
-### 1. Remove multiplier from wheel sensitivity
+### 1. Keep The Existing Info Area And Pace UI
 
-Refactor `useWheelAltitude` usage so wheel delta is not multiplied by the selected pace.
+Do not touch the Pixi info area or multiplier controls in `JourneyPixiTimeline.tsx`.
 
-Possible direction:
+The refactor should happen behind that UI, not by redesigning it.
 
-- keep a constant `MANUAL_SCROLL_DISTANCE_METERS`
-- use that for wheel and trackpad input regardless of selected pace
-- keep the current control value out of the wheel path entirely
+### 2. Add A Story Stop Resolver
 
-This is the single most important semantic change.
+Create a new domain utility, for example:
 
-### 2. Re-scope the current control
+- `app/features/timeline/domain/storyStops.ts`
 
-Replace the current multiplier meaning with one of these:
+Responsibilities:
 
-- assisted travel speed
-- rail drag inertia preset
-- keyboard hold speed
-- future autoplay speed
+- calculate direction-aware story checkpoints
+- find the nearest skipped story inside a paced jump
+- return a clamped target when needed
 
-If no assisted travel mode ships now, it is better to remove the control than to keep a misleading one.
+### 3. Add A Pending Stop Lock In The Route
 
-### 3. Add a crossed-story detector
+Implement the control logic in `app/routes/journey.$id.tsx`.
 
-Create a domain utility that answers:
+Why the route is the right place:
 
-- which stories were crossed between two altitude samples
-- which of those are cards versus lines
-- whether the crossed set is sparse or dense
+- it already owns `targetAltitudeRef`
+- it already handles wheel input through `useWheelAltitude`
+- it already receives `currentAltitude` back from Pixi via `onRenderedAltitudeChange`
 
-Suggested file:
+This means the new logic can be added without reworking the Pixi HUD.
 
-- `app/features/timeline/domain/crossedStories.ts`
+### 4. Keep `scrollMultiplier.ts` And `useWheelAltitude.ts`
 
-Inputs:
+No semantic rewrite is needed yet.
 
-- `previousAltitude`
-- `nextAltitude`
-- `stories`
+- `useWheelAltitude` still computes the paced proposal
+- the route intercepts that proposal before writing the final target
+- `scrollMultiplier.ts` can stay as the current pace source
 
-Outputs:
+### 5. Leave `recentPassedStories` Alone For The First Pass
 
-- `crossedStories`
-- `crossedCardStories`
-- `crossedLineStories`
-- maybe `clusters`
+The main fix should be stop-before-skip.
 
-### 4. Evolve the recent-stories model into an encounter model
-
-`recentStories.ts` is useful, but it currently answers a narrower question: "what stories are now behind the current altitude?"
-
-That is not enough for fast travel.
-
-A better model is:
-
-- `recentPassedStories`: derived from current altitude for passive UI
-- `crossedStories`: derived from the last movement segment for guaranteed encounter capture
-
-The recent tray can then be fed by crossed stories instead of only by final altitude state.
-
-### 5. Keep the motor, but only for presentation smoothing
-
-`stepAltitudeMotor(...)` is still valuable.
-
-The change is not "remove smoothing." The change is:
-
-- stop feeding it pace-inflated wheel jumps
-- use it for smooth rendering of normal input
-- if assisted travel is added later, give it explicit speed rules rather than overloading wheel pace
-
-### 6. Consider separate policies for cards and line stories
-
-Cards and lines are not equivalent.
-
-- cards are larger and can support soft slowdown or checkpoint behavior
-- line stories are subtle and should always be captured as encounters when crossed
-
-This difference should be explicit in the domain logic, not an accidental side effect of rendering.
+Only add encounter or crossed-story bookkeeping later if real usage shows that dense clusters still need additional fallback behavior.
 
 ---
 
 ## Suggested Refactor Phases
 
-### Phase 1: Semantic cleanup
+### Phase 1: Story Stop Resolver
 
-- remove pace from wheel scaling
-- keep wheel behavior constant
-- decide whether to rename or temporarily remove the current UI control
+- create a domain helper for nearest skipped story checkpoint
+- test upward scrolling, downward scrolling, short stories, and multiple stories inside one paced step
 
-### Phase 2: Crossed-story detection
+### Phase 2: Route-Side Pending Stop Lock
 
-- add segment-based crossed story detection
-- integrate it with the existing recent stories tray or modal
-- ensure short line stories are captured reliably
+- intercept `nextScaled` in `journey.$id.tsx`
+- clamp to the next story stop when needed
+- keep same-direction wheel input pinned until the rendered altitude reaches that stop
+- clear the lock on direction change
 
-### Phase 3: Assisted travel mode
+### Phase 3: Tuning Pass
 
-- introduce a separate assisted travel concept if still desired
-- pace affects only assisted movement
-- add slowdown or checkpoint behavior around crossed stories
+- verify whether `startPoint` and `getEffectiveStoryEndPoint(...)` are enough for both cards and lines
+- if line stories still feel too easy to miss, bias line stops slightly deeper into the active span
 
-### Phase 4: Density-aware handling
+### Phase 4: Optional Dense-Region Fallback
 
-- cluster multiple crossed stories in dense altitude bands
-- define whether the system slows once per cluster or simply logs them
+- only if necessary, add crossed-story bookkeeping or clustering for very dense line-story bands
+- this should be a later refinement, not part of the initial refactor
 
 ---
 
-## Open Product Questions
+## Open Questions
 
-These need product decisions before implementation details are finalized.
-
-1. Do we still want a pace control if there is no assisted travel mode yet?
-2. Should fast travel be explicit, such as a play or hold control, instead of implicit on wheel input?
-3. When a card story is crossed during assisted travel, should the system:
-   - slow down,
-   - snap briefly,
-   - or only log it?
-4. Should line stories ever interrupt movement, or should they always be passive encounters?
-5. In dense regions, do we want grouped summaries rather than one-by-one stops?
-6. Should the recent stories tray become the primary fallback for missed stories?
+1. Is `story.startPoint` the best upward stop altitude for line stories, or should line stories stop slightly deeper in their active span?
+2. What epsilon should count as "the stop has been reached" when releasing a pending lock?
+3. If multiple stories share the same checkpoint altitude, should one stop be enough for all of them? Probably yes.
+4. Should a pending stop clear immediately on reversed scrolling direction? Probably yes.
+5. Do we need dense-region clustering at all once stop-before-skip is in place, or only if real content proves it necessary?
 
 ---
 
 ## Recommended Next Step
 
-If we want the cleanest immediate improvement with minimal product risk:
+If we want the most direct implementation aligned with the current UI:
 
-1. Remove multiplier influence from wheel input.
-2. Keep the current smoothing motor.
-3. Re-label or temporarily hide the pace control.
-4. Add crossed-story detection as a domain utility.
-5. Feed crossed line stories into the recent stories UI first.
+1. Keep the current info area and pace control exactly as they are.
+2. Add a domain helper that resolves the next story-safe target for a paced jump.
+3. Add a route-side pending stop lock so a fast wheel cannot queue past the next stopped story.
+4. Validate upward and downward overjump cases, especially for short line stories.
 
-That gives us a much more honest manual scroll interaction immediately, while leaving room for a real pace or assisted-travel system later.
+This keeps the product simple: fast pace still exists, but it automatically stops at the next story instead of letting the user blow past it.

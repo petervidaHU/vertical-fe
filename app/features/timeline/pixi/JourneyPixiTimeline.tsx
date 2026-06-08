@@ -9,8 +9,9 @@ import {
   type BackgroundPatternConfig,
   type EpicBackgroundPatternPlacement,
 } from "./layout/epicBackgroundPattern";
+import { buildStableCardColumnAssignments } from "./layout/cardColumns";
 import { getCardPresentation, getLinePresentation } from "./layout/storyPresentation";
-import { smoothToward, stepAltitudeMotor } from "./motion/altitudeMotor";
+import { getAdaptiveAltitudeMotorOptions, smoothToward, stepAltitudeMotor } from "./motion/altitudeMotor";
 import {
   DEFAULT_SCROLL_MULTIPLIER,
   canDecreaseScrollMultiplier,
@@ -94,6 +95,7 @@ const EPIC_HEADER_WIDTH = 236;
 const EPIC_HEADER_HEIGHT = 86;
 const EPIC_PANEL_WIDTH = 420;
 const EPIC_PANEL_PADDING = 24;
+const EPIC_PANEL_ANIMATION_HALF_LIFE_MS = 180;
 const HUD_TOP_PADDING = 18;
 const TOOLTIP_IMAGE_MAX_WIDTH = 220;
 const TOOLTIP_IMAGE_MAX_HEIGHT = 110;
@@ -481,6 +483,7 @@ function buildCardStackLayouts(
     columnGap?: number;
     leftInset?: number;
     rightInset?: number;
+    columnAssignments?: Map<string, number>;
   },
 ): Map<string, CardStackLayout> {
   const layouts = new Map<string, CardStackLayout>();
@@ -491,6 +494,7 @@ function buildCardStackLayouts(
   const columnGap = options?.columnGap ?? CARD_COLUMN_GAP;
   const leftInset = options?.leftInset ?? CARD_SIDE_PADDING;
   const rightInset = options?.rightInset ?? CARD_SIDE_PADDING;
+  const columnAssignments = options?.columnAssignments;
 
   if (items.length === 0) {
     return layouts;
@@ -507,6 +511,44 @@ function buildCardStackLayouts(
       height: item.height ?? cardHeight,
     }))
     .sort((a, b) => a.preferredY - b.preferredY);
+
+  if (columnAssignments && columnAssignments.size > 0) {
+    const columnItemsByIndex = new Map<number, Array<{ id: string; preferredY: number; height: number }>>();
+
+    normalizedItems.forEach((item) => {
+      const columnIndex = columnAssignments.get(item.id) ?? 0;
+      const columnItems = columnItemsByIndex.get(columnIndex);
+
+      if (columnItems) {
+        columnItems.push(item);
+        return;
+      }
+
+      columnItemsByIndex.set(columnIndex, [item]);
+    });
+
+    [...columnItemsByIndex.entries()]
+      .sort(([leftColumnIndex], [rightColumnIndex]) => leftColumnIndex - rightColumnIndex)
+      .forEach(([columnIndex, columnItems]) => {
+        const columnYs = resolveStackedCardColumnYs(
+          columnItems.map((item) => ({ preferredY: item.preferredY, height: item.height })),
+          topDockY,
+          bottomDockY,
+          stackGap,
+        );
+        const x = leftInset + columnIndex * (cardWidth + columnGap);
+
+        columnItems.forEach((item, itemIndex) => {
+          layouts.set(item.id, {
+            x,
+            y: columnYs[itemIndex],
+          });
+        });
+      });
+
+    return layouts;
+  }
+
   const columns: Array<{
     items: Array<{ id: string; preferredY: number; height: number }>;
     lastPreferredBottom: number;
@@ -977,7 +1019,9 @@ export default function JourneyPixiTimeline({
     const epicPanelContainer = new Container();
     const epicPanelShadow = new Graphics();
     const epicPanelBackground = new Graphics();
+    const epicPanelContentMask = new Graphics();
     const epicPanelHeaderHitArea = new Graphics();
+    const epicPanelContent = new Container();
     const epicPanelTitle = new Text({
       text: "",
       style: {
@@ -1016,13 +1060,16 @@ export default function JourneyPixiTimeline({
       epicAccordionOpenRef.current = !epicAccordionOpenRef.current;
     });
     epicPanelBody.position.set(24, 86);
+    epicPanelContent.mask = epicPanelContentMask;
     epicPanelContainer.addChild(epicPanelShadow);
     epicPanelContainer.addChild(epicPanelBackground);
     epicPanelContainer.addChild(epicPanelHeaderHitArea);
-    epicPanelContainer.addChild(epicPanelTitle);
-    epicPanelContainer.addChild(epicPanelMeta);
-    epicPanelContainer.addChild(epicPanelChevron);
-    epicPanelContainer.addChild(epicPanelBody);
+    epicPanelContainer.addChild(epicPanelContentMask);
+    epicPanelContainer.addChild(epicPanelContent);
+    epicPanelContent.addChild(epicPanelTitle);
+    epicPanelContent.addChild(epicPanelMeta);
+    epicPanelContent.addChild(epicPanelChevron);
+    epicPanelContent.addChild(epicPanelBody);
 
     topInfoContainer.addChild(speedControlContainer);
     hudLayer.addChild(topInfoContainer);
@@ -1378,10 +1425,16 @@ export default function JourneyPixiTimeline({
     const renderFrame = (ticker?: { deltaMS?: number }) => {
       const lineOnly = viewMode === "line-only";
       const frameDeltaMs = Math.min(64, Math.max(0, ticker?.deltaMS ?? 16.66));
+      const adaptiveAltitudeMotorOptions = getAdaptiveAltitudeMotorOptions({
+        current: renderedAltitudeRef.current,
+        target: targetAltitudeRef.current,
+        deltaMs: frameDeltaMs,
+      });
       const currentAltitude = stepAltitudeMotor({
         current: renderedAltitudeRef.current,
         target: targetAltitudeRef.current,
         deltaMs: frameDeltaMs,
+        ...adaptiveAltitudeMotorOptions,
         maxAltitude: totalDistance,
       });
       renderedAltitudeRef.current = currentAltitude;
@@ -1543,7 +1596,7 @@ export default function JourneyPixiTimeline({
       const epicPanelProgress = smoothToward(
         epicAccordionProgressRef.current,
         epicAccordionOpenRef.current ? 1 : 0,
-        0.0065,
+        EPIC_PANEL_ANIMATION_HALF_LIFE_MS,
         frameDeltaMs,
       );
       epicAccordionProgressRef.current = epicPanelProgress;
@@ -1618,18 +1671,57 @@ export default function JourneyPixiTimeline({
       distanceEndLabelBg.clear();
       distanceMarkerLabelBg.clear();
 
-      const groundStops = buildPixiStops(parseStoredBackground(startGround, "#4b3726"), "#4b3726");
-      const groundWidth = rendererWidth;
-      const groundHeight = 10;
-      const groundX = 0;
+      const parsedGround = parseStoredBackground(startGround, "#4b3726");
+      const groundBaseColor = parseColor(primaryColorFromBackground(parsedGround), 0x4b3726);
+      const groundDeepColor = mixColorNumbers(groundBaseColor, 0x000000, 0.26);
+      const groundTopRimColor = mixColorNumbers(groundBaseColor, 0xffffff, 0.22);
       const groundY = rendererHeight - 42 + currentAltitude;
+      const groundCurveHeight = clampNumber(rendererHeight * 0.05, 18, 46);
+      const groundBottomY = rendererHeight + 24;
 
       startGroundGraphic.clear();
-      if (!lineOnly && groundY > -groundHeight && groundY < rendererHeight + groundHeight) {
-        startGroundGraphic.roundRect(groundX, groundY, groundWidth, groundHeight, 2);
-        startGroundGraphic.fill({ color: 0x1b1b1b, alpha: 0.8 });
-        drawGradientRect(startGroundGraphic, groundX, groundY, groundWidth, groundHeight, groundStops, 0.9, 64);
-        startGroundGraphic.stroke({ color: 0x2b2b2b, width: 1 });
+      if (!lineOnly && groundY < groundBottomY && groundY > -rendererHeight) {
+        // Main ground body: curved top edge and full fill to bottom of screen.
+        startGroundGraphic.moveTo(0, groundY);
+        startGroundGraphic.bezierCurveTo(
+          rendererWidth * 0.25,
+          groundY - groundCurveHeight,
+          rendererWidth * 0.75,
+          groundY - groundCurveHeight,
+          rendererWidth,
+          groundY,
+        );
+        startGroundGraphic.lineTo(rendererWidth, groundBottomY);
+        startGroundGraphic.lineTo(0, groundBottomY);
+        startGroundGraphic.closePath();
+        startGroundGraphic.fill({ color: groundBaseColor, alpha: 0.96 });
+
+        // Subtle depth layer to avoid flat look and suggest denser soil lower down.
+        startGroundGraphic.moveTo(0, groundY + 14);
+        startGroundGraphic.bezierCurveTo(
+          rendererWidth * 0.25,
+          groundY - groundCurveHeight + 14,
+          rendererWidth * 0.75,
+          groundY - groundCurveHeight + 14,
+          rendererWidth,
+          groundY + 14,
+        );
+        startGroundGraphic.lineTo(rendererWidth, groundBottomY);
+        startGroundGraphic.lineTo(0, groundBottomY);
+        startGroundGraphic.closePath();
+        startGroundGraphic.fill({ color: groundDeepColor, alpha: 0.28 });
+
+        // Highlight ridge where sky meets ground.
+        startGroundGraphic.moveTo(0, groundY);
+        startGroundGraphic.bezierCurveTo(
+          rendererWidth * 0.25,
+          groundY - groundCurveHeight,
+          rendererWidth * 0.75,
+          groundY - groundCurveHeight,
+          rendererWidth,
+          groundY,
+        );
+        startGroundGraphic.stroke({ color: groundTopRimColor, width: 2, alpha: 0.82 });
       }
 
       const epicPanelWidth = Math.min(EPIC_PANEL_WIDTH, Math.max(280, rendererWidth - EPIC_PANEL_PADDING * 2));
@@ -1644,6 +1736,16 @@ export default function JourneyPixiTimeline({
       const topDockY = uiTopBoundary + 14;
       const bottomDockY = rendererHeight - scaledCardHeight - 110;
       const offscreenDistance = scaledCardHeight + 28;
+      const stableCardColumnAssignments = buildStableCardColumnAssignments(
+        cardNodes.map(({ story }) => story),
+        rendererWidth,
+        {
+          cardWidth: scaledCardWidth,
+          columnGap: CARD_COLUMN_GAP,
+          leftInset: 86,
+          rightInset: reservedRightInset,
+        },
+      );
       const cardPresentations = new Map(
         cardNodes.map(({ story }) => [
           story.id,
@@ -1684,13 +1786,14 @@ export default function JourneyPixiTimeline({
           }))
           .filter(({ id }) => cardPresentations.get(id)?.visible),
         rendererWidth,
-        topDockY,
-        bottomDockY,
+        topDockY - offscreenDistance,
+        bottomDockY + offscreenDistance,
         {
           cardWidth: scaledCardWidth,
           cardHeight: scaledCardHeight,
           leftInset: 86,
           rightInset: reservedRightInset,
+          columnAssignments: stableCardColumnAssignments,
         },
       );
 
@@ -2037,16 +2140,19 @@ export default function JourneyPixiTimeline({
       if (lineOnly || !activeEpicForBackground) {
         epicPanelContainer.visible = false;
       } else {
-        const epicCurrentWidth = lerp(EPIC_HEADER_WIDTH, epicPanelWidth, epicPanelProgress);
-        const epicCurrentHeight = lerp(EPIC_HEADER_HEIGHT, epicPanelHeight, epicPanelProgress);
-        const epicPanelX = lerp(epicClosedX, epicOpenX, epicPanelProgress);
-        const epicBodyVisible = epicPanelProgress > 0.18;
-        const panelBodyAlpha = clamp01((epicPanelProgress - 0.08) / 0.92);
-        const panelBodyOffsetY = lerp(16, 0, epicPanelProgress);
+        const epicEasedProgress = smoothstep(epicPanelProgress);
+        const epicCurrentWidth = lerp(EPIC_HEADER_WIDTH, epicPanelWidth, epicEasedProgress);
+        const epicCurrentHeight = lerp(EPIC_HEADER_HEIGHT, epicPanelHeight, epicEasedProgress);
+        const epicPanelX = lerp(epicClosedX, epicOpenX, epicEasedProgress);
+        const panelHeaderAlpha = lerp(0.9, 1, epicEasedProgress);
+        const epicBodyVisible = epicEasedProgress > 0.42;
+        const panelBodyAlpha = clamp01((epicEasedProgress - 0.42) / 0.58);
+        const panelBodyOffsetY = lerp(28, 0, panelBodyAlpha);
 
         epicPanelContainer.visible = true;
-        epicPanelContainer.position.set(epicPanelX, EPIC_PANEL_PADDING);
-        epicPanelContainer.alpha = 0.92 + epicPanelProgress * 0.08;
+        epicPanelContainer.position.set(epicPanelX, EPIC_PANEL_PADDING + lerp(8, 0, epicEasedProgress));
+        epicPanelContainer.alpha = 0.86 + epicEasedProgress * 0.14;
+        epicPanelContainer.scale.set(lerp(0.97, 1, epicEasedProgress));
 
         fitTextToWidth(epicPanelTitle, activeEpicForBackground.title, Math.max(120, epicCurrentWidth - 72), 8);
         fitTextToWidth(
@@ -2059,11 +2165,14 @@ export default function JourneyPixiTimeline({
           x: 0,
           y: 0,
           size: 20,
-          progress: epicAccordionOpenRef.current ? 1 : 0,
+          progress: epicEasedProgress,
           color: 0x2a3846,
           alpha: 0.92,
           direction: "vertical",
         });
+        epicPanelTitle.alpha = panelHeaderAlpha;
+        epicPanelMeta.alpha = panelHeaderAlpha;
+        epicPanelChevron.alpha = panelHeaderAlpha;
         epicPanelBody.visible = epicBodyVisible;
         epicPanelBody.alpha = panelBodyAlpha;
         epicPanelBody.position.set(24, 86 + panelBodyOffsetY);
@@ -2085,6 +2194,10 @@ export default function JourneyPixiTimeline({
         epicPanelBackground.roundRect(0, 0, epicCurrentWidth, epicCurrentHeight, 28);
         epicPanelBackground.fill({ color: 0xfafaf8, alpha: 0.95 });
         epicPanelBackground.stroke({ color: 0xe0dbd5, width: 1, alpha: 0.6 });
+
+        epicPanelContentMask.clear();
+        epicPanelContentMask.roundRect(0, 0, epicCurrentWidth, epicCurrentHeight, 28);
+        epicPanelContentMask.fill({ color: 0xffffff, alpha: 1 });
 
         epicPanelHeaderHitArea.clear();
         epicPanelHeaderHitArea.roundRect(0, 0, epicCurrentWidth, Math.min(epicCurrentHeight, EPIC_HEADER_HEIGHT), 26);

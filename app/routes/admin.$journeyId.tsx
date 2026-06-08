@@ -228,7 +228,7 @@ const AdminJourneyLayoutRoute = () => {
                     startGround={journey.startingPoint}
                     epics={journey.epics}
                     stories={journey.stories}
-                    height={660}
+                    height={380}
                     getEpicHref={(currentEpicId) => `/admin/${journey.id}/epics/${currentEpicId}`}
                     getStoryHref={(currentStoryId) => `/admin/${journey.id}/stories/${currentStoryId}`}
                     selectedEpicId={epicId ?? null}

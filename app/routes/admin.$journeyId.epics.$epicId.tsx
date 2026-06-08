@@ -1,4 +1,5 @@
 import { Alert, Button, Checkbox, Divider, Group, NumberInput, Paper, Stack, Text, Textarea, TextInput } from "@mantine/core";
+import { useMemo, useState } from "react";
 import { Form, Link, useActionData, useOutletContext, useParams } from "react-router";
 import BackgroundField from "../features/admin/components/BackgroundField";
 import { EPIC_BACKGROUND_IMAGE_ACCEPT, EPIC_BACKGROUND_IMAGE_MAX_BYTES } from "../features/admin/domain/epicBackgroundImage.shared";
@@ -138,6 +139,9 @@ const AdminJourneyEpicEditorRoute = () => {
   const { journey } = useOutletContext<AdminJourneyOutletContext>();
   const { epicId } = useParams();
   const actionData = useActionData() as ActionData | undefined;
+  const [includeStoriesInEpicExport, setIncludeStoriesInEpicExport] = useState(true);
+  const [epicCopyState, setEpicCopyState] = useState<"idle" | "done" | "error">("idle");
+  const [epicPromptCopyState, setEpicPromptCopyState] = useState<"idle" | "done" | "error">("idle");
   const epic = journey.epics.find((item) => item.id === epicId);
   const overlappingStories = epic
     ? journey.stories.filter(
@@ -150,6 +154,58 @@ const AdminJourneyEpicEditorRoute = () => {
   }
 
   const patternConfig = normalizeBackgroundPatternConfig(epic.backgroundPatternConfig);
+  const epicExportJson = useMemo(() => JSON.stringify({
+    exportType: "epic-package",
+    generatedAt: new Date().toISOString(),
+    includeStories: includeStoriesInEpicExport,
+    journey: {
+      id: journey.id,
+      name: journey.name,
+      slug: journey.slug,
+      startingPoint: journey.startingPoint,
+    },
+    epic,
+    altitudeInfos: journey.altitudeInfos,
+    stories: includeStoriesInEpicExport ? overlappingStories : [],
+  }, null, 2), [epic, includeStoriesInEpicExport, journey.altitudeInfos, journey.id, journey.name, journey.slug, journey.startingPoint, overlappingStories]);
+  const epicExportHref = useMemo(
+    () => `data:application/json;charset=utf-8,${encodeURIComponent(epicExportJson)}`,
+    [epicExportJson],
+  );
+  const epicExplainPrompt = useMemo(() => [
+    "You are an expert journey-data analyst.",
+    "Explain this exported epic package in plain language for editors.",
+    "",
+    "Please cover:",
+    "1. What this epic represents in the journey.",
+    "2. The key properties of the epic (range, background, image/pattern choices).",
+    "3. How altitude info connects to this epic.",
+    "4. If stories are included, how they overlap and relate to the epic.",
+    "5. Any potential issues or inconsistencies.",
+    "",
+    "Export JSON:",
+    epicExportJson,
+  ].join("\n"), [epicExportJson]);
+  const handleCopyEpicJson = async () => {
+    try {
+      await navigator.clipboard.writeText(epicExportJson);
+      setEpicCopyState("done");
+      window.setTimeout(() => setEpicCopyState("idle"), 1600);
+    } catch {
+      setEpicCopyState("error");
+      window.setTimeout(() => setEpicCopyState("idle"), 2000);
+    }
+  };
+  const handleCopyEpicPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(epicExplainPrompt);
+      setEpicPromptCopyState("done");
+      window.setTimeout(() => setEpicPromptCopyState("idle"), 1600);
+    } catch {
+      setEpicPromptCopyState("error");
+      window.setTimeout(() => setEpicPromptCopyState("idle"), 2000);
+    }
+  };
 
   return (
     <AdminPage>
@@ -303,6 +359,36 @@ const AdminJourneyEpicEditorRoute = () => {
             </Group>
           </Stack>
         </Form>
+      </AdminSection>
+
+      <AdminSection
+        title="Export epic package JSON"
+        description="Download one JSON package with this epic and altitude info, with an option to include or exclude overlapping stories."
+      >
+        <Stack>
+          <Checkbox
+            checked={includeStoriesInEpicExport}
+            onChange={(event) => setIncludeStoriesInEpicExport(event.currentTarget.checked)}
+            label="Include overlapping stories in export"
+          />
+          <Group justify="flex-end" gap="xs">
+            <Button variant="default" onClick={handleCopyEpicJson}>
+              {epicCopyState === "done" ? "Copied" : epicCopyState === "error" ? "Copy failed" : "Copy JSON to clipboard"}
+            </Button>
+            <Button variant="default" onClick={handleCopyEpicPrompt}>
+              {epicPromptCopyState === "done" ? "Prompt copied" : epicPromptCopyState === "error" ? "Copy failed" : "Copy AI prompt"}
+            </Button>
+            <Button
+              component="a"
+              href={epicExportHref}
+              download={`${journey.slug}-${epic.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-package.json`}
+              variant="light"
+              color="teal"
+            >
+              Download epic JSON
+            </Button>
+          </Group>
+        </Stack>
       </AdminSection>
 
       {actionData?.success ? <Alert color="green">{actionData.success}</Alert> : null}

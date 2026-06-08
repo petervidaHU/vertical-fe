@@ -89,20 +89,6 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-function easeOutBack(value: number): number {
-  const t = clamp01(value);
-  const c1 = 1.70158;
-  const c3 = c1 + 1;
-  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-}
-
-function easeInBack(value: number): number {
-  const t = clamp01(value);
-  const c1 = 1.70158;
-  const c3 = c1 + 1;
-  return c3 * t * t * t - c1 * t * t;
-}
-
 function easeInOutCubic(value: number): number {
   const t = clamp01(value);
   if (t < 0.5) {
@@ -220,14 +206,12 @@ export function getCardPresentation({
   }
 
   if (motion.phase === "entering") {
-    const eased = easeOutBack(motion.progress);
-
     return {
       visible: true,
       phase: "entering",
-      y: lerp(offscreenTopY, topDockY, eased),
+      y: lerp(offscreenTopY, topDockY, easeInOutSine(motion.progress)),
       alpha: lerp(0, 0.96, easeInOutSine(motion.progress)),
-      rotation: lerp(-0.04, 0, easeInOutSine(motion.progress)),
+      rotation: 0,
       entryStart,
       activeEnd,
       exitEnd,
@@ -248,14 +232,12 @@ export function getCardPresentation({
   }
 
   if (motion.phase === "exiting") {
-    const eased = easeInBack(motion.progress);
-
     return {
       visible: true,
       phase: "exiting",
-      y: lerp(bottomDockY, offscreenBottomY, eased),
+      y: lerp(bottomDockY, offscreenBottomY, easeInOutSine(motion.progress)),
       alpha: lerp(0.96, 0, easeInOutSine(motion.progress)),
-      rotation: lerp(0, 0.028, easeInOutSine(motion.progress)),
+      rotation: 0,
       entryStart,
       activeEnd,
       exitEnd,
@@ -267,7 +249,7 @@ export function getCardPresentation({
     phase: "hidden-after",
     y: offscreenBottomY,
     alpha: 0,
-    rotation: 0.028,
+    rotation: 0,
     entryStart,
     activeEnd,
     exitEnd,

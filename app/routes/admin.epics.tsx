@@ -9,7 +9,7 @@ import {
   serializeBackground,
   tryParseBackgroundInput,
 } from "../shared/domain/background";
-import { Alert, Button, Divider, Group, NumberInput, Paper, SimpleGrid, Stack, Text, TextInput, Textarea } from "@mantine/core";
+import { Alert, Button, Checkbox, Divider, Group, NumberInput, Paper, SimpleGrid, Stack, Text, TextInput, Textarea } from "@mantine/core";
 import { useEffect, useMemo, useState } from "react";
 import { Form, Link, redirect, useActionData, useLoaderData } from "react-router";
 import { db } from "../server/db";
@@ -52,7 +52,7 @@ export async function loader({ request, params }: { request: Request; params: { 
   const journeys = await db.journey.findMany({ orderBy: { name: "asc" } });
   const selectedJourney = journeys.find((journey) => journey.id === journeyId) ?? null;
 
-  const [epics, stories] = selectedJourney
+  const [epics, stories, altitudeInfos] = selectedJourney
     ? await Promise.all([
         db.epic.findMany({
           where: { journeyId: selectedJourney.id },
@@ -62,14 +62,27 @@ export async function loader({ request, params }: { request: Request; params: { 
           where: { journeyId: selectedJourney.id },
           orderBy: { startPoint: "asc" },
         }),
+        db.altitudeInfo.findMany({
+          where: { journeyId: selectedJourney.id },
+          orderBy: [{ order: "asc" }, { title: "asc" }],
+          include: {
+            values: {
+              orderBy: { startPoint: "asc" },
+            },
+            tags: {
+              orderBy: { name: "asc" },
+            },
+          },
+        }),
       ])
-    : [[], []];
+    : [[], [], []];
 
   return {
     journeys,
     selectedJourney,
     epics,
     stories,
+    altitudeInfos,
     success: readSuccessMessage(request),
   };
 }
@@ -248,10 +261,13 @@ export async function action({ request, params }: { request: Request; params: { 
 }
 
 const AdminEpicsRoute = () => {
-  const { selectedJourney, epics, stories, success } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
+  const { selectedJourney, epics, stories, altitudeInfos, success } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
   const actionData = useActionData() as ActionData | undefined;
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [optimisticDeletedIds, setOptimisticDeletedIds] = useState<string[]>([]);
+  const [includeStoriesInAllEpicsExport, setIncludeStoriesInAllEpicsExport] = useState(true);
+  const [allEpicsCopyState, setAllEpicsCopyState] = useState<"idle" | "done" | "error">("idle");
+  const [allEpicsPromptCopyState, setAllEpicsPromptCopyState] = useState<"idle" | "done" | "error">("idle");
 
   useEffect(() => {
     if (actionData?.error) {
@@ -265,6 +281,60 @@ const AdminEpicsRoute = () => {
   );
   const epicsWithImages = epics.filter((epic) => Boolean(epic.backgroundImage)).length;
   const epicsWithPatternConfig = epics.filter((epic) => Boolean(epic.backgroundPatternConfig)).length;
+  const allEpicsExportJson = useMemo(() => JSON.stringify({
+    exportType: "all-epics-package",
+    generatedAt: new Date().toISOString(),
+    includeStories: includeStoriesInAllEpicsExport,
+    journey: {
+      id: selectedJourney?.id ?? null,
+      name: selectedJourney?.name ?? null,
+      slug: selectedJourney?.slug ?? null,
+      startingPoint: selectedJourney?.startingPoint ?? null,
+    },
+    epics,
+    altitudeInfos,
+    stories: includeStoriesInAllEpicsExport ? stories : [],
+  }, null, 2), [altitudeInfos, epics, includeStoriesInAllEpicsExport, selectedJourney?.id, selectedJourney?.name, selectedJourney?.slug, selectedJourney?.startingPoint, stories]);
+  const allEpicsExportHref = useMemo(
+    () => `data:application/json;charset=utf-8,${encodeURIComponent(allEpicsExportJson)}`,
+    [allEpicsExportJson],
+  );
+  const allEpicsExplainPrompt = useMemo(() => [
+    "You are an expert journey-data analyst.",
+    "Explain this exported epics package in plain language for editors.",
+    "",
+    "Please cover:",
+    "1. What this export contains overall.",
+    "2. What each epic means and its key properties (title, range, background choices).",
+    "3. How altitude info relates to the epics.",
+    "4. If stories are present, summarize how they map to epics.",
+    "5. Any obvious data quality checks or anomalies.",
+    "",
+    "Export JSON:",
+    allEpicsExportJson,
+  ].join("\n"), [allEpicsExportJson]);
+
+  const handleCopyAllEpicsJson = async () => {
+    try {
+      await navigator.clipboard.writeText(allEpicsExportJson);
+      setAllEpicsCopyState("done");
+      window.setTimeout(() => setAllEpicsCopyState("idle"), 1600);
+    } catch {
+      setAllEpicsCopyState("error");
+      window.setTimeout(() => setAllEpicsCopyState("idle"), 2000);
+    }
+  };
+
+  const handleCopyAllEpicsPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(allEpicsExplainPrompt);
+      setAllEpicsPromptCopyState("done");
+      window.setTimeout(() => setAllEpicsPromptCopyState("idle"), 1600);
+    } catch {
+      setAllEpicsPromptCopyState("error");
+      window.setTimeout(() => setAllEpicsPromptCopyState("idle"), 2000);
+    }
+  };
 
   return (
     <AdminPage>
@@ -285,6 +355,51 @@ const AdminEpicsRoute = () => {
         <AdminStatCard label="Patterned" value={epicsWithPatternConfig} description="Epics with explicit background scatter configuration." />
         <AdminStatCard label="Stories in journey" value={stories.length} description="Useful reference when checking overlaps against epics." />
       </AdminStatGrid>
+
+      <AdminSection
+        title="Journey settings"
+        description="Journey identity and ground styling are managed from overview."
+      >
+        <Group justify="space-between" align="center">
+          <Text size="sm" c="dimmed">
+            Open overview to edit name, slug, and journey start ground.
+          </Text>
+          <Button component={Link} to={`/admin/${selectedJourney?.id ?? ""}`} variant="light" color="teal">
+            Open journey settings
+          </Button>
+        </Group>
+      </AdminSection>
+
+      <AdminSection
+        title="Export all epics JSON"
+        description="Download one package containing all epics, plus altitude info and optionally stories."
+      >
+        <Stack>
+          <Checkbox
+            checked={includeStoriesInAllEpicsExport}
+            onChange={(event) => setIncludeStoriesInAllEpicsExport(event.currentTarget.checked)}
+            label="Include stories in export"
+          />
+          <Group justify="flex-end" gap="xs">
+            <Button variant="default" onClick={handleCopyAllEpicsJson}>
+              {allEpicsCopyState === "done" ? "Copied" : allEpicsCopyState === "error" ? "Copy failed" : "Copy JSON to clipboard"}
+            </Button>
+            <Button variant="default" onClick={handleCopyAllEpicsPrompt}>
+              {allEpicsPromptCopyState === "done" ? "Prompt copied" : allEpicsPromptCopyState === "error" ? "Copy failed" : "Copy AI prompt"}
+            </Button>
+            <Button
+              component="a"
+              href={allEpicsExportHref}
+              download={`${selectedJourney?.slug ?? "journey"}-all-epics${includeStoriesInAllEpicsExport ? "-with-stories" : ""}.json`}
+              variant="light"
+              color="teal"
+              disabled={!selectedJourney}
+            >
+              Download all epics JSON
+            </Button>
+          </Group>
+        </Stack>
+      </AdminSection>
 
       <AdminSection
         title="Existing epics"

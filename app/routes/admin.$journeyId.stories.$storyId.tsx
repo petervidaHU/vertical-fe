@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Checkbox, Group, Stack, Text, TextInput } from "@mantine/core";
+import { Alert, Badge, Button, Checkbox, Group, Stack, Text, TextInput, Textarea } from "@mantine/core";
 import { useEffect, useMemo, useState } from "react";
 import { Form, Link, useActionData, useOutletContext, useParams } from "react-router";
 import StoryExtraContentEditor from "../features/admin/components/StoryExtraContentEditor";
@@ -142,6 +142,7 @@ const AdminJourneyStoryEditorRoute = () => {
   const [selectedTags, setSelectedTags] = useState<TagLike[]>(() =>
     (story?.tags ?? []).map((tag) => ({ id: tag.id, name: tag.name })),
   );
+  const [storyPromptCopyState, setStoryPromptCopyState] = useState<"idle" | "done" | "error">("idle");
 
   const allTags: TagSuggestion[] = useMemo(
     () =>
@@ -151,6 +152,44 @@ const AdminJourneyStoryEditorRoute = () => {
       })),
     [journey.tags],
   );
+  const storyExportJson = useMemo(() => JSON.stringify({
+    exportType: "story",
+    generatedAt: new Date().toISOString(),
+    journey: {
+      id: journey.id,
+      name: journey.name,
+      slug: journey.slug,
+    },
+    story,
+  }, null, 2), [journey.id, journey.name, journey.slug, story]);
+  const storyExportHref = useMemo(
+    () => `data:application/json;charset=utf-8,${encodeURIComponent(storyExportJson)}`,
+    [storyExportJson],
+  );
+  const storyExplainPrompt = useMemo(() => [
+    "You are an expert journey-data analyst.",
+    "Explain this exported story in plain language for editors.",
+    "",
+    "Please cover:",
+    "1. What this story represents in the journey.",
+    "2. Its key properties (story type, altitude range, text/media fields, visual fields, tags).",
+    "3. If it is a LINE story, explain line-specific properties.",
+    "4. If it is a CARD story, explain card-specific implications.",
+    "5. Any potential data quality issues.",
+    "",
+    "Export JSON:",
+    storyExportJson,
+  ].join("\n"), [storyExportJson]);
+  const handleCopyStoryPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(storyExplainPrompt);
+      setStoryPromptCopyState("done");
+      window.setTimeout(() => setStoryPromptCopyState("idle"), 1600);
+    } catch {
+      setStoryPromptCopyState("error");
+      window.setTimeout(() => setStoryPromptCopyState("idle"), 2000);
+    }
+  };
 
   useEffect(() => {
     if (story) {
@@ -287,6 +326,36 @@ const AdminJourneyStoryEditorRoute = () => {
             </Group>
           </Stack>
         </Form>
+      </AdminSection>
+
+      <AdminSection
+        title="Export story JSON"
+        description="Download only this story as JSON for reuse, review, or AI-assisted editing workflows."
+      >
+        <Stack>
+          <Textarea
+            readOnly
+            value={storyExportJson}
+            autosize
+            minRows={8}
+            maxRows={20}
+            styles={{ input: { fontFamily: "monospace" } }}
+          />
+          <Group justify="flex-end" gap="xs">
+            <Button variant="default" onClick={handleCopyStoryPrompt}>
+              {storyPromptCopyState === "done" ? "Prompt copied" : storyPromptCopyState === "error" ? "Copy failed" : "Copy AI prompt"}
+            </Button>
+            <Button
+              component="a"
+              href={storyExportHref}
+              download={`${journey.slug}-${story.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.story.json`}
+              variant="light"
+              color="teal"
+            >
+              Download story JSON
+            </Button>
+          </Group>
+        </Stack>
       </AdminSection>
 
       {actionData?.success ? <Alert color="green">{actionData.success}</Alert> : null}

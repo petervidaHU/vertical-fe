@@ -2,6 +2,11 @@ import { startTransition, useCallback, useEffect, useMemo, useRef, useState } fr
 import { ActionIcon, Badge, Button, Group, Modal, Paper, ScrollArea, Stack, Text } from "@mantine/core";
 import { Link, useLoaderData, useSearchParams } from "react-router";
 import { getActiveAltitudeInfoItems } from "../features/altitude-info/domain/altitudeInfo";
+import {
+  hasReachedPendingStoryStop,
+  resolveNextStoryAwareTarget,
+  type PendingStoryStop,
+} from "../features/timeline/domain/storyStops";
 import AltitudeInfoIndicators from "../features/timeline/components/AltitudeInfoIndicators";
 import JourneyPixiTimelineClient from "../features/timeline/pixi/JourneyPixiTimelineClient";
 import { DEFAULT_SCROLL_MULTIPLIER, normalizeScrollMultiplier } from "../features/timeline/domain/scrollMultiplier";
@@ -16,140 +21,57 @@ import { TagFilterModal } from "../shared/components/tags/TagFilterModal";
 type JourneyPageData = Awaited<ReturnType<typeof loader>>;
 type JourneyStory = JourneyPageData["journey"]["stories"][number];
 
+const FAST_STOP_PACE_THRESHOLD = 10;
+const FAST_STOP_MIN_JUMP_DISTANCE = 800;
+
 function formatAltitude(altitude: number): string {
   if (altitude < 1000) return `${Math.round(altitude)} m`;
   return `${(altitude / 1000).toFixed(1)} km`;
 }
 
-function getStoryInitials(title: string): string {
-  return title
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("") || "ST";
-}
-
 function StoryDetailContent({ story }: { story: JourneyStory }) {
-  const storyInitials = getStoryInitials(story.title);
-
   return (
     <Stack gap="md">
-      <Paper
-        radius={36}
-        p="lg"
-        style={{
-          border: "1px solid rgba(196, 168, 128, 0.28)",
-          background: "linear-gradient(180deg, rgba(255, 250, 240, 0.98) 0%, rgba(246, 235, 210, 0.95) 100%)",
-          boxShadow: "0 26px 52px rgba(92, 65, 36, 0.16)",
-        }}
-      >
+      {story.imageUrl ? (
         <div
           style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: 20,
+            width: 180,
+            height: 180,
+            borderRadius: 12,
+            overflow: "hidden",
           }}
         >
-          <div
+          <img
+            src={story.imageUrl}
+            alt={story.title}
             style={{
-              flexShrink: 0,
-              width: 146,
-              display: "flex",
-              justifyContent: "center",
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
             }}
-          >
-            <div
-              style={{
-                width: 146,
-                height: 146,
-                borderRadius: 999,
-                overflow: "hidden",
-                border: "3px solid rgba(245, 250, 255, 0.98)",
-                boxShadow: "inset 0 0 0 2px rgba(179, 209, 233, 0.68), 0 18px 34px rgba(92, 65, 36, 0.14)",
-                background: "linear-gradient(180deg, rgba(223, 238, 248, 0.98) 0%, rgba(203, 224, 236, 0.94) 100%)",
-                display: "grid",
-                placeItems: "center",
-              }}
-            >
-              {story.imageUrl ? (
-                <img
-                  src={story.imageUrl}
-                  alt={story.title}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <span
-                  style={{
-                    color: "#6a7680",
-                    fontFamily: "Trebuchet MS, sans-serif",
-                    fontSize: 42,
-                    fontWeight: 700,
-                  }}
-                >
-                  {storyInitials}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div style={{ flex: "1 1 320px", minWidth: 0 }}>
-            <Stack gap={10}>
-              <Group justify="space-between" align="flex-start" wrap="wrap">
-                <Text fw={700} size="xl" c="dark" style={{ lineHeight: 1.05 }}>
-                  {story.title}
-                </Text>
-                <Badge
-                  variant="light"
-                  color={story.storyType === "LINE" ? "grape" : "teal"}
-                  style={{ alignSelf: "flex-start" }}
-                >
-                  {story.storyType === "LINE" ? "Line story" : "Card story"}
-                </Badge>
-              </Group>
-
-              <Text size="sm" c="dimmed" fw={600}>
-                {formatAltitude(story.startPoint)} - {formatAltitude(story.endPoint)}
-              </Text>
-
-              {story.storyType === "LINE" ? (
-                <Text size="xs" c="dimmed" fw={700}>
-                  Label: {story.lineLabel || story.title}
-                </Text>
-              ) : null}
-
-              <Text size="sm" c="dark" style={{ lineHeight: 1.65 }}>
-                {story.description || "No description added yet."}
-              </Text>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <div
-                  style={{
-                    width: 74,
-                    height: 2,
-                    borderRadius: 999,
-                    background: "rgba(95, 163, 197, 0.38)",
-                  }}
-                />
-                <Text size="sm" fw={700} c="dark">
-                  {formatAltitude(story.startPoint)} -&gt; {formatAltitude(story.endPoint)}
-                </Text>
-              </div>
-            </Stack>
-          </div>
+          />
         </div>
-      </Paper>
+      ) : null}
+
+      <Stack gap="xs">
+        <Text fw={700} size="lg" c="dark">
+          {story.title}
+        </Text>
+
+        <Text size="md" c="dimmed" fw={600}>
+          {formatAltitude(story.startPoint)} - {formatAltitude(story.endPoint)}
+        </Text>
+
+        {story.storyType === "LINE" ? (
+          <Text size="xs" c="dimmed" fw={700}>
+            Label: {story.lineLabel || story.title}
+          </Text>
+        ) : null}
+
+        <Text size="sm" c="dark" style={{ lineHeight: 1.65 }}>
+          {story.description || "No description added yet."}
+        </Text>
+      </Stack>
 
       {story.extraContent ? (
         <Paper
@@ -234,6 +156,8 @@ export default function JourneyPage() {
   const [wheelTarget, setWheelTarget] = useState<HTMLDivElement | null>(null);
   const [selectedEpicId, setSelectedEpicId] = useState<string | null>(null);
   const previousEpicIdRef = useRef<string | null>(null);
+  const renderedAltitudeRef = useRef(0);
+  const pendingStoryStopRef = useRef<PendingStoryStop | null>(null);
   const targetAltitudeRef = useRef(0);
 
   // Tag filtering
@@ -364,6 +288,12 @@ export default function JourneyPage() {
   }, []);
 
   const handleRenderedAltitudeChange = useCallback((altitude: number) => {
+    renderedAltitudeRef.current = altitude;
+
+    if (pendingStoryStopRef.current && hasReachedPendingStoryStop(pendingStoryStopRef.current, altitude)) {
+      pendingStoryStopRef.current = null;
+    }
+
     startTransition(() => {
       setCurrentAltitude((previousAltitude) => (previousAltitude === altitude ? previousAltitude : altitude));
     });
@@ -371,9 +301,30 @@ export default function JourneyPage() {
 
   const handleAltitudeChange = useCallback(
     ({ nextScaled }: { nextScaled: number }) => {
-      targetAltitudeRef.current = Math.max(0, Math.min(journeyMaxAltitude, nextScaled));
+      const currentAltitude = Math.max(0, Math.min(journeyMaxAltitude, renderedAltitudeRef.current));
+      const proposedTargetAltitude = Math.max(0, Math.min(journeyMaxAltitude, nextScaled));
+      const jumpDistance = Math.abs(proposedTargetAltitude - currentAltitude);
+      const shouldApplyStoryStopClamp = scrollMultiplier >= FAST_STOP_PACE_THRESHOLD
+        && jumpDistance >= FAST_STOP_MIN_JUMP_DISTANCE;
+
+      if (!shouldApplyStoryStopClamp) {
+        targetAltitudeRef.current = proposedTargetAltitude;
+        pendingStoryStopRef.current = null;
+        return;
+      }
+
+      const resolution = resolveNextStoryAwareTarget({
+        currentAltitude,
+        proposedTargetAltitude,
+        renderedAltitude: renderedAltitudeRef.current,
+        pendingStop: pendingStoryStopRef.current,
+        stories: filteredStories,
+      });
+
+      targetAltitudeRef.current = resolution.nextTargetAltitude;
+      pendingStoryStopRef.current = resolution.pendingStop;
     },
-    [journeyMaxAltitude],
+    [filteredStories, journeyMaxAltitude, scrollMultiplier],
   );
 
   const recentPassedStories = useMemo(
@@ -389,6 +340,18 @@ export default function JourneyPage() {
       setSelectedRecentStoryId(null);
     }
   }, [selectedRecentStory, selectedRecentStoryId]);
+
+  useEffect(() => {
+    const pendingStoryStop = pendingStoryStopRef.current;
+    if (!pendingStoryStop) {
+      return;
+    }
+
+    const storyStillAvailable = filteredStories.some((story) => story.id === pendingStoryStop.storyId);
+    if (!storyStillAvailable) {
+      pendingStoryStopRef.current = null;
+    }
+  }, [filteredStories]);
 
   // Detect when entering a new epic and show modal
   useEffect(() => {
@@ -418,8 +381,8 @@ export default function JourneyPage() {
 
   useWheelAltitude({
     pace: scrollMultiplier,
-    scaledValueRef: targetAltitudeRef,
-    naturalValueRef: targetAltitudeRef,
+    scaledValueRef: renderedAltitudeRef,
+    naturalValueRef: renderedAltitudeRef,
     onChange: handleAltitudeChange,
     enabled: wheelTarget !== null,
     target: wheelTarget,
@@ -490,9 +453,34 @@ export default function JourneyPage() {
       <Modal
         opened={selectedStory !== null}
         onClose={() => setSelectedStoryId(null)}
-        title={selectedStory?.title ?? "Story details"}
         size="lg"
         centered
+        styles={{
+          header: {
+            padding: 0,
+            marginBottom: 0,
+            minHeight: 0,
+            height: 0,
+            overflow: "visible",
+          },
+          body: {
+            padding: "20px",
+          },
+          close: {
+            border: "none",
+            outline: "none",
+            position: "absolute",
+            top: 12,
+            right: 12,
+            "&:focus": {
+              outline: "none",
+              boxShadow: "none",
+            },
+            "&:focus-visible": {
+              outline: "none",
+            },
+          },
+        }}
       >
         {selectedStory ? <StoryDetailContent story={selectedStory} /> : null}
       </Modal>
