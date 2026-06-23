@@ -1,0 +1,17 @@
+{
+  "skills": {
+    "pixijs": {
+      "source": "github:pixijs/pixijs-skills"
+    }
+  },
+  "mcpServers": {
+    "mantine": {
+      "command": "npx",
+      "args": ["-y", "@mantine/mcp-server"]
+    }
+  },
+  "customAgents": {
+    "file": ".claude/agents.json",
+    "description": "Project-specific agent personas. Invoke by name: e.g., 'help me debug this with debug-mode' or 'review with accessibility-agent'"
+  }
+}
