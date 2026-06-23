@@ -3,26 +3,32 @@ import { resolveAltitudeInfoIconSymbol, type ActiveAltitudeInfoItem } from "../.
 
 type AltitudeInfoIndicatorsProps = {
   items: ActiveAltitudeInfoItem[];
+  placement?: "top-center" | "below-epic";
 };
 
-const AltitudeInfoIndicators = ({ items }: AltitudeInfoIndicatorsProps) => {
+const AltitudeInfoIndicators = ({ items, placement = "top-center" }: AltitudeInfoIndicatorsProps) => {
   if (items.length === 0) {
     return null;
   }
+
+  const isBelowEpicPlacement = placement === "below-epic";
 
   return (
     <div
       style={{
         position: "fixed",
-        top: 18,
-        left: "50%",
-        transform: "translateX(-50%)",
+        top: isBelowEpicPlacement ? 124 : 18,
+        left: isBelowEpicPlacement ? "auto" : "50%",
+        right: isBelowEpicPlacement ? 16 : "auto",
+        transform: isBelowEpicPlacement ? "none" : "translateX(-50%)",
         zIndex: 1000,
         display: "flex",
+        flexDirection: isBelowEpicPlacement ? "column" : "row",
         gap: 10,
-        flexWrap: "wrap",
-        justifyContent: "center",
-        width: "min(92vw, 760px)",
+        flexWrap: isBelowEpicPlacement ? "nowrap" : "wrap",
+        justifyContent: isBelowEpicPlacement ? "flex-start" : "center",
+        alignItems: isBelowEpicPlacement ? "flex-end" : "stretch",
+        width: isBelowEpicPlacement ? "min(360px, 42vw)" : "min(92vw, 760px)",
         pointerEvents: "none",
       }}
     >

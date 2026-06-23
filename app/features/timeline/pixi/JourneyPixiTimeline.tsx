@@ -55,9 +55,12 @@ type JourneyPixiTimelineProps = {
   stories: StoryItem[];
   startGround: string;
   targetAltitudeRef: MutableRefObject<number>;
+  journeyTitle?: string;
   scrollMultiplier?: number;
   viewMode?: "full" | "line-only";
   onStoryCardClick?: (story: StoryItem) => void;
+  onBackToJourneys?: () => void;
+  onShareJourney?: () => void;
   onScrollMultiplierChange?: (nextMultiplier: number) => void;
   onRenderedAltitudeChange?: (altitude: number) => void;
 };
@@ -94,9 +97,10 @@ const CARD_PADDING_BOTTOM = 12;
 const EPIC_HEADER_WIDTH = 236;
 const EPIC_HEADER_HEIGHT = 86;
 const EPIC_PANEL_WIDTH = 420;
-const EPIC_PANEL_PADDING = 24;
+const EPIC_PANEL_PADDING = 16;
 const EPIC_PANEL_ANIMATION_HALF_LIFE_MS = 180;
-const HUD_TOP_PADDING = 18;
+const TOP_INFO_ANIMATION_HALF_LIFE_MS = 130;
+const HUD_TOP_PADDING = 16;
 const TOOLTIP_IMAGE_MAX_WIDTH = 220;
 const TOOLTIP_IMAGE_MAX_HEIGHT = 110;
 
@@ -791,9 +795,12 @@ export default function JourneyPixiTimeline({
   stories,
   startGround,
   targetAltitudeRef,
+  journeyTitle,
   scrollMultiplier = DEFAULT_SCROLL_MULTIPLIER,
   viewMode = "full",
   onStoryCardClick,
+  onBackToJourneys,
+  onShareJourney,
   onScrollMultiplierChange,
   onRenderedAltitudeChange,
 }: JourneyPixiTimelineProps) {
@@ -804,8 +811,12 @@ export default function JourneyPixiTimeline({
   const reportedAltitudeRef = useRef(Math.round(targetAltitudeRef.current));
   const scrollMultiplierRef = useRef(scrollMultiplier);
   const onScrollMultiplierChangeRef = useRef(onScrollMultiplierChange);
+  const onBackToJourneysRef = useRef(onBackToJourneys);
+  const onShareJourneyRef = useRef(onShareJourney);
   const epicAccordionOpenRef = useRef(false);
   const epicAccordionProgressRef = useRef(0);
+  const topInfoExpandedRef = useRef(false);
+  const topInfoProgressRef = useRef(0);
 
   useEffect(() => {
     scrollMultiplierRef.current = scrollMultiplier;
@@ -814,6 +825,14 @@ export default function JourneyPixiTimeline({
   useEffect(() => {
     onScrollMultiplierChangeRef.current = onScrollMultiplierChange;
   }, [onScrollMultiplierChange]);
+
+  useEffect(() => {
+    onBackToJourneysRef.current = onBackToJourneys;
+  }, [onBackToJourneys]);
+
+  useEffect(() => {
+    onShareJourneyRef.current = onShareJourney;
+  }, [onShareJourney]);
 
   const totalDistance = useMemo(() => {
     const storyMax = stories.reduce((max, item) => Math.max(max, item.endPoint), 0);
@@ -859,6 +878,58 @@ export default function JourneyPixiTimeline({
     const topInfoShadow = new Graphics();
     const topInfoBackground = new Graphics();
     const topInfoHighlight = new Graphics();
+    const topInfoChevron = new Graphics();
+    const topInfoChevronHitArea = new Graphics();
+    const topInfoExpandedMenu = new Container();
+    const topInfoJourneyLabel = new Text({
+      text: "Journey",
+      style: {
+        fill: 0x74869a,
+        fontFamily: BODY_FONT,
+        fontSize: 11,
+        fontWeight: "700",
+      },
+    });
+    const topInfoJourneyTitle = new Text({
+      text: "",
+      style: {
+        fill: 0x1f3040,
+        fontFamily: DISPLAY_FONT,
+        fontSize: 20,
+        fontWeight: "700",
+      },
+    });
+    const topInfoJourneyCounts = new Text({
+      text: "",
+      style: {
+        fill: 0x516173,
+        fontFamily: BODY_FONT,
+        fontSize: 12,
+        fontWeight: "700",
+      },
+    });
+    const topInfoBackButton = new Container();
+    const topInfoBackButtonBg = new Graphics();
+    const topInfoBackButtonLabel = new Text({
+      text: "Back to journeys",
+      style: {
+        fill: 0x2e3f50,
+        fontFamily: BODY_FONT,
+        fontSize: 11,
+        fontWeight: "700",
+      },
+    });
+    const topInfoShareButton = new Container();
+    const topInfoShareButtonBg = new Graphics();
+    const topInfoShareButtonLabel = new Text({
+      text: "Share",
+      style: {
+        fill: 0x2e3f50,
+        fontFamily: BODY_FONT,
+        fontSize: 11,
+        fontWeight: "700",
+      },
+    });
     const topInfoMeta = new Text({
       text: "/ 0 m",
       style: {
@@ -882,6 +953,38 @@ export default function JourneyPixiTimeline({
     topInfoContainer.addChild(topInfoHighlight);
     topInfoContainer.addChild(topInfoMeta);
     topInfoContainer.addChild(topInfoValue);
+    topInfoContainer.addChild(topInfoChevron);
+    topInfoContainer.addChild(topInfoChevronHitArea);
+    topInfoContainer.addChild(topInfoExpandedMenu);
+
+    topInfoExpandedMenu.addChild(topInfoJourneyTitle);
+    topInfoExpandedMenu.addChild(topInfoJourneyCounts);
+    topInfoExpandedMenu.addChild(topInfoBackButton);
+    topInfoExpandedMenu.addChild(topInfoShareButton);
+
+    topInfoBackButton.addChild(topInfoBackButtonBg);
+    topInfoBackButton.addChild(topInfoBackButtonLabel);
+    topInfoShareButton.addChild(topInfoShareButtonBg);
+    topInfoShareButton.addChild(topInfoShareButtonLabel);
+
+    topInfoChevronHitArea.eventMode = "static";
+    topInfoChevronHitArea.cursor = "pointer";
+    topInfoChevronHitArea.on("pointertap", (event) => {
+      event.stopPropagation();
+      topInfoExpandedRef.current = !topInfoExpandedRef.current;
+    });
+
+    topInfoBackButton.eventMode = "static";
+    topInfoBackButton.cursor = "pointer";
+    topInfoBackButton.on("pointertap", () => {
+      onBackToJourneysRef.current?.();
+    });
+
+    topInfoShareButton.eventMode = "static";
+    topInfoShareButton.cursor = "pointer";
+    topInfoShareButton.on("pointertap", () => {
+      onShareJourneyRef.current?.();
+    });
 
     const speedControlContainer = new Container();
     const speedBackground = new Graphics();
@@ -1517,11 +1620,25 @@ export default function JourneyPixiTimeline({
       topInfoMeta.text = `/ ${formatAltitude(totalDistance)}`;
 
       const speedWidth = Math.max(152, speedValue.width + 96);
-      const topInfoWidth = clampNumber(
+      const topInfoMinWidth = clampNumber(
         Math.max(220, topInfoValue.width + 40, speedWidth + 40),
         220,
         Math.min(320, rendererWidth - 32),
       );
+      const previewEpicClosedX = Math.max(EPIC_PANEL_PADDING, rendererWidth - EPIC_PANEL_PADDING - EPIC_HEADER_WIDTH);
+      const topInfoExpandedWidth = clampNumber(
+        previewEpicClosedX - 16 - 16,
+        topInfoMinWidth,
+        Math.max(topInfoMinWidth, rendererWidth - 32),
+      );
+      const topInfoProgress = smoothToward(
+        topInfoProgressRef.current,
+        topInfoExpandedRef.current ? 1 : 0,
+        TOP_INFO_ANIMATION_HALF_LIFE_MS,
+        frameDeltaMs,
+      );
+      topInfoProgressRef.current = topInfoProgress;
+      const topInfoWidth = lerp(topInfoMinWidth, topInfoExpandedWidth, smoothstep(topInfoProgress));
       const topInfoHeight = 112;
       const topInfoX = 16;
       const topInfoY = HUD_TOP_PADDING;
@@ -1530,6 +1647,21 @@ export default function JourneyPixiTimeline({
       topInfoContainer.position.set(topInfoX, topInfoY);
       topInfoValue.position.set(20, 12);
       topInfoMeta.position.set(22, 52);
+
+      const topInfoChevronCenterX = topInfoWidth - 20;
+      const topInfoChevronCenterY = 22;
+      topInfoChevronHitArea.clear();
+      topInfoChevronHitArea.roundRect(topInfoWidth - 36, 6, 28, 28, 14);
+      topInfoChevronHitArea.fill({ color: 0xffffff, alpha: 0.001 });
+      drawChevronIcon(topInfoChevron, {
+        x: topInfoChevronCenterX - 8,
+        y: topInfoChevronCenterY - 8,
+        size: 16,
+        progress: 1 - smoothstep(topInfoProgress),
+        color: 0x5f7389,
+        alpha: 0.86,
+        direction: "horizontal",
+      });
 
       topInfoShadow.clear();
       topInfoShadow.roundRect(8, 10, topInfoWidth, topInfoHeight, 28);
@@ -1544,19 +1676,64 @@ export default function JourneyPixiTimeline({
       topInfoHighlight.roundRect(4, 4, topInfoWidth - 8, 46, 24);
       topInfoHighlight.fill({ color: 0xffffff, alpha: 0.18 });
 
+      const expandedMenuAlpha = smoothstep(topInfoProgress);
+      const expandedMenuMargin = 16;
+      const expandedMenuPaddingLeft = topInfoMinWidth + 18;
+      const expandedMenuAvailableWidth = Math.max(130, topInfoWidth - expandedMenuPaddingLeft - expandedMenuMargin);
+
+      topInfoExpandedMenu.visible = expandedMenuAlpha > 0.02;
+      topInfoExpandedMenu.alpha = expandedMenuAlpha;
+      topInfoExpandedMenu.position.set(expandedMenuPaddingLeft, expandedMenuMargin);
+
+      fitTextToWidth(
+        topInfoJourneyTitle,
+        journeyTitle || "Untitled journey",
+        expandedMenuAvailableWidth,
+        18,
+      );
+      topInfoJourneyTitle.position.set(0, 0);
+      topInfoJourneyCounts.text = `Epics: ${epics.length}   Stories: ${stories.length}`;
+      topInfoJourneyCounts.position.set(0, 24);
+
+      const menuButtonsY = 48;
+      const menuButtonGap = 8;
+      const menuButtonWidth = clampNumber((expandedMenuAvailableWidth - menuButtonGap) / 2, 84, 160);
+      const menuButtonHeight = 30;
+
+      topInfoBackButton.position.set(0, menuButtonsY);
+      topInfoBackButtonBg.clear();
+      topInfoBackButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
+      topInfoBackButtonBg.fill({ color: 0xf9edd6, alpha: 0.96 });
+      topInfoBackButtonBg.stroke({ color: 0xe6cfaa, width: 1.25, alpha: 0.94 });
+      fitTextToWidth(topInfoBackButtonLabel, "Back to journeys", menuButtonWidth - 20, 8);
+      topInfoBackButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoBackButtonLabel.width) / 2), 8);
+
+      topInfoShareButton.position.set(menuButtonWidth + menuButtonGap, menuButtonsY);
+      topInfoShareButtonBg.clear();
+      topInfoShareButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
+      topInfoShareButtonBg.fill({ color: 0xebf3ff, alpha: 0.96 });
+      topInfoShareButtonBg.stroke({ color: 0xd0e0f5, width: 1.25, alpha: 0.94 });
+      fitTextToWidth(topInfoShareButtonLabel, "Share", menuButtonWidth - 20, 5);
+      topInfoShareButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoShareButtonLabel.width) / 2), 8);
+
+      const menuButtonsEnabled = expandedMenuAlpha > 0.75;
+      topInfoBackButton.eventMode = menuButtonsEnabled ? "static" : "none";
+      topInfoBackButton.cursor = menuButtonsEnabled ? "pointer" : "default";
+      topInfoShareButton.eventMode = menuButtonsEnabled ? "static" : "none";
+      topInfoShareButton.cursor = menuButtonsEnabled ? "pointer" : "default";
+
       const speedHeight = 32;
       const canDecreaseSpeed = canDecreaseScrollMultiplier(scrollMultiplierRef.current);
       const canIncreaseSpeed = canIncreaseScrollMultiplier(scrollMultiplierRef.current);
 
       speedControlContainer.visible = !lineOnly;
-      speedControlContainer.position.set((topInfoWidth - speedWidth) / 2, 72);
+      speedControlContainer.position.set(20, 72);
       speedValue.text = formatScrollMultiplierValue(scrollMultiplierRef.current);
-      speedValue.position.set((speedWidth - speedValue.width) / 2, 4);
+      speedValue.position.set(34, 4);
 
       speedBackground.clear();
-      speedBackground.roundRect(0, 0, speedWidth, speedHeight, 16);
-      speedBackground.fill({ color: 0xebf2f9, alpha: 0.94 });
-      speedBackground.stroke({ color: 0xffffff, width: 1.5, alpha: 0.72 });
+      speedBackground.rect(0, 0, 1, 1);
+      speedBackground.fill({ color: 0xffffff, alpha: 0 });
 
       speedDecreaseButton.alpha = canDecreaseSpeed ? 1 : 0.45;
       speedDecreaseButton.cursor = canDecreaseSpeed ? "pointer" : "default";
@@ -1577,7 +1754,7 @@ export default function JourneyPixiTimeline({
 
       speedIncreaseButton.alpha = canIncreaseSpeed ? 1 : 0.45;
       speedIncreaseButton.cursor = canIncreaseSpeed ? "pointer" : "default";
-      speedIncreaseButton.position.set(speedWidth - 28, 6);
+      speedIncreaseButton.position.set(98, 6);
       speedIncreaseBg.clear();
       speedIncreaseBg.circle(10, 10, 10);
       speedIncreaseBg.fill({ color: canIncreaseSpeed ? 0xfbf4e6 : 0xf1f4f7, alpha: 1 });
@@ -2150,7 +2327,7 @@ export default function JourneyPixiTimeline({
         const panelBodyOffsetY = lerp(28, 0, panelBodyAlpha);
 
         epicPanelContainer.visible = true;
-        epicPanelContainer.position.set(epicPanelX, EPIC_PANEL_PADDING + lerp(8, 0, epicEasedProgress));
+        epicPanelContainer.position.set(epicPanelX, EPIC_PANEL_PADDING);
         epicPanelContainer.alpha = 0.86 + epicEasedProgress * 0.14;
         epicPanelContainer.scale.set(lerp(0.97, 1, epicEasedProgress));
 

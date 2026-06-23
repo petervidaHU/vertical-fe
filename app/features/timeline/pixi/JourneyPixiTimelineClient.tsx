@@ -35,9 +35,12 @@ type JourneyPixiTimelineProps = {
   stories: StoryItem[];
   startGround: string;
   targetAltitudeRef: MutableRefObject<number>;
+  journeyTitle?: string;
   scrollMultiplier?: number;
   viewMode?: "full" | "line-only";
   onStoryCardClick?: (story: StoryItem) => void;
+  onBackToJourneys?: () => void;
+  onShareJourney?: () => void;
   onScrollMultiplierChange?: (nextMultiplier: number) => void;
   onRenderedAltitudeChange?: (altitude: number) => void;
 };

@@ -10,5 +10,5 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true
   },
-  "include": ["app", "react-router.config.ts", "vite.config.ts", "webpack.config.js"]
+  "include": ["app", "react-router.config.ts", "vite.config.ts"]
 }

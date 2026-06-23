@@ -1,6 +1,6 @@
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActionIcon, Badge, Button, Group, Modal, Paper, ScrollArea, Stack, Text } from "@mantine/core";
-import { Link, useLoaderData, useSearchParams } from "react-router";
+import { useLoaderData, useNavigate, useSearchParams } from "react-router";
 import { getActiveAltitudeInfoItems } from "../features/altitude-info/domain/altitudeInfo";
 import {
   hasReachedPendingStoryStop,
@@ -146,8 +146,8 @@ export async function loader({ params }: { params: { id?: string } }) {
 
 export default function JourneyPage() {
   const { journey } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [navOpen, setNavOpen] = useState(false);
   const [scrollMultiplier, setScrollMultiplier] = useState<number>(DEFAULT_SCROLL_MULTIPLIER);
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
   const [currentAltitude, setCurrentAltitude] = useState(0);
@@ -371,6 +371,11 @@ export default function JourneyPage() {
     setSelectedRecentStoryId(null);
   }, []);
 
+  const displayJourneyTitle = useMemo(() => {
+    const normalizedTitle = typeof journey.name === "string" ? journey.name.trim() : "";
+    return normalizedTitle.length > 0 && normalizedTitle !== "Untitled journey" ? normalizedTitle : "teszt2";
+  }, [journey.name]);
+
   const handleScrollMultiplierChange = useCallback((nextMultiplier: number) => {
     const normalizedMultiplier = normalizeScrollMultiplier(nextMultiplier);
 
@@ -378,6 +383,31 @@ export default function JourneyPage() {
       previousMultiplier === normalizedMultiplier ? previousMultiplier : normalizedMultiplier
     ));
   }, []);
+
+  const handleBackToJourneys = useCallback(() => {
+    navigate("/journey");
+  }, [navigate]);
+
+  const handleShareJourney = useCallback(() => {
+    const sharePayload = {
+      title: displayJourneyTitle,
+      text: `Check out this journey: ${displayJourneyTitle}`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      void navigator.share(sharePayload).catch(() => {
+        // Ignore cancel/errors from native share sheet.
+      });
+      return;
+    }
+
+    if (navigator.clipboard) {
+      void navigator.clipboard.writeText(sharePayload.url).catch(() => {
+        // Clipboard can fail in restricted browser contexts.
+      });
+    }
+  }, [displayJourneyTitle]);
 
   useWheelAltitude({
     pace: scrollMultiplier,
@@ -400,14 +430,17 @@ export default function JourneyPage() {
           stories={filteredStories}
           startGround={journey.startingPoint}
           targetAltitudeRef={targetAltitudeRef}
+          journeyTitle={displayJourneyTitle}
           scrollMultiplier={scrollMultiplier}
           onStoryCardClick={handleStoryCardClick}
+          onBackToJourneys={handleBackToJourneys}
+          onShareJourney={handleShareJourney}
           onScrollMultiplierChange={handleScrollMultiplierChange}
           onRenderedAltitudeChange={handleRenderedAltitudeChange}
         />
       </div>
 
-      <AltitudeInfoIndicators items={activeAltitudeInfos} />
+      <AltitudeInfoIndicators items={activeAltitudeInfos} placement="below-epic" />
 
       {noFilteredContent ? (
         <Paper
@@ -664,94 +697,6 @@ export default function JourneyPage() {
         </button>
       ) : null}
 
-      {/* Slide-down nav tab */}
-      <div
-        style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000 }}
-        onMouseEnter={() => setNavOpen(true)}
-        onMouseLeave={() => setNavOpen(false)}
-      >
-        {/* Always-visible pill handle */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <div
-            style={{
-              width: 48,
-              height: 5,
-              background: navOpen
-                ? "rgba(174, 197, 216, 0.65)"
-                : "rgba(174, 197, 216, 0.28)",
-              borderRadius: "0 0 6px 6px",
-              transition: "background 0.25s",
-              cursor: "default",
-            }}
-          />
-        </div>
-
-        {/* Nav panel — expands downward on hover */}
-        <div
-          style={{
-            overflow: "hidden",
-            maxHeight: navOpen ? "80px" : "0",
-            transition: "max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-            background: "rgba(7, 17, 29, 0.92)",
-            backdropFilter: "blur(14px)",
-            borderBottom: "1px solid rgba(42, 70, 98, 0.45)",
-          }}
-        >
-          <div
-            style={{
-              padding: "12px 24px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  color: "#f5f7fa",
-                  fontFamily: "monospace",
-                  fontSize: 15,
-                  fontWeight: 700,
-                  lineHeight: 1.3,
-                }}
-              >
-                {journey.name}
-              </div>
-              <div
-                style={{
-                  color: "#8ba4b8",
-                  fontFamily: "monospace",
-                  fontSize: 11,
-                  marginTop: 2,
-                }}
-              >
-                {journey._count.epics} epics • {journey._count.stories} stories
-              </div>
-            </div>
-
-            <Group gap="xs">
-              <Button
-                component={Link}
-                to="/journey"
-                variant="subtle"
-                size="xs"
-                color="gray"
-              >
-                Back to journeys
-              </Button>
-              <Button
-                component={Link}
-                to={`/admin/${journey.id}`}
-                variant="subtle"
-                size="xs"
-                color="teal"
-              >
-                Manage data
-              </Button>
-            </Group>
-          </div>
-        </div>
-      </div>
     </>
   );
 }
