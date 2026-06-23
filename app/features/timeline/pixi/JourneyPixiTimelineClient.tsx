@@ -43,6 +43,7 @@ type JourneyPixiTimelineProps = {
   onShareJourney?: () => void;
   onScrollMultiplierChange?: (nextMultiplier: number) => void;
   onRenderedAltitudeChange?: (altitude: number) => void;
+  onEpicPanelOpenChange?: (open: boolean) => void;
 };
 
 type JourneyPixiTimelineComponent = (props: JourneyPixiTimelineProps) => JSX.Element;

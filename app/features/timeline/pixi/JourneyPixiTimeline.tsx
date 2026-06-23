@@ -63,6 +63,7 @@ type JourneyPixiTimelineProps = {
   onShareJourney?: () => void;
   onScrollMultiplierChange?: (nextMultiplier: number) => void;
   onRenderedAltitudeChange?: (altitude: number) => void;
+  onEpicPanelOpenChange?: (open: boolean) => void;
 };
 
 const DISPLAY_FONT = "Trebuchet MS";
@@ -763,8 +764,6 @@ function buildEpicPanelHtml(epic: EpicVisual, stories: StoryVisual[]): string {
 
   return [
     '<div style="line-height:1.55;">',
-    `<p><strong>${escapeHtml(epic.title)}</strong></p>`,
-    `<p><strong>Altitude band</strong><br/>${escapeHtml(formatAltitude(epic.startPoint))} to ${escapeHtml(formatAltitude(epic.endPoint))}</p>`,
     epic.description ? `<p>${escapeHtml(epic.description)}</p>` : "",
     "<p><strong>Highlights</strong></p>",
     highlightMarkup,
@@ -803,6 +802,7 @@ export default function JourneyPixiTimeline({
   onShareJourney,
   onScrollMultiplierChange,
   onRenderedAltitudeChange,
+  onEpicPanelOpenChange,
 }: JourneyPixiTimelineProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const appRef = useRef<Application | null>(null);
@@ -813,8 +813,12 @@ export default function JourneyPixiTimeline({
   const onScrollMultiplierChangeRef = useRef(onScrollMultiplierChange);
   const onBackToJourneysRef = useRef(onBackToJourneys);
   const onShareJourneyRef = useRef(onShareJourney);
+  const onEpicPanelOpenChangeRef = useRef(onEpicPanelOpenChange);
   const epicAccordionOpenRef = useRef(false);
   const epicAccordionProgressRef = useRef(0);
+  const epicPanelReportedOpenRef = useRef(false);
+  const epicScrollOffsetRef = useRef(0);
+  const canvasWheelHandlerRef = useRef<((event: WheelEvent) => void) | null>(null);
   const topInfoExpandedRef = useRef(false);
   const topInfoProgressRef = useRef(0);
 
@@ -833,6 +837,10 @@ export default function JourneyPixiTimeline({
   useEffect(() => {
     onShareJourneyRef.current = onShareJourney;
   }, [onShareJourney]);
+
+  useEffect(() => {
+    onEpicPanelOpenChangeRef.current = onEpicPanelOpenChange;
+  }, [onEpicPanelOpenChange]);
 
   const totalDistance = useMemo(() => {
     const storyMax = stories.reduce((max, item) => Math.max(max, item.endPoint), 0);
@@ -1161,18 +1169,25 @@ export default function JourneyPixiTimeline({
     epicPanelHeaderHitArea.cursor = "pointer";
     epicPanelHeaderHitArea.on("pointertap", () => {
       epicAccordionOpenRef.current = !epicAccordionOpenRef.current;
+      if (!epicAccordionOpenRef.current) {
+        epicScrollOffsetRef.current = 0;
+      }
     });
-    epicPanelBody.position.set(24, 86);
+    const epicPanelBodyMask = new Graphics();
+    epicPanelBody.position.set(24, EPIC_HEADER_HEIGHT);
+    epicPanelBody.mask = epicPanelBodyMask;
     epicPanelContent.mask = epicPanelContentMask;
     epicPanelContainer.addChild(epicPanelShadow);
     epicPanelContainer.addChild(epicPanelBackground);
     epicPanelContainer.addChild(epicPanelHeaderHitArea);
     epicPanelContainer.addChild(epicPanelContentMask);
     epicPanelContainer.addChild(epicPanelContent);
+    // body rendered first so header text always draws on top
+    epicPanelContent.addChild(epicPanelBody);
+    epicPanelContent.addChild(epicPanelBodyMask);
     epicPanelContent.addChild(epicPanelTitle);
     epicPanelContent.addChild(epicPanelMeta);
     epicPanelContent.addChild(epicPanelChevron);
-    epicPanelContent.addChild(epicPanelBody);
 
     topInfoContainer.addChild(speedControlContainer);
     hudLayer.addChild(topInfoContainer);
@@ -2314,6 +2329,12 @@ export default function JourneyPixiTimeline({
         tooltipContainer.visible = false;
       }
 
+      // Notify host when epic panel open state changes
+      if (epicAccordionOpenRef.current !== epicPanelReportedOpenRef.current) {
+        epicPanelReportedOpenRef.current = epicAccordionOpenRef.current;
+        onEpicPanelOpenChangeRef.current?.(epicAccordionOpenRef.current);
+      }
+
       if (lineOnly || !activeEpicForBackground) {
         epicPanelContainer.visible = false;
       } else {
@@ -2325,6 +2346,14 @@ export default function JourneyPixiTimeline({
         const epicBodyVisible = epicEasedProgress > 0.42;
         const panelBodyAlpha = clamp01((epicEasedProgress - 0.42) / 0.58);
         const panelBodyOffsetY = lerp(28, 0, panelBodyAlpha);
+
+        const contentHeight = epicCurrentHeight - EPIC_HEADER_HEIGHT;
+        const maxScrollOffset = Math.max(0, epicPanelBody.height - contentHeight + 16);
+        epicScrollOffsetRef.current = Math.min(Math.max(0, epicScrollOffsetRef.current), maxScrollOffset);
+
+        epicPanelBodyMask.clear();
+        epicPanelBodyMask.rect(0, EPIC_HEADER_HEIGHT, epicCurrentWidth, Math.max(0, epicCurrentHeight - EPIC_HEADER_HEIGHT));
+        epicPanelBodyMask.fill({ color: 0xffffff, alpha: 1 });
 
         epicPanelContainer.visible = true;
         epicPanelContainer.position.set(epicPanelX, EPIC_PANEL_PADDING);
@@ -2352,7 +2381,7 @@ export default function JourneyPixiTimeline({
         epicPanelChevron.alpha = panelHeaderAlpha;
         epicPanelBody.visible = epicBodyVisible;
         epicPanelBody.alpha = panelBodyAlpha;
-        epicPanelBody.position.set(24, 86 + panelBodyOffsetY);
+        epicPanelBody.position.set(24, EPIC_HEADER_HEIGHT + panelBodyOffsetY - epicScrollOffsetRef.current);
 
         if (lastEpicPanelId !== activeEpicForBackground.id || lastEpicPanelHtml === "") {
           lastEpicPanelId = activeEpicForBackground.id;
@@ -2468,6 +2497,17 @@ export default function JourneyPixiTimeline({
       host.innerHTML = "";
       host.appendChild(app.canvas);
 
+      const handleCanvasWheel = (event: WheelEvent) => {
+        if (epicAccordionOpenRef.current) {
+          event.preventDefault();
+          event.stopPropagation();
+          epicScrollOffsetRef.current += event.deltaY * 0.6;
+        }
+      };
+
+      canvasWheelHandlerRef.current = handleCanvasWheel;
+      app.canvas.addEventListener("wheel", handleCanvasWheel, { passive: false });
+
       resizeObserverRef.current = new ResizeObserver(syncSize);
       resizeObserverRef.current.observe(host);
 
@@ -2485,6 +2525,9 @@ export default function JourneyPixiTimeline({
       resizeObserverRef.current = null;
       if (initialized) {
         app.ticker.remove(renderFrame);
+        if (canvasWheelHandlerRef.current) {
+          app.canvas.removeEventListener("wheel", canvasWheelHandlerRef.current);
+        }
         app.destroy(true, { children: true });
       }
       appRef.current = null;

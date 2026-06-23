@@ -155,6 +155,7 @@ export default function JourneyPage() {
   const [selectedRecentStoryId, setSelectedRecentStoryId] = useState<string | null>(null);
   const [wheelTarget, setWheelTarget] = useState<HTMLDivElement | null>(null);
   const [selectedEpicId, setSelectedEpicId] = useState<string | null>(null);
+  const [epicPanelOpen, setEpicPanelOpen] = useState(false);
   const previousEpicIdRef = useRef<string | null>(null);
   const renderedAltitudeRef = useRef(0);
   const pendingStoryStopRef = useRef<PendingStoryStop | null>(null);
@@ -376,6 +377,10 @@ export default function JourneyPage() {
     return normalizedTitle.length > 0 && normalizedTitle !== "Untitled journey" ? normalizedTitle : "teszt2";
   }, [journey.name]);
 
+  const handleEpicPanelOpenChange = useCallback((open: boolean) => {
+    setEpicPanelOpen(open);
+  }, []);
+
   const handleScrollMultiplierChange = useCallback((nextMultiplier: number) => {
     const normalizedMultiplier = normalizeScrollMultiplier(nextMultiplier);
 
@@ -414,7 +419,7 @@ export default function JourneyPage() {
     scaledValueRef: renderedAltitudeRef,
     naturalValueRef: renderedAltitudeRef,
     onChange: handleAltitudeChange,
-    enabled: wheelTarget !== null,
+    enabled: wheelTarget !== null && !epicPanelOpen,
     target: wheelTarget,
   });
 
@@ -437,10 +442,11 @@ export default function JourneyPage() {
           onShareJourney={handleShareJourney}
           onScrollMultiplierChange={handleScrollMultiplierChange}
           onRenderedAltitudeChange={handleRenderedAltitudeChange}
+          onEpicPanelOpenChange={handleEpicPanelOpenChange}
         />
       </div>
 
-      <AltitudeInfoIndicators items={activeAltitudeInfos} placement="below-epic" />
+      {!epicPanelOpen && <AltitudeInfoIndicators items={activeAltitudeInfos} placement="below-epic" />}
 
       {noFilteredContent ? (
         <Paper
