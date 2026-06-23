@@ -1,10 +1,10 @@
-import { Alert, Badge, Button, Group, Paper, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
+import { Badge, Button, Group, Paper, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
 import { db } from "../server/db";
 import { Form, Link, redirect, useActionData, useLoaderData } from "react-router";
 import { useEffect, useMemo, useState } from "react";
 import StoryExtraContentEditor from "../features/admin/components/StoryExtraContentEditor";
 import { STORY_IMAGE_ACCEPT, STORY_IMAGE_MAX_BYTES } from "../features/admin/domain/storyImage.shared";
-import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
+import { AdminActionStatus, AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
 import { parseStoryExtraContent } from "../shared/validation/storySchemas";
 
 type ActionData = { error?: string };
@@ -173,28 +173,12 @@ const AdminStoriesRoute = () => {
     () => stories.filter((story) => !optimisticDeletedIds.includes(story.id)),
     [stories, optimisticDeletedIds],
   );
-  const lineStories = stories.filter((story) => story.storyType === "LINE").length;
-  const storiesWithImages = stories.filter((story) => Boolean(story.imageUrl)).length;
-
   return (
     <AdminPage>
       <AdminPageHeader
         eyebrow="Stories"
         title="Create the moments that appear in the journey"
-        description="Stories are either cards or line events. Create them here, then open a story to refine visuals, imagery, tags, and range details."
-        actions={(
-          <Button component={Link} to={`/admin/${selectedJourney?.id ?? ""}`} variant="default">
-            Back to overview
-          </Button>
-        )}
       />
-
-      <AdminStatGrid>
-        <AdminStatCard label="Stories" value={visibleStories.length} description={`Managing ${selectedJourney?.name ?? "this journey"}.`} />
-        <AdminStatCard label="Line stories" value={lineStories} description="Stories rendered as line events instead of cards." />
-        <AdminStatCard label="With images" value={storiesWithImages} description="Stories already carrying an uploaded journey image." />
-        <AdminStatCard label="Epics in scope" value={epics.length} description="Reference count for overlap planning while authoring stories." />
-      </AdminStatGrid>
 
       <AdminSection
         title="Existing stories"
@@ -374,8 +358,7 @@ const AdminStoriesRoute = () => {
         </Form>
       </AdminSection>
 
-      {success ? <Alert color="green">{success}</Alert> : null}
-      {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
+      <AdminActionStatus success={success} error={actionData?.error} />
     </AdminPage>
   );
 };

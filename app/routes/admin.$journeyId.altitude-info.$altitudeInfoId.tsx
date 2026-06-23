@@ -2,7 +2,7 @@ import { Alert, Button, Checkbox, Group, Paper, Stack, Text, TextInput } from "@
 import { useEffect, useMemo, useState } from "react";
 import { Form, Link, useActionData, useOutletContext, useParams } from "react-router";
 import { ALTITUDE_INFO_ICON_OPTIONS, normalizeAltitudeInfoIcon, rangesOverlap, resolveAltitudeInfoIconSymbol } from "../features/altitude-info/domain/altitudeInfo";
-import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
+import { AdminActionStatus, AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
 import TagSelector from "../features/tags/admin/TagSelector";
 import { TAG_SYSTEM_MAX_COUNT, type TagLike } from "../features/tags/domain/tags";
@@ -215,25 +215,12 @@ const AdminJourneyAltitudeInfoEditorRoute = () => {
       <AdminPageHeader
         eyebrow="Altitude info editor"
         title={`Edit ${altitudeInfo.title}`}
-        description="Tune the series identity, attach tags, and define non-overlapping value bands that activate across the journey altitude range."
         actions={(
-          <>
-            <Button component={Link} to={`/admin/${journey.id}/altitude-info`} variant="default">
-              Back to altitude info
-            </Button>
-            <Button component={Link} to={`/admin/${journey.id}`} variant="light">
-              Journey overview
-            </Button>
-          </>
+          <Button component={Link} to={`/admin/${journey.id}/altitude-info`} variant="default">
+            Back to altitude info
+          </Button>
         )}
       />
-
-      <AdminStatGrid>
-        <AdminStatCard label="Value bands" value={altitudeInfo.values.length} description="Non-overlapping ranges currently configured for this series." />
-        <AdminStatCard label="Gradient bands" value={gradientBands} description="Bands that interpolate values between a start and end point." />
-        <AdminStatCard label="Order" value={altitudeInfo.order} description="Display order used when multiple series are shown together." />
-        <AdminStatCard label="Tags" value={selectedTags.length} description="Shared labels attached to this altitude info series." />
-      </AdminStatGrid>
 
       <AdminSection
         title="Series settings"
@@ -322,8 +309,7 @@ const AdminJourneyAltitudeInfoEditorRoute = () => {
         </Form>
       </AdminSection>
 
-      {actionData?.success ? <Alert color="green">{actionData.success}</Alert> : null}
-      {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
+      <AdminActionStatus success={actionData?.success} error={actionData?.error} />
 
       <AdminSection
         title="Existing value bands"

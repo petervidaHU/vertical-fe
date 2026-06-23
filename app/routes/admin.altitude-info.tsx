@@ -1,8 +1,8 @@
-import { Alert, Button, Group, Paper, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
+import { Button, Group, Paper, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
 import { useMemo, useState } from "react";
 import { Form, Link, redirect, useActionData, useOutletContext } from "react-router";
 import { ALTITUDE_INFO_ICON_OPTIONS, normalizeAltitudeInfoIcon, resolveAltitudeInfoIconSymbol } from "../features/altitude-info/domain/altitudeInfo";
-import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
+import { AdminActionStatus, AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
 import { db } from "../server/db";
 
@@ -81,27 +81,12 @@ const AdminAltitudeInfoRoute = () => {
     }),
     [journey.altitudeInfos],
   );
-  const totalValueBands = altitudeInfos.reduce((sum, item) => sum + item.values.length, 0);
-
   return (
     <AdminPage>
       <AdminPageHeader
         eyebrow="Altitude info"
         title="Manage indicator series for this journey"
-        description="Create the series here, then open a detail screen to add or refine the altitude value bands within that series."
-        actions={(
-          <Button component={Link} to={`/admin/${journey.id}`} variant="default">
-            Back to overview
-          </Button>
-        )}
       />
-
-      <AdminStatGrid>
-        <AdminStatCard label="Series" value={altitudeInfos.length} description="Independent indicator tracks attached to this journey." />
-        <AdminStatCard label="Value bands" value={totalValueBands} description="Altitude ranges distributed across all series." />
-        <AdminStatCard label="Ordered items" value={altitudeInfos.filter((item) => item.order !== 0).length} description="Series with an explicit display order set." />
-        <AdminStatCard label="Unconfigured" value={altitudeInfos.filter((item) => item.values.length === 0).length} description="Series that still need their first value band." />
-      </AdminStatGrid>
 
       <AdminSection
         title="Create altitude info series"
@@ -128,7 +113,7 @@ const AdminAltitudeInfoRoute = () => {
         </Form>
       </AdminSection>
 
-      {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
+      <AdminActionStatus error={actionData?.error} />
 
       <AdminSection
         title="Existing altitude info series"

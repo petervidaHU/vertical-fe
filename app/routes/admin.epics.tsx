@@ -9,12 +9,12 @@ import {
   serializeBackground,
   tryParseBackgroundInput,
 } from "../shared/domain/background";
-import { Alert, Button, Checkbox, Divider, Group, NumberInput, Paper, SimpleGrid, Stack, Text, TextInput, Textarea } from "@mantine/core";
+import { Button, Checkbox, Divider, Group, NumberInput, Paper, SimpleGrid, Stack, Text, TextInput, Textarea } from "@mantine/core";
 import { useEffect, useMemo, useState } from "react";
 import { Form, Link, redirect, useActionData, useLoaderData } from "react-router";
 import { db } from "../server/db";
 import BackgroundField from "../features/admin/components/BackgroundField";
-import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
+import { AdminActionStatus, AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
 
 type ActionData = { error?: string };
 
@@ -341,34 +341,7 @@ const AdminEpicsRoute = () => {
       <AdminPageHeader
         eyebrow="Epics"
         title="Define the major vertical bands"
-        description="Epics shape the structure of the journey. Create them here, import them in bulk, or open one to refine visuals and overlaps."
-        actions={(
-          <Button component={Link} to={`/admin/${selectedJourney?.id ?? ""}`} variant="default">
-            Back to overview
-          </Button>
-        )}
       />
-
-      <AdminStatGrid>
-        <AdminStatCard label="Epics" value={visibleEpics.length} description={`Managing ${selectedJourney?.name ?? "this journey"}.`} />
-        <AdminStatCard label="With images" value={epicsWithImages} description="Epics already using a repeating background image." />
-        <AdminStatCard label="Patterned" value={epicsWithPatternConfig} description="Epics with explicit background scatter configuration." />
-        <AdminStatCard label="Stories in journey" value={stories.length} description="Useful reference when checking overlaps against epics." />
-      </AdminStatGrid>
-
-      <AdminSection
-        title="Journey settings"
-        description="Journey identity and ground styling are managed from overview."
-      >
-        <Group justify="space-between" align="center">
-          <Text size="sm" c="dimmed">
-            Open overview to edit name, slug, and journey start ground.
-          </Text>
-          <Button component={Link} to={`/admin/${selectedJourney?.id ?? ""}`} variant="light" color="teal">
-            Open journey settings
-          </Button>
-        </Group>
-      </AdminSection>
 
       <AdminSection
         title="Export all epics JSON"
@@ -637,8 +610,7 @@ const AdminEpicsRoute = () => {
         </Form>
       </AdminSection>
 
-      {success ? <Alert color="green">{success}</Alert> : null}
-      {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
+      <AdminActionStatus success={success} error={actionData?.error} />
     </AdminPage>
   );
 };

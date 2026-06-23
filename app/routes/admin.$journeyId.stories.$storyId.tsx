@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Form, Link, useActionData, useOutletContext, useParams } from "react-router";
 import StoryExtraContentEditor from "../features/admin/components/StoryExtraContentEditor";
 import { STORY_IMAGE_ACCEPT, STORY_IMAGE_MAX_BYTES } from "../features/admin/domain/storyImage.shared";
-import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
+import { AdminActionStatus, AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
 import { parseStoryExtraContent } from "../shared/validation/storySchemas";
 import TagSelector from "../features/tags/admin/TagSelector";
@@ -207,30 +207,14 @@ const AdminJourneyStoryEditorRoute = () => {
       <AdminPageHeader
         eyebrow="Story editor"
         title={`Edit ${story.title}`}
-        description="Adjust the story type, copy, visuals, imagery, tags, and altitude range from one focused editing surface."
         actions={(
-          <>
-            <Button component={Link} to={`/admin/${journey.id}/stories`} variant="default">
-              Back to stories
-            </Button>
-            <Button component={Link} to={`/admin/${journey.id}`} variant="light">
-              Journey overview
-            </Button>
-          </>
+          <Button component={Link} to={`/admin/${journey.id}/stories`} variant="default">
+            Back to stories
+          </Button>
         )}
       />
 
-      <AdminStatGrid>
-        <AdminStatCard label="Story type" value={story.storyType} description="Card stories use a card background; line stories use line styling and tooltip fields." />
-        <AdminStatCard label="Range" value={`${story.startPoint} - ${story.endPoint}`} description="Altitude span where this story becomes active." />
-        <AdminStatCard label="Tags" value={selectedTags.length} description="Shared labels currently attached to this story." />
-        <AdminStatCard label="Image" value={story.imageUrl ? "Attached" : "None"} description="Uploaded story image rendered in the journey UI." />
-      </AdminStatGrid>
-
-      <AdminSection
-        title="Story settings"
-        description="Use this form for all story-specific settings, including visuals, rich content, tags, and altitude range."
-      >
+      <AdminSection title="Story settings">
         <Form method="post" encType="multipart/form-data" key={story.id}>
           <Stack>
             <Text size="sm" c="dimmed">Journey: {journey.name}</Text>
@@ -328,10 +312,7 @@ const AdminJourneyStoryEditorRoute = () => {
         </Form>
       </AdminSection>
 
-      <AdminSection
-        title="Export story JSON"
-        description="Download only this story as JSON for reuse, review, or AI-assisted editing workflows."
-      >
+      <AdminSection title="Export story JSON">
         <Stack>
           <Textarea
             readOnly
@@ -358,8 +339,7 @@ const AdminJourneyStoryEditorRoute = () => {
         </Stack>
       </AdminSection>
 
-      {actionData?.success ? <Alert color="green">{actionData.success}</Alert> : null}
-      {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
+      <AdminActionStatus success={actionData?.success} error={actionData?.error} />
     </AdminPage>
   );
 };

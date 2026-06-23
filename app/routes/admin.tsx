@@ -1,4 +1,4 @@
-import { AppShell, Badge, Box, Burger, Group, NavLink, Paper, Stack, Text, Title } from "@mantine/core";
+import { AppShell, Badge, Box, Burger, Group, NavLink, Stack, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Link, Outlet, useLocation } from "react-router";
 
@@ -94,10 +94,6 @@ const AdminRoute = () => {
               </Title>
             </Box>
           </Group>
-
-          <Text visibleFrom="md" maw={520} size="sm" c="dimmed" ta="right">
-            {activeSection.description}
-          </Text>
         </Group>
       </AppShell.Header>
 
@@ -110,29 +106,12 @@ const AdminRoute = () => {
         }}
       >
         <AppShell.Section>
-          <Paper
-            radius="xl"
-            p="lg"
-            style={{
-              background: "linear-gradient(180deg, rgba(229, 249, 240, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)",
-              border: "1px solid rgba(173, 234, 211, 0.16)",
-            }}
-          >
-            <Stack gap={6}>
-              <Text size="xs" tt="uppercase" fw={800} c="teal.2" style={{ letterSpacing: "0.1em" }}>
-                Control room
-              </Text>
-              <Title order={3} c="white" size="h4">
-                Vertical journey admin
-              </Title>
-              <Text size="sm" c="rgba(235, 245, 246, 0.78)">
-                The redesigned workspace keeps structure, counts, and next actions visible while you edit timeline data.
-              </Text>
-            </Stack>
-          </Paper>
+          <Text size="xs" tt="uppercase" fw={800} c="teal.2" style={{ letterSpacing: "0.1em" }} px="xs" pt="xs">
+            Vertical admin
+          </Text>
         </AppShell.Section>
 
-        <AppShell.Section grow mt="lg">
+        <AppShell.Section grow mt="md">
           <Stack gap="xs">
             {workspaceLinks.map((link) => (
               <NavLink
@@ -140,7 +119,6 @@ const AdminRoute = () => {
                 component={Link}
                 to={link.to}
                 label={link.label}
-                description={link.description}
                 active={link.matches(location.pathname)}
                 variant="filled"
                 color="teal"
@@ -148,46 +126,21 @@ const AdminRoute = () => {
                 onClick={close}
                 styles={{
                   root: {
+                    borderRadius: 12,
                     background: link.matches(location.pathname)
                       ? "linear-gradient(135deg, rgba(194, 242, 221, 0.96) 0%, rgba(160, 230, 214, 0.92) 100%)"
                       : "rgba(255, 255, 255, 0.04)",
                     border: link.matches(location.pathname)
                       ? "1px solid rgba(194, 242, 221, 0.92)"
                       : "1px solid rgba(255, 255, 255, 0.08)",
-                    boxShadow: link.matches(location.pathname)
-                      ? "0 14px 30px rgba(7, 28, 32, 0.18)"
-                      : "none",
                   },
                   label: {
                     fontWeight: 700,
-                  },
-                  description: {
-                    color: link.matches(location.pathname) ? "#214241" : "rgba(220, 230, 232, 0.72)",
                   },
                 }}
               />
             ))}
           </Stack>
-        </AppShell.Section>
-
-        <AppShell.Section>
-          <Paper
-            radius="xl"
-            p="md"
-            style={{
-              background: "rgba(255, 255, 255, 0.04)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-          >
-            <Stack gap={4}>
-              <Text size="sm" fw={700} c="white">
-                Editing principle
-              </Text>
-              <Text size="xs" c="rgba(220, 230, 232, 0.72)">
-                Lists answer what exists. Detail pages answer what changes next. Journey workspaces keep both in view.
-              </Text>
-            </Stack>
-          </Paper>
         </AppShell.Section>
       </AppShell.Navbar>
 

@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Form, Link, useActionData, useOutletContext, useParams } from "react-router";
 import BackgroundField from "../features/admin/components/BackgroundField";
 import { EPIC_BACKGROUND_IMAGE_ACCEPT, EPIC_BACKGROUND_IMAGE_MAX_BYTES } from "../features/admin/domain/epicBackgroundImage.shared";
-import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
+import { AdminActionStatus, AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
 import { normalizeBackgroundPatternConfig, type BackgroundPatternConfig } from "../features/timeline/pixi/layout/epicBackgroundPattern";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
 import {
@@ -212,30 +212,14 @@ const AdminJourneyEpicEditorRoute = () => {
       <AdminPageHeader
         eyebrow="Epic editor"
         title={`Edit ${epic.title}`}
-        description="Refine the epic range, visual background, repeated art, and pattern density while keeping overlapping stories visible below."
         actions={(
-          <>
-            <Button component={Link} to={`/admin/${journey.id}/epics`} variant="default">
-              Back to epics
-            </Button>
-            <Button component={Link} to={`/admin/${journey.id}`} variant="light">
-              Journey overview
-            </Button>
-          </>
+          <Button component={Link} to={`/admin/${journey.id}/epics`} variant="default">
+            Back to epics
+          </Button>
         )}
       />
 
-      <AdminStatGrid>
-        <AdminStatCard label="Range" value={`${epic.startPoint} - ${epic.endPoint}`} description="Altitude span covered by this epic." />
-        <AdminStatCard label="Overlapping stories" value={overlappingStories.length} description="Stories that intersect this epic's altitude range." />
-        <AdminStatCard label="Background image" value={epic.backgroundImage ? "Attached" : "None"} description="Repeated art rendered through the epic band." />
-        <AdminStatCard label="Pattern config" value={patternConfig ? "Configured" : "Default"} description="Scatter settings for repeated epic background art." />
-      </AdminStatGrid>
-
-      <AdminSection
-        title="Epic settings"
-        description="This is the full editing surface for one epic, including title, range, background, repeated art, and pattern behavior."
-      >
+      <AdminSection title="Epic settings">
         <Form method="post" encType="multipart/form-data" key={`${epic.id}:${actionData?.success ?? "idle"}`}>
           <Stack>
             <Text size="sm" c="dimmed">Journey: {journey.name}</Text>
@@ -361,10 +345,7 @@ const AdminJourneyEpicEditorRoute = () => {
         </Form>
       </AdminSection>
 
-      <AdminSection
-        title="Export epic package JSON"
-        description="Download one JSON package with this epic and altitude info, with an option to include or exclude overlapping stories."
-      >
+      <AdminSection title="Export epic package JSON">
         <Stack>
           <Checkbox
             checked={includeStoriesInEpicExport}
@@ -391,13 +372,9 @@ const AdminJourneyEpicEditorRoute = () => {
         </Stack>
       </AdminSection>
 
-      {actionData?.success ? <Alert color="green">{actionData.success}</Alert> : null}
-      {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
+      <AdminActionStatus success={actionData?.success} error={actionData?.error} />
 
-      <AdminSection
-        title="Overlapping stories"
-        description="These stories intersect the current epic range, which makes them the best candidates to double-check while adjusting boundaries."
-      >
+      <AdminSection title="Overlapping stories">
         {overlappingStories.length === 0 ? (
           <Text size="sm" c="dimmed">No stories overlap this epic.</Text>
         ) : (

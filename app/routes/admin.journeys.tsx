@@ -3,7 +3,7 @@ import { db } from "../server/db";
 import { Form, Link, redirect, useActionData, useLoaderData } from "react-router";
 import { useEffect, useMemo, useState } from "react";
 import BackgroundField from "../features/admin/components/BackgroundField";
-import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
+import { AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
 import { backgroundToCss, parseStoredBackground, serializeBackground, tryParseBackgroundInput } from "../shared/domain/background";
 
 type ActionData = { error?: string };
@@ -95,28 +95,16 @@ const AdminJourneysRoute = () => {
     () => journeys.filter((journey) => !optimisticDeletedIds.includes(journey.id)),
     [journeys, optimisticDeletedIds],
   );
-  const totalEpics = journeys.reduce((sum, journey) => sum + journey._count.epics, 0);
-  const totalStories = journeys.reduce((sum, journey) => sum + journey._count.stories, 0);
-  const emptyJourneys = journeys.filter((journey) => journey._count.epics === 0 && journey._count.stories === 0).length;
-
   return (
     <AdminPage>
       <AdminPageHeader
         eyebrow="Journeys"
         title="Create the containers for your timelines"
-        description="Every journey becomes a focused workspace where altitude info, epics, stories, and tags can be edited with the shared map in view."
         breadcrumbs={[
           { label: "Admin", to: "/admin" },
           { label: "Journeys" },
         ]}
       />
-
-      <AdminStatGrid>
-        <AdminStatCard label="Journeys" value={journeys.length} description="Total editable timeline containers in the system." />
-        <AdminStatCard label="Epics" value={totalEpics} description="Major vertical bands defined across all journeys." />
-        <AdminStatCard label="Stories" value={totalStories} description="Cards and line events currently attached to journeys." />
-        <AdminStatCard label="Empty journeys" value={emptyJourneys} description="Journeys that still need content structure." />
-      </AdminStatGrid>
 
       <AdminSection
         title="Create a new journey"

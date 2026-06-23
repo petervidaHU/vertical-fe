@@ -1,7 +1,7 @@
-import { Alert, Badge, Button, Group, Paper, Stack, Text, TextInput } from "@mantine/core";
+import { Badge, Button, Group, Paper, Stack, Text, TextInput } from "@mantine/core";
 import { useMemo, useState } from "react";
-import { Form, Link, useActionData, useOutletContext } from "react-router";
-import { AdminPage, AdminPageHeader, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
+import { Form, useActionData, useOutletContext } from "react-router";
+import { AdminActionStatus, AdminPage, AdminSection } from "../features/admin/components/AdminScaffold";
 import { TAG_SYSTEM_MAX_COUNT } from "../features/tags/domain/tags";
 import { createJourneyTag, deleteJourneyTag, renameJourneyTag } from "../server/api/tags";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
@@ -74,26 +74,7 @@ const AdminJourneyTagsRoute = () => {
 
   return (
     <AdminPage>
-      <AdminPageHeader
-        eyebrow="Tags"
-        title="Manage shared labels for this journey"
-        description="Tags are shared across stories and altitude info, so changes here immediately affect editing suggestions and journey filtering."
-        actions={(
-          <Button component={Link} to={`/admin/${journey.id}`} variant="default">
-            Back to overview
-          </Button>
-        )}
-      />
-
-      <AdminStatGrid>
-        <AdminStatCard label="Total tags" value={tagsWithUsage.length} description={`Up to ${TAG_SYSTEM_MAX_COUNT} tags per journey.`} />
-        <AdminStatCard label="Used tags" value={usedTags} description="Tags currently attached to at least one story or altitude info series." />
-        <AdminStatCard label="Unused tags" value={tagsWithUsage.length - usedTags} description="Available tags that are not yet attached to content." />
-        <AdminStatCard label="Capacity left" value={TAG_SYSTEM_MAX_COUNT - (journey.tags?.length ?? 0)} description="Additional unique tags you can still create." />
-      </AdminStatGrid>
-
-      {actionData?.success ? <Alert color="green">{actionData.success}</Alert> : null}
-      {actionData?.error ? <Alert color="red">{actionData.error}</Alert> : null}
+      <AdminActionStatus success={actionData?.success} error={actionData?.error} />
 
       <AdminSection
         title="Create a new tag"

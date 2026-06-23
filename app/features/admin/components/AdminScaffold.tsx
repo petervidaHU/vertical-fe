@@ -1,4 +1,4 @@
-import { Badge, Breadcrumbs, Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { Alert, Badge, Breadcrumbs, Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { Link } from "react-router";
 
 type AdminBreadcrumbItem = {
@@ -141,6 +141,21 @@ export function AdminStatGrid({ children }: { children: React.ReactNode }) {
     <SimpleGrid cols={{ base: 1, xs: 2, xl: 4 }} spacing="md" verticalSpacing="md">
       {children}
     </SimpleGrid>
+  );
+}
+
+type AdminActionStatusProps = {
+  success?: string | null;
+  error?: string | null;
+};
+
+export function AdminActionStatus({ success, error }: AdminActionStatusProps) {
+  if (!success && !error) return null;
+  return (
+    <Stack gap="xs">
+      {success ? <Alert color="green">{success}</Alert> : null}
+      {error ? <Alert color="red">{error}</Alert> : null}
+    </Stack>
   );
 }
 
