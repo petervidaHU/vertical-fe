@@ -25,6 +25,7 @@
     "label": "Label",
     "endedAt": "Ended at",
     "epicLayer": "Epic layer",
+    "nowEntering": "Now entering",
     "epicNoDescription": "No description for this epic layer yet."
   }
 }

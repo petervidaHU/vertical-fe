@@ -28,6 +28,7 @@ import {
   localizeStory,
   localizeTag,
 } from "../shared/i18n/localizeContent";
+import { isHexColor, parseStoredBackground, primaryColorFromBackground } from "../shared/domain/background";
 import { db } from "../server/db";
 import { countTagsPerItem, filterOutByExcludedTags } from "../features/tags/domain/tags";
 import { TagFilterButton } from "../shared/components/tags/TagFilterButton";
@@ -46,79 +47,272 @@ function formatAltitude(altitude: number): string {
   return `${(altitude / 1000).toFixed(1)} km`;
 }
 
-function StoryDetailContent({ story }: { story: JourneyStory }) {
+function GlassCloseButton({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   return (
-    <Stack gap="md">
+    <ActionIcon
+      onClick={onClose}
+      variant="transparent"
+      aria-label={t("common.close")}
+      style={{
+        position: "absolute",
+        top: 16,
+        right: 16,
+        zIndex: 3,
+        width: 34,
+        height: 34,
+        borderRadius: 999,
+        color: "rgba(255, 255, 255, 0.92)",
+        background: "rgba(16, 21, 34, 0.4)",
+        border: "1px solid rgba(255, 255, 255, 0.28)",
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+        <path d="M18 6 6 18M6 6l12 12" />
+      </svg>
+    </ActionIcon>
+  );
+}
+
+function StoryDetailContent({ story, onClose }: { story: JourneyStory; onClose: () => void }) {
+  const { t } = useTranslation();
+  const isLine = story.storyType === "LINE";
+  const accent = isLine
+    ? (isHexColor(story.lineColor ?? "") ? (story.lineColor as string) : "#4ecdc4")
+    : primaryColorFromBackground(parseStoredBackground(story.background, "#4ecdc4"));
+  const altitudeDisplay = isLine
+    ? formatAltitude(story.startPoint)
+    : `${formatAltitude(story.startPoint)} – ${formatAltitude(story.endPoint)}`;
+  const lineLabel = isLine && story.lineLabel && story.lineLabel !== story.title ? story.lineLabel : null;
+  const bodyText = isLine
+    ? (story.tooltipText || story.description)
+    : story.description;
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        borderRadius: 28,
+        overflow: "hidden",
+        background: "linear-gradient(180deg, rgba(255, 251, 244, 0.98) 0%, rgba(247, 238, 220, 0.98) 100%)",
+        boxShadow: `0 36px 90px rgba(12, 16, 26, 0.45), 0 0 0 1px color-mix(in srgb, ${accent} 38%, transparent)`,
+      }}
+    >
       {story.imageUrl ? (
-        <div
-          style={{
-            width: 180,
-            height: 180,
-            borderRadius: 12,
-            overflow: "hidden",
-          }}
-        >
+        <div style={{ position: "relative", height: 220 }}>
           <img
             src={story.imageUrl}
             alt={story.title}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          />
+          <div
+            aria-hidden
             style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(180deg, rgba(8, 11, 20, 0.05) 28%, rgba(8, 11, 20, 0.82) 100%)",
             }}
           />
+          <GlassCloseButton onClose={onClose} />
+          <div style={{ position: "absolute", left: 24, right: 24, bottom: 18 }}>
+            {lineLabel ? (
+              <Text style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
+                {lineLabel}
+              </Text>
+            ) : null}
+            <Text fw={800} style={{ color: "#ffffff", fontSize: 26, lineHeight: 1.15, letterSpacing: "-0.01em", marginBottom: 6 }}>
+              {story.title}
+            </Text>
+            <Text style={{ color: "rgba(255, 255, 255, 0.78)", fontSize: 13, lineHeight: 1.4 }}>
+              {altitudeDisplay}
+            </Text>
+          </div>
         </div>
-      ) : null}
-
-      <Stack gap="xs">
-        <Text fw={700} size="lg" c="dark">
-          {story.title}
-        </Text>
-
-        <Text size="md" c="dimmed" fw={600}>
-          {formatAltitude(story.startPoint)} - {formatAltitude(story.endPoint)}
-        </Text>
-
-        {story.storyType === "LINE" ? (
-          <Text size="xs" c="dimmed" fw={700}>
-            {t("reader.label")}: {story.lineLabel || story.title}
-          </Text>
-        ) : null}
-
-        <Text size="sm" c="dark" style={{ lineHeight: 1.65 }}>
-          {story.description || t("reader.noDescription")}
-        </Text>
-      </Stack>
-
-      {story.extraContent ? (
-        <Paper
-          radius={28}
-          p="lg"
+      ) : (
+        <div
           style={{
-            border: "1px solid rgba(196, 168, 128, 0.2)",
-            background: "rgba(255, 249, 239, 0.96)",
-            boxShadow: "0 16px 34px rgba(92, 65, 36, 0.08)",
+            position: "relative",
+            padding: "28px 28px 26px",
+            overflow: "hidden",
+            background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 90%, #0c1020) 0%, color-mix(in srgb, ${accent} 50%, #0c1020) 100%)`,
           }}
         >
-          <Stack gap="xs">
-            <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.06em" }}>
-              {t("reader.additionalContext")}
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              top: -90,
+              right: -70,
+              width: 220,
+              height: 220,
+              borderRadius: "50%",
+              background: `radial-gradient(circle, color-mix(in srgb, ${accent} 65%, #ffffff) 0%, transparent 70%)`,
+              opacity: 0.4,
+              pointerEvents: "none",
+            }}
+          />
+          <GlassCloseButton onClose={onClose} />
+          <Stack gap={4} style={{ position: "relative" }}>
+            {lineLabel ? (
+              <Text style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                {lineLabel}
+              </Text>
+            ) : null}
+            <Text fw={800} style={{ color: "#ffffff", fontSize: 26, lineHeight: 1.15, letterSpacing: "-0.01em" }}>
+              {story.title}
             </Text>
-            <ScrollArea.Autosize mah={420}>
-              <div
-                style={{
-                  lineHeight: 1.7,
-                  fontSize: 15,
-                  color: "#33291f",
-                }}
-                dangerouslySetInnerHTML={{ __html: story.extraContent }}
-              />
-            </ScrollArea.Autosize>
+            <Text style={{ color: "rgba(255, 255, 255, 0.78)", fontSize: 13, lineHeight: 1.4 }}>
+              {altitudeDisplay}
+            </Text>
           </Stack>
-        </Paper>
-      ) : null}
-    </Stack>
+        </div>
+      )}
+
+      <div style={{ padding: "22px 28px 28px" }}>
+        <Stack gap="md">
+          <Text size="sm" style={{ color: "#3a2f22", lineHeight: 1.75 }}>
+            {bodyText || t("reader.noDescription")}
+          </Text>
+
+          {story.extraContent ? (
+            <Paper
+              radius={20}
+              p="lg"
+              style={{
+                border: `1px solid color-mix(in srgb, ${accent} 22%, rgba(196, 168, 128, 0.3))`,
+                background: "rgba(255, 252, 245, 0.7)",
+                boxShadow: "0 14px 30px rgba(92, 65, 36, 0.07)",
+              }}
+            >
+              <Stack gap="xs">
+                <Group gap={8} align="center">
+                  <span style={{ width: 18, height: 3, borderRadius: 999, background: accent }} />
+                  <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.08em" }}>
+                    {t("reader.additionalContext")}
+                  </Text>
+                </Group>
+                <ScrollArea.Autosize mah={420}>
+                  <div
+                    style={{ lineHeight: 1.7, fontSize: 15, color: "#33291f" }}
+                    dangerouslySetInnerHTML={{ __html: story.extraContent }}
+                  />
+                </ScrollArea.Autosize>
+              </Stack>
+            </Paper>
+          ) : null}
+        </Stack>
+      </div>
+    </div>
+  );
+}
+
+type EpicEnteredCardEpic = {
+  title: string;
+  description: string;
+  color: string;
+  startPoint: number;
+  endPoint: number;
+};
+
+function EpicEnteredCard({ epic, onClose }: { epic: EpicEnteredCardEpic; onClose: () => void }) {
+  const { t } = useTranslation();
+  const accent = isHexColor(epic.color) ? epic.color : "#4ecdc4";
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        borderRadius: 28,
+        overflow: "hidden",
+        background: "linear-gradient(180deg, rgba(255, 251, 244, 0.98) 0%, rgba(247, 238, 220, 0.98) 100%)",
+        boxShadow: `0 36px 90px rgba(12, 16, 26, 0.45), 0 0 0 1px color-mix(in srgb, ${accent} 38%, transparent)`,
+      }}
+    >
+      {/* Hero banner — tinted with the epic's own color, deepened toward space navy */}
+      <div
+        style={{
+          position: "relative",
+          padding: "30px 30px 32px",
+          overflow: "hidden",
+          background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 90%, #0c1020) 0%, color-mix(in srgb, ${accent} 50%, #0c1020) 100%)`,
+        }}
+      >
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: -90,
+            right: -70,
+            width: 240,
+            height: 240,
+            borderRadius: "50%",
+            background: `radial-gradient(circle, color-mix(in srgb, ${accent} 65%, #ffffff) 0%, transparent 70%)`,
+            opacity: 0.4,
+            pointerEvents: "none",
+          }}
+        />
+
+        <GlassCloseButton onClose={onClose} />
+
+        <Stack gap={14} style={{ position: "relative" }}>
+          <Group gap={7} align="center">
+            <span style={{ display: "inline-flex", color: "rgba(255, 255, 255, 0.85)" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 15l-6-6-6 6" />
+              </svg>
+            </span>
+            <Text
+              size="xs"
+              fw={700}
+              style={{ color: "rgba(255, 255, 255, 0.82)", textTransform: "uppercase", letterSpacing: "0.2em" }}
+            >
+              {t("reader.nowEntering")}
+            </Text>
+          </Group>
+
+          <Text fw={800} style={{ color: "#ffffff", fontSize: 30, lineHeight: 1.12, letterSpacing: "-0.01em" }}>
+            {epic.title}
+          </Text>
+
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 9,
+              alignSelf: "flex-start",
+              padding: "6px 14px",
+              borderRadius: 999,
+              background: "rgba(255, 255, 255, 0.15)",
+              border: "1px solid rgba(255, 255, 255, 0.24)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <Text size="xs" fw={700} style={{ color: "rgba(255, 255, 255, 0.72)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              {t("reader.epicLayer")}
+            </Text>
+            <Text size="sm" fw={700} style={{ color: "#ffffff" }}>
+              {formatAltitude(epic.startPoint)} – {formatAltitude(epic.endPoint)}
+            </Text>
+          </div>
+        </Stack>
+      </div>
+
+      {/* Body — warm reader surface, consistent with story cards */}
+      <div style={{ padding: "24px 30px 30px" }}>
+        {epic.description ? (
+          <ScrollArea.Autosize mah={360}>
+            <Text size="sm" style={{ color: "#3a2f22", lineHeight: 1.75 }}>
+              {epic.description}
+            </Text>
+          </ScrollArea.Autosize>
+        ) : (
+          <Text size="sm" c="dimmed">
+            {t("reader.epicNoDescription")}
+          </Text>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -563,91 +757,46 @@ export default function JourneyPage() {
       <Modal
         opened={selectedStory !== null}
         onClose={() => setSelectedStoryId(null)}
+        withCloseButton={false}
         size="lg"
         centered
+        padding={0}
+        overlayProps={{ backgroundOpacity: 0.6, blur: 4 }}
+        transitionProps={{ transition: "pop", duration: 220 }}
         styles={{
-          header: {
-            padding: 0,
-            marginBottom: 0,
-            minHeight: 0,
-            height: 0,
-            overflow: "visible",
-          },
-          body: {
-            padding: "20px",
-          },
-          close: {
-            border: "none",
-            outline: "none",
-            position: "absolute",
-            top: 12,
-            right: 12,
-            "&:focus": {
-              outline: "none",
-              boxShadow: "none",
-            },
-            "&:focus-visible": {
-              outline: "none",
-            },
-          },
+          content: { background: "transparent", boxShadow: "none", overflow: "visible" },
+          body: { padding: 0 },
         }}
       >
-        {selectedStory ? <StoryDetailContent story={selectedStory} /> : null}
+        {selectedStory ? (
+          <StoryDetailContent story={selectedStory} onClose={() => setSelectedStoryId(null)} />
+        ) : null}
       </Modal>
 
       <Modal
         opened={selectedEpic !== null}
         onClose={() => setSelectedEpicId(null)}
-        title={selectedEpic?.title ?? t("reader.epicLayer")}
+        withCloseButton={false}
         size="lg"
         centered
+        padding={0}
+        overlayProps={{ backgroundOpacity: 0.6, blur: 4 }}
+        transitionProps={{ transition: "pop", duration: 220 }}
+        styles={{
+          content: { background: "transparent", boxShadow: "none", overflow: "visible" },
+          body: { padding: 0 },
+        }}
       >
         {selectedEpic ? (
-          <Stack gap="md">
-            <Paper
-              radius={36}
-              p="lg"
-              style={{
-                border: "1px solid rgba(196, 168, 128, 0.28)",
-                background: "linear-gradient(180deg, rgba(255, 250, 240, 0.98) 0%, rgba(246, 235, 210, 0.95) 100%)",
-                boxShadow: "0 26px 52px rgba(92, 65, 36, 0.16)",
-              }}
-            >
-              {selectedEpic.description && (
-                <Text size="sm" c="dark" lh={1.6}>
-                  {selectedEpic.description}
-                </Text>
-              )}
-              {!selectedEpic.description && (
-                <Text size="sm" c="dimmed">
-                  {t("reader.epicNoDescription")}
-                </Text>
-              )}
-            </Paper>
-          </Stack>
+          <EpicEnteredCard epic={selectedEpic} onClose={() => setSelectedEpicId(null)} />
         ) : null}
       </Modal>
 
       <Modal
         opened={recentStoriesOpen}
         onClose={closeRecentStoriesModal}
-        title={selectedRecentStory ? (
-          <Group gap="xs" wrap="nowrap">
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              aria-label="Back to recent stories"
-              onClick={() => setSelectedRecentStoryId(null)}
-            >
-              <span style={{ fontFamily: "monospace", fontSize: 18 }}>←</span>
-            </ActionIcon>
-
-            <div>
-              <Text fw={700}>{selectedRecentStory.title}</Text>
-              <Text size="xs" c="dimmed">{t("reader.recentStories")}</Text>
-            </div>
-          </Group>
-        ) : (
+        withCloseButton={!selectedRecentStory}
+        title={selectedRecentStory ? undefined : (
           <Group gap="xs">
             <Text fw={700}>{t("reader.recentStories")}</Text>
             <Badge variant="light" color="teal">{recentPassedStories.length}</Badge>
@@ -655,9 +804,15 @@ export default function JourneyPage() {
         )}
         size="xl"
         centered
+        padding={selectedRecentStory ? 0 : undefined}
+        overlayProps={selectedRecentStory ? { backgroundOpacity: 0.6, blur: 4 } : undefined}
+        styles={selectedRecentStory ? {
+          content: { background: "transparent", boxShadow: "none", overflow: "visible" },
+          body: { padding: 0 },
+        } : undefined}
       >
         {selectedRecentStory ? (
-          <StoryDetailContent story={selectedRecentStory} />
+          <StoryDetailContent story={selectedRecentStory} onClose={() => setSelectedRecentStoryId(null)} />
         ) : recentPassedStories.length > 0 ? (
           <ScrollArea.Autosize mah={500}>
             <Stack gap="sm">

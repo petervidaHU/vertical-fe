@@ -25,6 +25,7 @@
     "label": "Címke",
     "endedAt": "Vége itt:",
     "epicLayer": "Epic réteg",
+    "nowEntering": "Belépés ide",
     "epicNoDescription": "Ehhez az epic réteghez még nincs leírás."
   }
 }

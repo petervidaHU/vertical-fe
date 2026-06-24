@@ -115,6 +115,15 @@ const HUD_TOP_PADDING = 16;
 const TOOLTIP_IMAGE_MAX_WIDTH = 220;
 const TOOLTIP_IMAGE_MAX_HEIGHT = 110;
 
+// Shared light HUD panel theme — keeps the reader chrome (info + epic panels)
+// consistent with the warm parchment cards. Minimal chrome, soft layered shadows.
+const PANEL_SURFACE = 0xfbf4e7;
+const PANEL_BORDER = 0xe7dcc8;
+const PANEL_SHADOW = 0x6f5736;
+const PANEL_TEXT = 0x33291f;
+const PANEL_TEXT_DIM = 0x8c7c66;
+const PANEL_BTN_FILL = 0xfffdf8;
+
 type CardLayoutState = {
   x: number;
   y: number;
@@ -740,6 +749,20 @@ function drawGradientRect(
   }
 }
 
+// Soft, smoothly-falling panel shadow built from a few low-alpha offset layers
+// (cheaper and softer-looking than a single hard drop shadow).
+function drawSoftPanelShadow(graphics: Graphics, width: number, height: number, radius: number) {
+  const w = Math.max(0, width);
+  const h = Math.max(0, height);
+  graphics.clear();
+  graphics.roundRect(6, 16, w, h, radius + 2);
+  graphics.fill({ color: PANEL_SHADOW, alpha: 0.05 });
+  graphics.roundRect(4, 10, w, h, radius);
+  graphics.fill({ color: PANEL_SHADOW, alpha: 0.06 });
+  graphics.roundRect(2, 5, w, h, radius);
+  graphics.fill({ color: PANEL_SHADOW, alpha: 0.08 });
+}
+
 type EpicVisual = EpicItem & {
   backgroundPlacements: EpicBackgroundPatternPlacement[];
   stops: Array<{ color: number; percentage: number }>;
@@ -966,14 +989,13 @@ export default function JourneyPixiTimeline({
     const topInfoContainer = new Container();
     const topInfoShadow = new Graphics();
     const topInfoBackground = new Graphics();
-    const topInfoHighlight = new Graphics();
     const topInfoChevron = new Graphics();
     const topInfoChevronHitArea = new Graphics();
     const topInfoExpandedMenu = new Container();
     const topInfoJourneyTitle = new Text({
       text: "",
       style: {
-        fill: 0x1f3040,
+        fill: PANEL_TEXT,
         fontFamily: DISPLAY_FONT,
         fontSize: 20,
         fontWeight: "700",
@@ -982,7 +1004,7 @@ export default function JourneyPixiTimeline({
     const topInfoJourneyCounts = new Text({
       text: "",
       style: {
-        fill: 0x516173,
+        fill: PANEL_TEXT_DIM,
         fontFamily: BODY_FONT,
         fontSize: 12,
         fontWeight: "700",
@@ -993,7 +1015,7 @@ export default function JourneyPixiTimeline({
     const topInfoBackButtonLabel = new Text({
       text: "Back to journeys",
       style: {
-        fill: 0x2e3f50,
+        fill: PANEL_TEXT,
         fontFamily: BODY_FONT,
         fontSize: 11,
         fontWeight: "700",
@@ -1004,7 +1026,7 @@ export default function JourneyPixiTimeline({
     const topInfoShareButtonLabel = new Text({
       text: "Share",
       style: {
-        fill: 0x2e3f50,
+        fill: PANEL_TEXT,
         fontFamily: BODY_FONT,
         fontSize: 11,
         fontWeight: "700",
@@ -1015,7 +1037,7 @@ export default function JourneyPixiTimeline({
     const topInfoLanguageButtonLabel = new Text({
       text: LOCALE_LABELS[localeRef.current] ?? localeRef.current,
       style: {
-        fill: 0x2e3f50,
+        fill: PANEL_TEXT,
         fontFamily: BODY_FONT,
         fontSize: 11,
         fontWeight: "700",
@@ -1024,7 +1046,7 @@ export default function JourneyPixiTimeline({
     const topInfoMeta = new Text({
       text: "/ 0 m",
       style: {
-        fill: 0x6f7f92,
+        fill: PANEL_TEXT_DIM,
         fontFamily: BODY_FONT,
         fontSize: 13,
         fontWeight: "700",
@@ -1033,7 +1055,7 @@ export default function JourneyPixiTimeline({
     const topInfoValue = new Text({
       text: formatAltitude(0),
       style: {
-        fill: 0x20313f,
+        fill: PANEL_TEXT,
         fontFamily: DISPLAY_FONT,
         fontSize: 34,
         fontWeight: "700",
@@ -1041,7 +1063,6 @@ export default function JourneyPixiTimeline({
     });
     topInfoContainer.addChild(topInfoShadow);
     topInfoContainer.addChild(topInfoBackground);
-    topInfoContainer.addChild(topInfoHighlight);
     topInfoContainer.addChild(topInfoMeta);
     topInfoContainer.addChild(topInfoValue);
     topInfoContainer.addChild(topInfoChevron);
@@ -1092,7 +1113,7 @@ export default function JourneyPixiTimeline({
     const speedValue = new Text({
       text: formatScrollMultiplierValue(scrollMultiplierRef.current),
       style: {
-        fill: 0x20313f,
+        fill: PANEL_TEXT,
         fontFamily: DISPLAY_FONT,
         fontSize: 18,
         fontWeight: "700",
@@ -1190,7 +1211,7 @@ export default function JourneyPixiTimeline({
     const epicPanelTitle = new Text({
       text: "",
       style: {
-        fill: 0x1b232c,
+        fill: PANEL_TEXT,
         fontFamily: DISPLAY_FONT,
         fontSize: 18,
         fontWeight: "700",
@@ -1199,7 +1220,7 @@ export default function JourneyPixiTimeline({
     const epicPanelMeta = new Text({
       text: "",
       style: {
-        fill: 0x66788c,
+        fill: PANEL_TEXT_DIM,
         fontFamily: BODY_FONT,
         fontSize: 12,
         fontWeight: "600",
@@ -1775,23 +1796,17 @@ export default function JourneyPixiTimeline({
         y: topInfoChevronCenterY - 8,
         size: 16,
         progress: 1 - smoothstep(topInfoProgress),
-        color: 0x5f7389,
+        color: PANEL_TEXT_DIM,
         alpha: 0.86,
         direction: "horizontal",
       });
 
-      topInfoShadow.clear();
-      topInfoShadow.roundRect(8, 10, topInfoWidth, topInfoHeight, 28);
-      topInfoShadow.fill({ color: 0x6f5736, alpha: 0.16 });
+      drawSoftPanelShadow(topInfoShadow, topInfoWidth, topInfoHeight, 28);
 
       topInfoBackground.clear();
       topInfoBackground.roundRect(0, 0, topInfoWidth, topInfoHeight, 28);
-      topInfoBackground.fill({ color: 0xf4f9ff, alpha: 0.88 });
-      topInfoBackground.stroke({ color: 0xffffff, width: 2, alpha: 0.74 });
-
-      topInfoHighlight.clear();
-      topInfoHighlight.roundRect(4, 4, topInfoWidth - 8, 46, 24);
-      topInfoHighlight.fill({ color: 0xffffff, alpha: 0.18 });
+      topInfoBackground.fill({ color: PANEL_SURFACE, alpha: 0.96 });
+      topInfoBackground.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.7 });
 
       const expandedMenuAlpha = smoothstep(topInfoProgress);
       const expandedMenuMargin = 16;
@@ -1820,16 +1835,16 @@ export default function JourneyPixiTimeline({
       topInfoBackButton.position.set(0, menuButtonsY);
       topInfoBackButtonBg.clear();
       topInfoBackButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
-      topInfoBackButtonBg.fill({ color: 0xf9edd6, alpha: 0.96 });
-      topInfoBackButtonBg.stroke({ color: 0xe6cfaa, width: 1.25, alpha: 0.94 });
+      topInfoBackButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.96 });
+      topInfoBackButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.8 });
       fitTextToWidth(topInfoBackButtonLabel, labelsRef.current?.back ?? "Back to journeys", menuButtonWidth - 20, 8);
       topInfoBackButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoBackButtonLabel.width) / 2), 8);
 
       topInfoShareButton.position.set(menuButtonWidth + menuButtonGap, menuButtonsY);
       topInfoShareButtonBg.clear();
       topInfoShareButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
-      topInfoShareButtonBg.fill({ color: 0xebf3ff, alpha: 0.96 });
-      topInfoShareButtonBg.stroke({ color: 0xd0e0f5, width: 1.25, alpha: 0.94 });
+      topInfoShareButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.96 });
+      topInfoShareButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.8 });
       fitTextToWidth(topInfoShareButtonLabel, labelsRef.current?.share ?? "Share", menuButtonWidth - 20, 5);
       topInfoShareButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoShareButtonLabel.width) / 2), 8);
 
@@ -1838,8 +1853,8 @@ export default function JourneyPixiTimeline({
       topInfoLanguageButton.position.set(0, languageButtonY);
       topInfoLanguageButtonBg.clear();
       topInfoLanguageButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
-      topInfoLanguageButtonBg.fill({ color: 0xeef7ee, alpha: 0.96 });
-      topInfoLanguageButtonBg.stroke({ color: 0xc9e3c9, width: 1.25, alpha: 0.94 });
+      topInfoLanguageButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.96 });
+      topInfoLanguageButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.8 });
       const languageButtonText = LOCALE_LABELS[localeRef.current] ?? localeRef.current;
       fitTextToWidth(topInfoLanguageButtonLabel, `🌐 ${languageButtonText}`, menuButtonWidth - 20, 8);
       topInfoLanguageButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoLanguageButtonLabel.width) / 2), 8);
@@ -1870,14 +1885,14 @@ export default function JourneyPixiTimeline({
       speedDecreaseButton.position.set(8, 6);
       speedDecreaseBg.clear();
       speedDecreaseBg.circle(10, 10, 10);
-      speedDecreaseBg.fill({ color: canDecreaseSpeed ? 0xfbf4e6 : 0xf1f4f7, alpha: 1 });
-      speedDecreaseBg.stroke({ color: canDecreaseSpeed ? 0xe8d6ba : 0xd8e1ea, width: 1, alpha: 0.9 });
+      speedDecreaseBg.fill({ color: PANEL_BTN_FILL, alpha: canDecreaseSpeed ? 1 : 0.6 });
+      speedDecreaseBg.stroke({ color: PANEL_BORDER, width: 1, alpha: canDecreaseSpeed ? 0.85 : 0.4 });
       drawChevronIcon(speedDecreaseChevron, {
         x: 4,
         y: 4,
         size: 12,
         progress: 0,
-        color: canDecreaseSpeed ? 0x34424f : 0x8895a8,
+        color: canDecreaseSpeed ? PANEL_TEXT : PANEL_TEXT_DIM,
         alpha: 0.9,
         direction: "horizontal",
       });
@@ -1887,14 +1902,14 @@ export default function JourneyPixiTimeline({
       speedIncreaseButton.position.set(98, 6);
       speedIncreaseBg.clear();
       speedIncreaseBg.circle(10, 10, 10);
-      speedIncreaseBg.fill({ color: canIncreaseSpeed ? 0xfbf4e6 : 0xf1f4f7, alpha: 1 });
-      speedIncreaseBg.stroke({ color: canIncreaseSpeed ? 0xe8d6ba : 0xd8e1ea, width: 1, alpha: 0.9 });
+      speedIncreaseBg.fill({ color: PANEL_BTN_FILL, alpha: canIncreaseSpeed ? 1 : 0.6 });
+      speedIncreaseBg.stroke({ color: PANEL_BORDER, width: 1, alpha: canIncreaseSpeed ? 0.85 : 0.4 });
       drawChevronIcon(speedIncreaseChevron, {
         x: 4,
         y: 4,
         size: 12,
         progress: 1,
-        color: canIncreaseSpeed ? 0x34424f : 0x8895a8,
+        color: canIncreaseSpeed ? PANEL_TEXT : PANEL_TEXT_DIM,
         alpha: 0.9,
         direction: "horizontal",
       });
@@ -2483,7 +2498,7 @@ export default function JourneyPixiTimeline({
           y: 0,
           size: 20,
           progress: epicEasedProgress,
-          color: 0x2a3846,
+          color: PANEL_TEXT_DIM,
           alpha: 0.92,
           direction: "vertical",
         });
@@ -2501,16 +2516,12 @@ export default function JourneyPixiTimeline({
         }
         epicPanelBody.style.wordWrapWidth = Math.max(220, epicPanelWidth - 48);
 
-        epicPanelShadow.clear();
-        epicPanelShadow.roundRect(6, 10, Math.max(0, epicCurrentWidth - 4), Math.max(0, epicCurrentHeight - 10), 30);
-        epicPanelShadow.fill({ color: 0x000000, alpha: 0.04 });
-        epicPanelShadow.roundRect(2, 4, Math.max(0, epicCurrentWidth - 2), Math.max(0, epicCurrentHeight - 6), 28);
-        epicPanelShadow.fill({ color: 0x000000, alpha: 0.08 });
+        drawSoftPanelShadow(epicPanelShadow, Math.max(0, epicCurrentWidth), Math.max(0, epicCurrentHeight), 28);
 
         epicPanelBackground.clear();
         epicPanelBackground.roundRect(0, 0, epicCurrentWidth, epicCurrentHeight, 28);
-        epicPanelBackground.fill({ color: 0xfafaf8, alpha: 0.95 });
-        epicPanelBackground.stroke({ color: 0xe0dbd5, width: 1, alpha: 0.6 });
+        epicPanelBackground.fill({ color: PANEL_SURFACE, alpha: 0.97 });
+        epicPanelBackground.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.7 });
 
         epicPanelContentMask.clear();
         epicPanelContentMask.roundRect(0, 0, epicCurrentWidth, epicCurrentHeight, 28);
