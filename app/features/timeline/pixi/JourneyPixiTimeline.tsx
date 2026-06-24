@@ -20,6 +20,7 @@ import {
   stepScrollMultiplier,
 } from "../domain/scrollMultiplier";
 import { drawChevronIcon } from "./icons/chevron";
+import { DEFAULT_LOCALE, LOCALE_LABELS, type Locale } from "../../../shared/i18n/locales";
 
 type EpicItem = {
   id: string;
@@ -50,6 +51,12 @@ type StoryItem = {
   endPoint: number;
 };
 
+type TimelineLabels = {
+  back: string;
+  share: string;
+  journey: string;
+};
+
 type JourneyPixiTimelineProps = {
   epics: EpicItem[];
   stories: StoryItem[];
@@ -58,12 +65,15 @@ type JourneyPixiTimelineProps = {
   journeyTitle?: string;
   scrollMultiplier?: number;
   viewMode?: "full" | "line-only";
+  locale?: Locale;
+  labels?: TimelineLabels;
   onStoryCardClick?: (story: StoryItem) => void;
   onBackToJourneys?: () => void;
   onShareJourney?: () => void;
   onScrollMultiplierChange?: (nextMultiplier: number) => void;
   onRenderedAltitudeChange?: (altitude: number) => void;
   onEpicPanelOpenChange?: (open: boolean) => void;
+  onToggleLocale?: () => void;
 };
 
 const DISPLAY_FONT = "Trebuchet MS";
@@ -797,30 +807,52 @@ export default function JourneyPixiTimeline({
   journeyTitle,
   scrollMultiplier = DEFAULT_SCROLL_MULTIPLIER,
   viewMode = "full",
+  locale = DEFAULT_LOCALE,
+  labels,
   onStoryCardClick,
   onBackToJourneys,
   onShareJourney,
   onScrollMultiplierChange,
   onRenderedAltitudeChange,
   onEpicPanelOpenChange,
+  onToggleLocale,
 }: JourneyPixiTimelineProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const appRef = useRef<Application | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const renderedAltitudeRef = useRef(targetAltitudeRef.current);
   const reportedAltitudeRef = useRef(Math.round(targetAltitudeRef.current));
+  // Latest localized content. The heavy init effect rebuilds only when the scene
+  // *structure* changes; locale switches reach the scene through these refs +
+  // applyLocalizedContentRef so text updates in place without a teardown.
+  const storiesRef = useRef(stories);
+  const epicsRef = useRef(epics);
+  const applyLocalizedContentRef = useRef<(() => void) | null>(null);
   const scrollMultiplierRef = useRef(scrollMultiplier);
   const onScrollMultiplierChangeRef = useRef(onScrollMultiplierChange);
   const onBackToJourneysRef = useRef(onBackToJourneys);
   const onShareJourneyRef = useRef(onShareJourney);
   const onEpicPanelOpenChangeRef = useRef(onEpicPanelOpenChange);
+  const onToggleLocaleRef = useRef(onToggleLocale);
+  const localeRef = useRef<Locale>(locale);
+  const labelsRef = useRef<TimelineLabels | undefined>(labels);
+  const journeyTitleRef = useRef(journeyTitle);
   const epicAccordionOpenRef = useRef(false);
   const epicAccordionProgressRef = useRef(0);
   const epicPanelReportedOpenRef = useRef(false);
   const epicScrollOffsetRef = useRef(0);
+  const epicPanelBoundsRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
+  const topInfoBoundsRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const canvasWheelHandlerRef = useRef<((event: WheelEvent) => void) | null>(null);
+  const canvasPointerDownHandlerRef = useRef<((event: PointerEvent) => void) | null>(null);
   const topInfoExpandedRef = useRef(false);
   const topInfoProgressRef = useRef(0);
+
+  useEffect(() => {
+    storiesRef.current = stories;
+    epicsRef.current = epics;
+    applyLocalizedContentRef.current?.();
+  }, [stories, epics]);
 
   useEffect(() => {
     scrollMultiplierRef.current = scrollMultiplier;
@@ -842,10 +874,59 @@ export default function JourneyPixiTimeline({
     onEpicPanelOpenChangeRef.current = onEpicPanelOpenChange;
   }, [onEpicPanelOpenChange]);
 
+  useEffect(() => {
+    onToggleLocaleRef.current = onToggleLocale;
+  }, [onToggleLocale]);
+
+  // Panel text (title + language label) updates in place on locale change since the
+  // scene is no longer rebuilt; renderFrame reads these refs each frame.
+  useEffect(() => {
+    localeRef.current = locale;
+  }, [locale]);
+
+  useEffect(() => {
+    labelsRef.current = labels;
+  }, [labels]);
+
+  useEffect(() => {
+    journeyTitleRef.current = journeyTitle;
+  }, [journeyTitle]);
+
   const totalDistance = useMemo(() => {
     const storyMax = stories.reduce((max, item) => Math.max(max, item.endPoint), 0);
     const epicMax = epics.reduce((max, item) => Math.max(max, item.endPoint), 0);
     return Math.max(storyMax, epicMax);
+  }, [epics, stories]);
+
+  // Signature of everything the Pixi scene is *built* from (positions, colors, images,
+  // line styling, background) but NOT translatable text. The heavy init effect keys on
+  // this so locale switches don't tear the scene down — only adds/removes/edits do.
+  const sceneStructureKey = useMemo(() => {
+    const epicPart = epics
+      .map((epic) => [
+        epic.id,
+        epic.startPoint,
+        epic.endPoint,
+        epic.color,
+        epic.background,
+        epic.backgroundImage ?? "",
+        JSON.stringify(epic.backgroundPatternConfig ?? null),
+      ].join("~"))
+      .join("|");
+    const storyPart = stories
+      .map((story) => [
+        story.id,
+        story.storyType,
+        story.startPoint,
+        story.endPoint,
+        story.background,
+        story.imageUrl ?? "",
+        story.tooltipImageUrl ?? "",
+        story.lineColor,
+        story.lineWidth,
+      ].join("~"))
+      .join("|");
+    return `${epicPart}__${storyPart}`;
   }, [epics, stories]);
 
   useEffect(() => {
@@ -889,15 +970,6 @@ export default function JourneyPixiTimeline({
     const topInfoChevron = new Graphics();
     const topInfoChevronHitArea = new Graphics();
     const topInfoExpandedMenu = new Container();
-    const topInfoJourneyLabel = new Text({
-      text: "Journey",
-      style: {
-        fill: 0x74869a,
-        fontFamily: BODY_FONT,
-        fontSize: 11,
-        fontWeight: "700",
-      },
-    });
     const topInfoJourneyTitle = new Text({
       text: "",
       style: {
@@ -938,6 +1010,17 @@ export default function JourneyPixiTimeline({
         fontWeight: "700",
       },
     });
+    const topInfoLanguageButton = new Container();
+    const topInfoLanguageButtonBg = new Graphics();
+    const topInfoLanguageButtonLabel = new Text({
+      text: LOCALE_LABELS[localeRef.current] ?? localeRef.current,
+      style: {
+        fill: 0x2e3f50,
+        fontFamily: BODY_FONT,
+        fontSize: 11,
+        fontWeight: "700",
+      },
+    });
     const topInfoMeta = new Text({
       text: "/ 0 m",
       style: {
@@ -969,11 +1052,14 @@ export default function JourneyPixiTimeline({
     topInfoExpandedMenu.addChild(topInfoJourneyCounts);
     topInfoExpandedMenu.addChild(topInfoBackButton);
     topInfoExpandedMenu.addChild(topInfoShareButton);
+    topInfoExpandedMenu.addChild(topInfoLanguageButton);
 
     topInfoBackButton.addChild(topInfoBackButtonBg);
     topInfoBackButton.addChild(topInfoBackButtonLabel);
     topInfoShareButton.addChild(topInfoShareButtonBg);
     topInfoShareButton.addChild(topInfoShareButtonLabel);
+    topInfoLanguageButton.addChild(topInfoLanguageButtonBg);
+    topInfoLanguageButton.addChild(topInfoLanguageButtonLabel);
 
     topInfoChevronHitArea.eventMode = "static";
     topInfoChevronHitArea.cursor = "pointer";
@@ -992,6 +1078,13 @@ export default function JourneyPixiTimeline({
     topInfoShareButton.cursor = "pointer";
     topInfoShareButton.on("pointertap", () => {
       onShareJourneyRef.current?.();
+    });
+
+    topInfoLanguageButton.eventMode = "static";
+    topInfoLanguageButton.cursor = "pointer";
+    topInfoLanguageButton.on("pointertap", (event) => {
+      event.stopPropagation();
+      onToggleLocaleRef.current?.();
     });
 
     const speedControlContainer = new Container();
@@ -1085,47 +1178,8 @@ export default function JourneyPixiTimeline({
     distanceStartLabelBg.visible = false;
     distanceEndLabel.visible = false;
     distanceEndLabelBg.visible = false;
-    const distanceRailBoundsRef = { current: { top: 0, bottom: 0, height: 0 } };
-    const distanceRailDraggingRef = { current: false };
 
-    const syncTargetAltitudeFromDistanceRail = (globalY: number) => {
-      const { top, bottom, height } = distanceRailBoundsRef.current;
-      if (height <= 0 || totalDistance <= 0) return;
-
-      const clampedY = clampNumber(globalY, top, bottom);
-      const nextAltitude = totalDistance * (1 - (clampedY - top) / height);
-
-      targetAltitudeRef.current = clampNumber(nextAltitude, 0, totalDistance);
-    };
-
-    distanceInteractionArea.eventMode = "static";
-    distanceInteractionArea.cursor = "ns-resize";
-    distanceInteractionArea.on("pointertap", (event) => {
-      event.stopPropagation();
-      syncTargetAltitudeFromDistanceRail(event.global.y);
-    });
-    distanceInteractionArea.on("pointerdown", (event) => {
-      event.stopPropagation();
-      distanceRailDraggingRef.current = true;
-      syncTargetAltitudeFromDistanceRail(event.global.y);
-    });
-    distanceInteractionArea.on("pointerup", (event) => {
-      event.stopPropagation();
-      distanceRailDraggingRef.current = false;
-    });
-    distanceInteractionArea.on("pointerupoutside", (event) => {
-      event.stopPropagation();
-      distanceRailDraggingRef.current = false;
-    });
-    distanceInteractionArea.on("pointercancel", (event) => {
-      event.stopPropagation();
-      distanceRailDraggingRef.current = false;
-    });
-    distanceInteractionArea.on("globalpointermove", (event) => {
-      if (!distanceRailDraggingRef.current) return;
-      event.stopPropagation();
-      syncTargetAltitudeFromDistanceRail(event.global.y);
-    });
+    distanceInteractionArea.eventMode = "none";
 
     const epicPanelContainer = new Container();
     const epicPanelShadow = new Graphics();
@@ -1206,7 +1260,10 @@ export default function JourneyPixiTimeline({
     hudLayer.addChild(startGroundGraphic);
     badgeLayer.addChild(epicPanelContainer);
 
-    const epicVisuals: EpicVisual[] = epics.map((epic) => {
+    // Read from refs (not the captured props) so the scene is built from the latest
+    // localized content. Structural changes re-run this effect via sceneStructureKey;
+    // locale-only changes mutate these visuals in place through applyLocalizedContent.
+    const epicVisuals: EpicVisual[] = epicsRef.current.map((epic) => {
       const parsedBackground = parseStoredBackground(epic.background, epic.color);
       return {
         ...epic,
@@ -1220,7 +1277,7 @@ export default function JourneyPixiTimeline({
 
     const epicVisualById = new Map(epicVisuals.map((epic) => [epic.id, epic]));
 
-    const storyVisuals: StoryVisual[] = stories.map((story) => {
+    const storyVisuals: StoryVisual[] = storiesRef.current.map((story) => {
       const parsed = parseStoredBackground(story.background, "#ffd8a8");
       return {
         ...story,
@@ -1458,6 +1515,8 @@ export default function JourneyPixiTimeline({
           },
           chevronHovered: () => chevronHovered,
           story,
+          contentX,
+          altitudeY,
           chevronGraphic,
           collapsedTitleText,
           titleText,
@@ -1539,6 +1598,46 @@ export default function JourneyPixiTimeline({
     const textures = new Map<string, Texture>();
     let lastEpicPanelHtml = "";
     let lastEpicPanelId = "";
+
+    // Push the latest localized strings into the already-built scene without a teardown.
+    // Card/line/tooltip/epic-title text is read from these visuals each frame, so mutating
+    // them in place is enough; the expanded card title/description and the epic body HTML
+    // are only computed on build, so they are refreshed explicitly here.
+    const applyLocalizedContent = () => {
+      const latestStoryById = new Map(storiesRef.current.map((story) => [story.id, story]));
+      const latestEpicById = new Map(epicsRef.current.map((epic) => [epic.id, epic]));
+
+      storyVisuals.forEach((visual) => {
+        const latest = latestStoryById.get(visual.id);
+        if (!latest) return;
+        visual.title = latest.title;
+        visual.description = latest.description;
+        visual.lineLabel = latest.lineLabel;
+        visual.tooltipText = latest.tooltipText;
+      });
+
+      epicVisuals.forEach((visual) => {
+        const latest = latestEpicById.get(visual.id);
+        if (!latest) return;
+        visual.title = latest.title;
+        visual.description = latest.description;
+      });
+
+      cardNodes.forEach((node) => {
+        fitTextToHeight(node.titleText, node.story.title, 48, 18);
+        const descY = node.titleText.y + node.titleText.height + 8;
+        node.descText.position.set(node.contentX, descY);
+        const descSource = node.story.description || "No description";
+        fitTextToHeight(node.descText, descSource, node.altitudeY - descY - 10, 24);
+        node.descText.visible = node.descText.text.length > 0;
+      });
+
+      // Force the epic panel body (rebuilt from localized stories) to refresh next frame.
+      lastEpicPanelId = "";
+      lastEpicPanelHtml = "";
+    };
+
+    applyLocalizedContentRef.current = applyLocalizedContent;
 
     const renderFrame = (ticker?: { deltaMS?: number }) => {
       const lineOnly = viewMode === "line-only";
@@ -1654,12 +1753,15 @@ export default function JourneyPixiTimeline({
       );
       topInfoProgressRef.current = topInfoProgress;
       const topInfoWidth = lerp(topInfoMinWidth, topInfoExpandedWidth, smoothstep(topInfoProgress));
-      const topInfoHeight = 112;
+      // Closed: 112 fits altitude + meta + pace control.
+      // Open: 144 = expandedMenuMargin(16) + languageButtonY(86) + menuButtonHeight(30) + bottomPad(12).
+      const topInfoHeight = Math.round(lerp(112, 144, smoothstep(topInfoProgress)));
       const topInfoX = 16;
       const topInfoY = HUD_TOP_PADDING;
 
       topInfoContainer.visible = !lineOnly;
       topInfoContainer.position.set(topInfoX, topInfoY);
+      topInfoBoundsRef.current = { x: topInfoX, y: topInfoY, width: topInfoWidth, height: topInfoHeight };
       topInfoValue.position.set(20, 12);
       topInfoMeta.position.set(22, 52);
 
@@ -1702,12 +1804,12 @@ export default function JourneyPixiTimeline({
 
       fitTextToWidth(
         topInfoJourneyTitle,
-        journeyTitle || "Untitled journey",
+        journeyTitleRef.current || "Untitled journey",
         expandedMenuAvailableWidth,
         18,
       );
       topInfoJourneyTitle.position.set(0, 0);
-      topInfoJourneyCounts.text = `Epics: ${epics.length}   Stories: ${stories.length}`;
+      topInfoJourneyCounts.text = `Epics: ${epicsRef.current.length}   Stories: ${storiesRef.current.length}`;
       topInfoJourneyCounts.position.set(0, 24);
 
       const menuButtonsY = 48;
@@ -1720,7 +1822,7 @@ export default function JourneyPixiTimeline({
       topInfoBackButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
       topInfoBackButtonBg.fill({ color: 0xf9edd6, alpha: 0.96 });
       topInfoBackButtonBg.stroke({ color: 0xe6cfaa, width: 1.25, alpha: 0.94 });
-      fitTextToWidth(topInfoBackButtonLabel, "Back to journeys", menuButtonWidth - 20, 8);
+      fitTextToWidth(topInfoBackButtonLabel, labelsRef.current?.back ?? "Back to journeys", menuButtonWidth - 20, 8);
       topInfoBackButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoBackButtonLabel.width) / 2), 8);
 
       topInfoShareButton.position.set(menuButtonWidth + menuButtonGap, menuButtonsY);
@@ -1728,14 +1830,27 @@ export default function JourneyPixiTimeline({
       topInfoShareButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
       topInfoShareButtonBg.fill({ color: 0xebf3ff, alpha: 0.96 });
       topInfoShareButtonBg.stroke({ color: 0xd0e0f5, width: 1.25, alpha: 0.94 });
-      fitTextToWidth(topInfoShareButtonLabel, "Share", menuButtonWidth - 20, 5);
+      fitTextToWidth(topInfoShareButtonLabel, labelsRef.current?.share ?? "Share", menuButtonWidth - 20, 5);
       topInfoShareButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoShareButtonLabel.width) / 2), 8);
+
+      // Language toggle sits on its own row below the back/share buttons.
+      const languageButtonY = menuButtonsY + menuButtonHeight + menuButtonGap;
+      topInfoLanguageButton.position.set(0, languageButtonY);
+      topInfoLanguageButtonBg.clear();
+      topInfoLanguageButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
+      topInfoLanguageButtonBg.fill({ color: 0xeef7ee, alpha: 0.96 });
+      topInfoLanguageButtonBg.stroke({ color: 0xc9e3c9, width: 1.25, alpha: 0.94 });
+      const languageButtonText = LOCALE_LABELS[localeRef.current] ?? localeRef.current;
+      fitTextToWidth(topInfoLanguageButtonLabel, `🌐 ${languageButtonText}`, menuButtonWidth - 20, 8);
+      topInfoLanguageButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoLanguageButtonLabel.width) / 2), 8);
 
       const menuButtonsEnabled = expandedMenuAlpha > 0.75;
       topInfoBackButton.eventMode = menuButtonsEnabled ? "static" : "none";
       topInfoBackButton.cursor = menuButtonsEnabled ? "pointer" : "default";
       topInfoShareButton.eventMode = menuButtonsEnabled ? "static" : "none";
       topInfoShareButton.cursor = menuButtonsEnabled ? "pointer" : "default";
+      topInfoLanguageButton.eventMode = menuButtonsEnabled ? "static" : "none";
+      topInfoLanguageButton.cursor = menuButtonsEnabled ? "pointer" : "default";
 
       const speedHeight = 32;
       const canDecreaseSpeed = canDecreaseScrollMultiplier(scrollMultiplierRef.current);
@@ -1805,12 +1920,6 @@ export default function JourneyPixiTimeline({
       distanceRailShell.clear();
       distanceRailShell.roundRect(timelineX - 2, timelineTop - 4, 12, timelineHeight + 8, 6);
       distanceRailShell.fill({ color: lineOnly ? 0xa7c0da : 0x5e7b98, alpha: lineOnly ? 0.16 : 0.08 });
-
-      distanceRailBoundsRef.current = {
-        top: timelineTop,
-        bottom: timelineBottom,
-        height: timelineHeight,
-      };
 
       distanceInteractionArea.clear();
       distanceInteractionArea.roundRect(28, timelineTop - 26, 148, timelineHeight + 52, 24);
@@ -2337,11 +2446,13 @@ export default function JourneyPixiTimeline({
 
       if (lineOnly || !activeEpicForBackground) {
         epicPanelContainer.visible = false;
+        epicPanelBoundsRef.current = { x: 0, y: 0, width: 0, height: 0 };
       } else {
         const epicEasedProgress = smoothstep(epicPanelProgress);
         const epicCurrentWidth = lerp(EPIC_HEADER_WIDTH, epicPanelWidth, epicEasedProgress);
         const epicCurrentHeight = lerp(EPIC_HEADER_HEIGHT, epicPanelHeight, epicEasedProgress);
         const epicPanelX = lerp(epicClosedX, epicOpenX, epicEasedProgress);
+        epicPanelBoundsRef.current = { x: epicPanelX, y: EPIC_PANEL_PADDING, width: epicCurrentWidth, height: epicCurrentHeight };
         const panelHeaderAlpha = lerp(0.9, 1, epicEasedProgress);
         const epicBodyVisible = epicEasedProgress > 0.42;
         const panelBodyAlpha = clamp01((epicEasedProgress - 0.42) / 0.58);
@@ -2508,6 +2619,40 @@ export default function JourneyPixiTimeline({
       canvasWheelHandlerRef.current = handleCanvasWheel;
       app.canvas.addEventListener("wheel", handleCanvasWheel, { passive: false });
 
+      const handleCanvasPointerDown = (event: PointerEvent) => {
+        const canvasRect = app.canvas.getBoundingClientRect();
+        const localX = event.clientX - canvasRect.left;
+        const localY = event.clientY - canvasRect.top;
+
+        // Close epic panel if open and clicked outside
+        if (epicAccordionOpenRef.current) {
+          const epicBounds = epicPanelBoundsRef.current;
+          const isInsideEpicPanel = localX >= epicBounds.x
+            && localX <= epicBounds.x + epicBounds.width
+            && localY >= epicBounds.y
+            && localY <= epicBounds.y + epicBounds.height;
+          if (!isInsideEpicPanel) {
+            epicAccordionOpenRef.current = false;
+            epicScrollOffsetRef.current = 0;
+          }
+        }
+
+        // Close top info if expanded and clicked outside
+        if (topInfoExpandedRef.current) {
+          const topInfoBounds = topInfoBoundsRef.current;
+          const isInsideTopInfo = localX >= topInfoBounds.x
+            && localX <= topInfoBounds.x + topInfoBounds.width
+            && localY >= topInfoBounds.y
+            && localY <= topInfoBounds.y + topInfoBounds.height;
+          if (!isInsideTopInfo) {
+            topInfoExpandedRef.current = false;
+          }
+        }
+      };
+
+      canvasPointerDownHandlerRef.current = handleCanvasPointerDown;
+      app.canvas.addEventListener("pointerdown", handleCanvasPointerDown);
+
       resizeObserverRef.current = new ResizeObserver(syncSize);
       resizeObserverRef.current.observe(host);
 
@@ -2521,6 +2666,9 @@ export default function JourneyPixiTimeline({
 
     return () => {
       cancelled = true;
+      // Drop the closure bound to this (about-to-be-destroyed) scene so a concurrent
+      // stories/epics change can't run applyLocalizedContent against freed Pixi objects.
+      applyLocalizedContentRef.current = null;
       resizeObserverRef.current?.disconnect();
       resizeObserverRef.current = null;
       if (initialized) {
@@ -2528,11 +2676,16 @@ export default function JourneyPixiTimeline({
         if (canvasWheelHandlerRef.current) {
           app.canvas.removeEventListener("wheel", canvasWheelHandlerRef.current);
         }
+        if (canvasPointerDownHandlerRef.current) {
+          app.canvas.removeEventListener("pointerdown", canvasPointerDownHandlerRef.current);
+        }
         app.destroy(true, { children: true });
       }
       appRef.current = null;
     };
-  }, [epics, onRenderedAltitudeChange, onStoryCardClick, startGround, stories, targetAltitudeRef, totalDistance, viewMode]);
+    // Rebuild only on structural changes; locale/text-only changes update in place.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneStructureKey, onRenderedAltitudeChange, onStoryCardClick, startGround, targetAltitudeRef, totalDistance, viewMode]);
 
   return (
     <div

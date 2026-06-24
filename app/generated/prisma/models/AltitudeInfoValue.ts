@@ -269,6 +269,7 @@ export type AltitudeInfoValueWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"AltitudeInfoValue"> | Date | string
   altitudeInfoId?: Prisma.StringFilter<"AltitudeInfoValue"> | string
   altitudeInfo?: Prisma.XOR<Prisma.AltitudeInfoScalarRelationFilter, Prisma.AltitudeInfoWhereInput>
+  translations?: Prisma.AltitudeInfoValueTranslationListRelationFilter
 }
 
 export type AltitudeInfoValueOrderByWithRelationInput = {
@@ -283,6 +284,7 @@ export type AltitudeInfoValueOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   altitudeInfoId?: Prisma.SortOrder
   altitudeInfo?: Prisma.AltitudeInfoOrderByWithRelationInput
+  translations?: Prisma.AltitudeInfoValueTranslationOrderByRelationAggregateInput
 }
 
 export type AltitudeInfoValueWhereUniqueInput = Prisma.AtLeast<{
@@ -300,6 +302,7 @@ export type AltitudeInfoValueWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"AltitudeInfoValue"> | Date | string
   altitudeInfoId?: Prisma.StringFilter<"AltitudeInfoValue"> | string
   altitudeInfo?: Prisma.XOR<Prisma.AltitudeInfoScalarRelationFilter, Prisma.AltitudeInfoWhereInput>
+  translations?: Prisma.AltitudeInfoValueTranslationListRelationFilter
 }, "id">
 
 export type AltitudeInfoValueOrderByWithAggregationInput = {
@@ -347,6 +350,7 @@ export type AltitudeInfoValueCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   altitudeInfo: Prisma.AltitudeInfoCreateNestedOneWithoutValuesInput
+  translations?: Prisma.AltitudeInfoValueTranslationCreateNestedManyWithoutAltitudeInfoValueInput
 }
 
 export type AltitudeInfoValueUncheckedCreateInput = {
@@ -360,6 +364,7 @@ export type AltitudeInfoValueUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   altitudeInfoId: string
+  translations?: Prisma.AltitudeInfoValueTranslationUncheckedCreateNestedManyWithoutAltitudeInfoValueInput
 }
 
 export type AltitudeInfoValueUpdateInput = {
@@ -373,6 +378,7 @@ export type AltitudeInfoValueUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   altitudeInfo?: Prisma.AltitudeInfoUpdateOneRequiredWithoutValuesNestedInput
+  translations?: Prisma.AltitudeInfoValueTranslationUpdateManyWithoutAltitudeInfoValueNestedInput
 }
 
 export type AltitudeInfoValueUncheckedUpdateInput = {
@@ -386,6 +392,7 @@ export type AltitudeInfoValueUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   altitudeInfoId?: Prisma.StringFieldUpdateOperationsInput | string
+  translations?: Prisma.AltitudeInfoValueTranslationUncheckedUpdateManyWithoutAltitudeInfoValueNestedInput
 }
 
 export type AltitudeInfoValueCreateManyInput = {
@@ -489,6 +496,11 @@ export type AltitudeInfoValueSumOrderByAggregateInput = {
   endValue?: Prisma.SortOrder
 }
 
+export type AltitudeInfoValueScalarRelationFilter = {
+  is?: Prisma.AltitudeInfoValueWhereInput
+  isNot?: Prisma.AltitudeInfoValueWhereInput
+}
+
 export type AltitudeInfoValueCreateNestedManyWithoutAltitudeInfoInput = {
   create?: Prisma.XOR<Prisma.AltitudeInfoValueCreateWithoutAltitudeInfoInput, Prisma.AltitudeInfoValueUncheckedCreateWithoutAltitudeInfoInput> | Prisma.AltitudeInfoValueCreateWithoutAltitudeInfoInput[] | Prisma.AltitudeInfoValueUncheckedCreateWithoutAltitudeInfoInput[]
   connectOrCreate?: Prisma.AltitudeInfoValueCreateOrConnectWithoutAltitudeInfoInput | Prisma.AltitudeInfoValueCreateOrConnectWithoutAltitudeInfoInput[]
@@ -543,6 +555,20 @@ export type NullableFloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type AltitudeInfoValueCreateNestedOneWithoutTranslationsInput = {
+  create?: Prisma.XOR<Prisma.AltitudeInfoValueCreateWithoutTranslationsInput, Prisma.AltitudeInfoValueUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.AltitudeInfoValueCreateOrConnectWithoutTranslationsInput
+  connect?: Prisma.AltitudeInfoValueWhereUniqueInput
+}
+
+export type AltitudeInfoValueUpdateOneRequiredWithoutTranslationsNestedInput = {
+  create?: Prisma.XOR<Prisma.AltitudeInfoValueCreateWithoutTranslationsInput, Prisma.AltitudeInfoValueUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.AltitudeInfoValueCreateOrConnectWithoutTranslationsInput
+  upsert?: Prisma.AltitudeInfoValueUpsertWithoutTranslationsInput
+  connect?: Prisma.AltitudeInfoValueWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AltitudeInfoValueUpdateToOneWithWhereWithoutTranslationsInput, Prisma.AltitudeInfoValueUpdateWithoutTranslationsInput>, Prisma.AltitudeInfoValueUncheckedUpdateWithoutTranslationsInput>
+}
+
 export type AltitudeInfoValueCreateWithoutAltitudeInfoInput = {
   id?: string
   value: string
@@ -553,6 +579,7 @@ export type AltitudeInfoValueCreateWithoutAltitudeInfoInput = {
   endValue?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  translations?: Prisma.AltitudeInfoValueTranslationCreateNestedManyWithoutAltitudeInfoValueInput
 }
 
 export type AltitudeInfoValueUncheckedCreateWithoutAltitudeInfoInput = {
@@ -565,6 +592,7 @@ export type AltitudeInfoValueUncheckedCreateWithoutAltitudeInfoInput = {
   endValue?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  translations?: Prisma.AltitudeInfoValueTranslationUncheckedCreateNestedManyWithoutAltitudeInfoValueInput
 }
 
 export type AltitudeInfoValueCreateOrConnectWithoutAltitudeInfoInput = {
@@ -609,6 +637,74 @@ export type AltitudeInfoValueScalarWhereInput = {
   altitudeInfoId?: Prisma.StringFilter<"AltitudeInfoValue"> | string
 }
 
+export type AltitudeInfoValueCreateWithoutTranslationsInput = {
+  id?: string
+  value: string
+  startPoint: number
+  endPoint: number
+  useGradient?: boolean
+  startValue?: number | null
+  endValue?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  altitudeInfo: Prisma.AltitudeInfoCreateNestedOneWithoutValuesInput
+}
+
+export type AltitudeInfoValueUncheckedCreateWithoutTranslationsInput = {
+  id?: string
+  value: string
+  startPoint: number
+  endPoint: number
+  useGradient?: boolean
+  startValue?: number | null
+  endValue?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  altitudeInfoId: string
+}
+
+export type AltitudeInfoValueCreateOrConnectWithoutTranslationsInput = {
+  where: Prisma.AltitudeInfoValueWhereUniqueInput
+  create: Prisma.XOR<Prisma.AltitudeInfoValueCreateWithoutTranslationsInput, Prisma.AltitudeInfoValueUncheckedCreateWithoutTranslationsInput>
+}
+
+export type AltitudeInfoValueUpsertWithoutTranslationsInput = {
+  update: Prisma.XOR<Prisma.AltitudeInfoValueUpdateWithoutTranslationsInput, Prisma.AltitudeInfoValueUncheckedUpdateWithoutTranslationsInput>
+  create: Prisma.XOR<Prisma.AltitudeInfoValueCreateWithoutTranslationsInput, Prisma.AltitudeInfoValueUncheckedCreateWithoutTranslationsInput>
+  where?: Prisma.AltitudeInfoValueWhereInput
+}
+
+export type AltitudeInfoValueUpdateToOneWithWhereWithoutTranslationsInput = {
+  where?: Prisma.AltitudeInfoValueWhereInput
+  data: Prisma.XOR<Prisma.AltitudeInfoValueUpdateWithoutTranslationsInput, Prisma.AltitudeInfoValueUncheckedUpdateWithoutTranslationsInput>
+}
+
+export type AltitudeInfoValueUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  value?: Prisma.StringFieldUpdateOperationsInput | string
+  startPoint?: Prisma.IntFieldUpdateOperationsInput | number
+  endPoint?: Prisma.IntFieldUpdateOperationsInput | number
+  useGradient?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfo?: Prisma.AltitudeInfoUpdateOneRequiredWithoutValuesNestedInput
+}
+
+export type AltitudeInfoValueUncheckedUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  value?: Prisma.StringFieldUpdateOperationsInput | string
+  startPoint?: Prisma.IntFieldUpdateOperationsInput | number
+  endPoint?: Prisma.IntFieldUpdateOperationsInput | number
+  useGradient?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  endValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  altitudeInfoId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
 export type AltitudeInfoValueCreateManyAltitudeInfoInput = {
   id?: string
   value: string
@@ -631,6 +727,7 @@ export type AltitudeInfoValueUpdateWithoutAltitudeInfoInput = {
   endValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  translations?: Prisma.AltitudeInfoValueTranslationUpdateManyWithoutAltitudeInfoValueNestedInput
 }
 
 export type AltitudeInfoValueUncheckedUpdateWithoutAltitudeInfoInput = {
@@ -643,6 +740,7 @@ export type AltitudeInfoValueUncheckedUpdateWithoutAltitudeInfoInput = {
   endValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  translations?: Prisma.AltitudeInfoValueTranslationUncheckedUpdateManyWithoutAltitudeInfoValueNestedInput
 }
 
 export type AltitudeInfoValueUncheckedUpdateManyWithoutAltitudeInfoInput = {
@@ -658,6 +756,35 @@ export type AltitudeInfoValueUncheckedUpdateManyWithoutAltitudeInfoInput = {
 }
 
 
+/**
+ * Count Type AltitudeInfoValueCountOutputType
+ */
+
+export type AltitudeInfoValueCountOutputType = {
+  translations: number
+}
+
+export type AltitudeInfoValueCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  translations?: boolean | AltitudeInfoValueCountOutputTypeCountTranslationsArgs
+}
+
+/**
+ * AltitudeInfoValueCountOutputType without action
+ */
+export type AltitudeInfoValueCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AltitudeInfoValueCountOutputType
+   */
+  select?: Prisma.AltitudeInfoValueCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * AltitudeInfoValueCountOutputType without action
+ */
+export type AltitudeInfoValueCountOutputTypeCountTranslationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AltitudeInfoValueTranslationWhereInput
+}
+
 
 export type AltitudeInfoValueSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -671,6 +798,8 @@ export type AltitudeInfoValueSelect<ExtArgs extends runtime.Types.Extensions.Int
   updatedAt?: boolean
   altitudeInfoId?: boolean
   altitudeInfo?: boolean | Prisma.AltitudeInfoDefaultArgs<ExtArgs>
+  translations?: boolean | Prisma.AltitudeInfoValue$translationsArgs<ExtArgs>
+  _count?: boolean | Prisma.AltitudeInfoValueCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["altitudeInfoValue"]>
 
 export type AltitudeInfoValueSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -717,6 +846,8 @@ export type AltitudeInfoValueSelectScalar = {
 export type AltitudeInfoValueOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value" | "startPoint" | "endPoint" | "useGradient" | "startValue" | "endValue" | "createdAt" | "updatedAt" | "altitudeInfoId", ExtArgs["result"]["altitudeInfoValue"]>
 export type AltitudeInfoValueInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   altitudeInfo?: boolean | Prisma.AltitudeInfoDefaultArgs<ExtArgs>
+  translations?: boolean | Prisma.AltitudeInfoValue$translationsArgs<ExtArgs>
+  _count?: boolean | Prisma.AltitudeInfoValueCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AltitudeInfoValueIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   altitudeInfo?: boolean | Prisma.AltitudeInfoDefaultArgs<ExtArgs>
@@ -729,6 +860,7 @@ export type $AltitudeInfoValuePayload<ExtArgs extends runtime.Types.Extensions.I
   name: "AltitudeInfoValue"
   objects: {
     altitudeInfo: Prisma.$AltitudeInfoPayload<ExtArgs>
+    translations: Prisma.$AltitudeInfoValueTranslationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1136,6 +1268,7 @@ readonly fields: AltitudeInfoValueFieldRefs;
 export interface Prisma__AltitudeInfoValueClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   altitudeInfo<T extends Prisma.AltitudeInfoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AltitudeInfoDefaultArgs<ExtArgs>>): Prisma.Prisma__AltitudeInfoClient<runtime.Types.Result.GetResult<Prisma.$AltitudeInfoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  translations<T extends Prisma.AltitudeInfoValue$translationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AltitudeInfoValue$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AltitudeInfoValueTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1573,6 +1706,30 @@ export type AltitudeInfoValueDeleteManyArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many AltitudeInfoValues to delete.
    */
   limit?: number
+}
+
+/**
+ * AltitudeInfoValue.translations
+ */
+export type AltitudeInfoValue$translationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AltitudeInfoValueTranslation
+   */
+  select?: Prisma.AltitudeInfoValueTranslationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AltitudeInfoValueTranslation
+   */
+  omit?: Prisma.AltitudeInfoValueTranslationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AltitudeInfoValueTranslationInclude<ExtArgs> | null
+  where?: Prisma.AltitudeInfoValueTranslationWhereInput
+  orderBy?: Prisma.AltitudeInfoValueTranslationOrderByWithRelationInput | Prisma.AltitudeInfoValueTranslationOrderByWithRelationInput[]
+  cursor?: Prisma.AltitudeInfoValueTranslationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AltitudeInfoValueTranslationScalarFieldEnum | Prisma.AltitudeInfoValueTranslationScalarFieldEnum[]
 }
 
 /**

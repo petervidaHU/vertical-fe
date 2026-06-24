@@ -9,9 +9,15 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Journey'
+export type * from './models/JourneyTranslation'
 export type * from './models/Tag'
+export type * from './models/TagTranslation'
 export type * from './models/AltitudeInfo'
+export type * from './models/AltitudeInfoTranslation'
 export type * from './models/AltitudeInfoValue'
+export type * from './models/AltitudeInfoValueTranslation'
 export type * from './models/Epic'
+export type * from './models/EpicTranslation'
 export type * from './models/Story'
+export type * from './models/StoryTranslation'
 export type * from './commonInputTypes'

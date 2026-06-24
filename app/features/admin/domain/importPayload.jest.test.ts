@@ -26,6 +26,60 @@ describe("normalizeImportPayload", () => {
     expect(parsed.stories[0]?.tags).toEqual(["planning", "basics"]);
   });
 
+  it("parses per-locale translation blocks and drops the source/blank locales", () => {
+    const parsed = normalizeImportPayload({
+      altitudeInfos: [
+        {
+          title: "Temperature",
+          translations: { hu: { title: "Hőmérséklet" }, en: { title: "ignored-source" } },
+          values: [
+            {
+              value: "18 C",
+              startPoint: 0,
+              endPoint: 120,
+              translations: { hu: { value: "18 °C hideg" } },
+            },
+          ],
+        },
+      ],
+      epics: [
+        {
+          title: "Approach",
+          startPoint: 0,
+          endPoint: 120,
+          translations: { hu: { title: "Megközelítés", description: "Leírás" } },
+        },
+      ],
+      stories: [
+        {
+          title: "Set Camp",
+          startPoint: 10,
+          endPoint: 40,
+          translations: { hu: { title: "Tábor", description: "" } },
+        },
+      ],
+    });
+
+    // The "en" block is ignored (source locale lives in the base columns).
+    expect(parsed.altitudeInfos[0]?.translations).toEqual([{ locale: "hu", title: "Hőmérséklet" }]);
+    expect(parsed.altitudeInfos[0]?.values[0]?.translations).toEqual([{ locale: "hu", value: "18 °C hideg" }]);
+    expect(parsed.epics[0]?.translations).toEqual([
+      { locale: "hu", title: "Megközelítés", description: "Leírás" },
+    ]);
+    // Blank description still produces a row because the title carries content.
+    expect(parsed.stories[0]?.translations).toEqual([
+      { locale: "hu", title: "Tábor", description: "", extraContent: "", lineLabel: "", tooltipText: "" },
+    ]);
+  });
+
+  it("defaults missing translation blocks to an empty array", () => {
+    const parsed = normalizeImportPayload({
+      epics: [{ title: "Approach", startPoint: 0, endPoint: 120 }],
+    });
+
+    expect(parsed.epics[0]?.translations).toEqual([]);
+  });
+
   it("caps imported tags to the configured system maximum", () => {
     const tags = Array.from({ length: 25 }, (_, index) => `topic-${String(index).padStart(2, "0")}`);
 

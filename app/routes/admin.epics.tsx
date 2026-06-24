@@ -183,11 +183,17 @@ export async function action({ request, params }: { request: Request; params: { 
               icon: altitudeInfo.icon,
               order: altitudeInfo.order,
               journeyId,
+              ...(altitudeInfo.translations.length > 0 && {
+                translations: { create: altitudeInfo.translations },
+              }),
               values: {
                 create: altitudeInfo.values.map((valueBand) => ({
                   value: valueBand.value,
                   startPoint: valueBand.startPoint,
                   endPoint: valueBand.endPoint,
+                  ...(valueBand.translations.length > 0 && {
+                    translations: { create: valueBand.translations },
+                  }),
                 })),
               },
               ...(altitudeInfo.tags.length > 0 && {
@@ -213,6 +219,9 @@ export async function action({ request, params }: { request: Request; params: { 
               journeyId,
               startPoint: epic.startPoint,
               endPoint: epic.endPoint,
+              ...(epic.translations.length > 0 && {
+                translations: { create: epic.translations },
+              }),
             },
           });
         }
@@ -224,7 +233,6 @@ export async function action({ request, params }: { request: Request; params: { 
               description: story.description,
               extraContent: story.extraContent,
               storyType: story.storyType,
-              background: story.background,
               imageUrl: story.imageUrl,
               lineColor: story.lineColor,
               lineWidth: story.lineWidth,
@@ -234,6 +242,9 @@ export async function action({ request, params }: { request: Request; params: { 
               journeyId,
               startPoint: story.startPoint,
               endPoint: story.endPoint,
+              ...(story.translations.length > 0 && {
+                translations: { create: story.translations },
+              }),
               ...(story.tags.length > 0 && {
                 tags: {
                   connectOrCreate: story.tags.map((name) => ({

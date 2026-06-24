@@ -185,6 +185,7 @@ export type TagWhereInput = {
   journey?: Prisma.XOR<Prisma.JourneyScalarRelationFilter, Prisma.JourneyWhereInput>
   stories?: Prisma.StoryListRelationFilter
   altitudeInfos?: Prisma.AltitudeInfoListRelationFilter
+  translations?: Prisma.TagTranslationListRelationFilter
 }
 
 export type TagOrderByWithRelationInput = {
@@ -196,6 +197,7 @@ export type TagOrderByWithRelationInput = {
   journey?: Prisma.JourneyOrderByWithRelationInput
   stories?: Prisma.StoryOrderByRelationAggregateInput
   altitudeInfos?: Prisma.AltitudeInfoOrderByRelationAggregateInput
+  translations?: Prisma.TagTranslationOrderByRelationAggregateInput
 }
 
 export type TagWhereUniqueInput = Prisma.AtLeast<{
@@ -210,6 +212,7 @@ export type TagWhereUniqueInput = Prisma.AtLeast<{
   journey?: Prisma.XOR<Prisma.JourneyScalarRelationFilter, Prisma.JourneyWhereInput>
   stories?: Prisma.StoryListRelationFilter
   altitudeInfos?: Prisma.AltitudeInfoListRelationFilter
+  translations?: Prisma.TagTranslationListRelationFilter
 }, "id" | "name">
 
 export type TagOrderByWithAggregationInput = {
@@ -242,6 +245,7 @@ export type TagCreateInput = {
   journey: Prisma.JourneyCreateNestedOneWithoutTagsInput
   stories?: Prisma.StoryCreateNestedManyWithoutTagsInput
   altitudeInfos?: Prisma.AltitudeInfoCreateNestedManyWithoutTagsInput
+  translations?: Prisma.TagTranslationCreateNestedManyWithoutTagInput
 }
 
 export type TagUncheckedCreateInput = {
@@ -252,6 +256,7 @@ export type TagUncheckedCreateInput = {
   journeyId: string
   stories?: Prisma.StoryUncheckedCreateNestedManyWithoutTagsInput
   altitudeInfos?: Prisma.AltitudeInfoUncheckedCreateNestedManyWithoutTagsInput
+  translations?: Prisma.TagTranslationUncheckedCreateNestedManyWithoutTagInput
 }
 
 export type TagUpdateInput = {
@@ -262,6 +267,7 @@ export type TagUpdateInput = {
   journey?: Prisma.JourneyUpdateOneRequiredWithoutTagsNestedInput
   stories?: Prisma.StoryUpdateManyWithoutTagsNestedInput
   altitudeInfos?: Prisma.AltitudeInfoUpdateManyWithoutTagsNestedInput
+  translations?: Prisma.TagTranslationUpdateManyWithoutTagNestedInput
 }
 
 export type TagUncheckedUpdateInput = {
@@ -272,6 +278,7 @@ export type TagUncheckedUpdateInput = {
   journeyId?: Prisma.StringFieldUpdateOperationsInput | string
   stories?: Prisma.StoryUncheckedUpdateManyWithoutTagsNestedInput
   altitudeInfos?: Prisma.AltitudeInfoUncheckedUpdateManyWithoutTagsNestedInput
+  translations?: Prisma.TagTranslationUncheckedUpdateManyWithoutTagNestedInput
 }
 
 export type TagCreateManyInput = {
@@ -331,6 +338,11 @@ export type TagMinOrderByAggregateInput = {
   journeyId?: Prisma.SortOrder
 }
 
+export type TagScalarRelationFilter = {
+  is?: Prisma.TagWhereInput
+  isNot?: Prisma.TagWhereInput
+}
+
 export type TagCreateNestedManyWithoutJourneyInput = {
   create?: Prisma.XOR<Prisma.TagCreateWithoutJourneyInput, Prisma.TagUncheckedCreateWithoutJourneyInput> | Prisma.TagCreateWithoutJourneyInput[] | Prisma.TagUncheckedCreateWithoutJourneyInput[]
   connectOrCreate?: Prisma.TagCreateOrConnectWithoutJourneyInput | Prisma.TagCreateOrConnectWithoutJourneyInput[]
@@ -371,6 +383,20 @@ export type TagUncheckedUpdateManyWithoutJourneyNestedInput = {
   update?: Prisma.TagUpdateWithWhereUniqueWithoutJourneyInput | Prisma.TagUpdateWithWhereUniqueWithoutJourneyInput[]
   updateMany?: Prisma.TagUpdateManyWithWhereWithoutJourneyInput | Prisma.TagUpdateManyWithWhereWithoutJourneyInput[]
   deleteMany?: Prisma.TagScalarWhereInput | Prisma.TagScalarWhereInput[]
+}
+
+export type TagCreateNestedOneWithoutTranslationsInput = {
+  create?: Prisma.XOR<Prisma.TagCreateWithoutTranslationsInput, Prisma.TagUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.TagCreateOrConnectWithoutTranslationsInput
+  connect?: Prisma.TagWhereUniqueInput
+}
+
+export type TagUpdateOneRequiredWithoutTranslationsNestedInput = {
+  create?: Prisma.XOR<Prisma.TagCreateWithoutTranslationsInput, Prisma.TagUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.TagCreateOrConnectWithoutTranslationsInput
+  upsert?: Prisma.TagUpsertWithoutTranslationsInput
+  connect?: Prisma.TagWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TagUpdateToOneWithWhereWithoutTranslationsInput, Prisma.TagUpdateWithoutTranslationsInput>, Prisma.TagUncheckedUpdateWithoutTranslationsInput>
 }
 
 export type TagCreateNestedManyWithoutAltitudeInfosInput = {
@@ -456,6 +482,7 @@ export type TagCreateWithoutJourneyInput = {
   updatedAt?: Date | string
   stories?: Prisma.StoryCreateNestedManyWithoutTagsInput
   altitudeInfos?: Prisma.AltitudeInfoCreateNestedManyWithoutTagsInput
+  translations?: Prisma.TagTranslationCreateNestedManyWithoutTagInput
 }
 
 export type TagUncheckedCreateWithoutJourneyInput = {
@@ -465,6 +492,7 @@ export type TagUncheckedCreateWithoutJourneyInput = {
   updatedAt?: Date | string
   stories?: Prisma.StoryUncheckedCreateNestedManyWithoutTagsInput
   altitudeInfos?: Prisma.AltitudeInfoUncheckedCreateNestedManyWithoutTagsInput
+  translations?: Prisma.TagTranslationUncheckedCreateNestedManyWithoutTagInput
 }
 
 export type TagCreateOrConnectWithoutJourneyInput = {
@@ -504,6 +532,62 @@ export type TagScalarWhereInput = {
   journeyId?: Prisma.StringFilter<"Tag"> | string
 }
 
+export type TagCreateWithoutTranslationsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  journey: Prisma.JourneyCreateNestedOneWithoutTagsInput
+  stories?: Prisma.StoryCreateNestedManyWithoutTagsInput
+  altitudeInfos?: Prisma.AltitudeInfoCreateNestedManyWithoutTagsInput
+}
+
+export type TagUncheckedCreateWithoutTranslationsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  journeyId: string
+  stories?: Prisma.StoryUncheckedCreateNestedManyWithoutTagsInput
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedCreateNestedManyWithoutTagsInput
+}
+
+export type TagCreateOrConnectWithoutTranslationsInput = {
+  where: Prisma.TagWhereUniqueInput
+  create: Prisma.XOR<Prisma.TagCreateWithoutTranslationsInput, Prisma.TagUncheckedCreateWithoutTranslationsInput>
+}
+
+export type TagUpsertWithoutTranslationsInput = {
+  update: Prisma.XOR<Prisma.TagUpdateWithoutTranslationsInput, Prisma.TagUncheckedUpdateWithoutTranslationsInput>
+  create: Prisma.XOR<Prisma.TagCreateWithoutTranslationsInput, Prisma.TagUncheckedCreateWithoutTranslationsInput>
+  where?: Prisma.TagWhereInput
+}
+
+export type TagUpdateToOneWithWhereWithoutTranslationsInput = {
+  where?: Prisma.TagWhereInput
+  data: Prisma.XOR<Prisma.TagUpdateWithoutTranslationsInput, Prisma.TagUncheckedUpdateWithoutTranslationsInput>
+}
+
+export type TagUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  journey?: Prisma.JourneyUpdateOneRequiredWithoutTagsNestedInput
+  stories?: Prisma.StoryUpdateManyWithoutTagsNestedInput
+  altitudeInfos?: Prisma.AltitudeInfoUpdateManyWithoutTagsNestedInput
+}
+
+export type TagUncheckedUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  journeyId?: Prisma.StringFieldUpdateOperationsInput | string
+  stories?: Prisma.StoryUncheckedUpdateManyWithoutTagsNestedInput
+  altitudeInfos?: Prisma.AltitudeInfoUncheckedUpdateManyWithoutTagsNestedInput
+}
+
 export type TagCreateWithoutAltitudeInfosInput = {
   id?: string
   name: string
@@ -511,6 +595,7 @@ export type TagCreateWithoutAltitudeInfosInput = {
   updatedAt?: Date | string
   journey: Prisma.JourneyCreateNestedOneWithoutTagsInput
   stories?: Prisma.StoryCreateNestedManyWithoutTagsInput
+  translations?: Prisma.TagTranslationCreateNestedManyWithoutTagInput
 }
 
 export type TagUncheckedCreateWithoutAltitudeInfosInput = {
@@ -520,6 +605,7 @@ export type TagUncheckedCreateWithoutAltitudeInfosInput = {
   updatedAt?: Date | string
   journeyId: string
   stories?: Prisma.StoryUncheckedCreateNestedManyWithoutTagsInput
+  translations?: Prisma.TagTranslationUncheckedCreateNestedManyWithoutTagInput
 }
 
 export type TagCreateOrConnectWithoutAltitudeInfosInput = {
@@ -550,6 +636,7 @@ export type TagCreateWithoutStoriesInput = {
   updatedAt?: Date | string
   journey: Prisma.JourneyCreateNestedOneWithoutTagsInput
   altitudeInfos?: Prisma.AltitudeInfoCreateNestedManyWithoutTagsInput
+  translations?: Prisma.TagTranslationCreateNestedManyWithoutTagInput
 }
 
 export type TagUncheckedCreateWithoutStoriesInput = {
@@ -559,6 +646,7 @@ export type TagUncheckedCreateWithoutStoriesInput = {
   updatedAt?: Date | string
   journeyId: string
   altitudeInfos?: Prisma.AltitudeInfoUncheckedCreateNestedManyWithoutTagsInput
+  translations?: Prisma.TagTranslationUncheckedCreateNestedManyWithoutTagInput
 }
 
 export type TagCreateOrConnectWithoutStoriesInput = {
@@ -596,6 +684,7 @@ export type TagUpdateWithoutJourneyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stories?: Prisma.StoryUpdateManyWithoutTagsNestedInput
   altitudeInfos?: Prisma.AltitudeInfoUpdateManyWithoutTagsNestedInput
+  translations?: Prisma.TagTranslationUpdateManyWithoutTagNestedInput
 }
 
 export type TagUncheckedUpdateWithoutJourneyInput = {
@@ -605,6 +694,7 @@ export type TagUncheckedUpdateWithoutJourneyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stories?: Prisma.StoryUncheckedUpdateManyWithoutTagsNestedInput
   altitudeInfos?: Prisma.AltitudeInfoUncheckedUpdateManyWithoutTagsNestedInput
+  translations?: Prisma.TagTranslationUncheckedUpdateManyWithoutTagNestedInput
 }
 
 export type TagUncheckedUpdateManyWithoutJourneyInput = {
@@ -621,6 +711,7 @@ export type TagUpdateWithoutAltitudeInfosInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journey?: Prisma.JourneyUpdateOneRequiredWithoutTagsNestedInput
   stories?: Prisma.StoryUpdateManyWithoutTagsNestedInput
+  translations?: Prisma.TagTranslationUpdateManyWithoutTagNestedInput
 }
 
 export type TagUncheckedUpdateWithoutAltitudeInfosInput = {
@@ -630,6 +721,7 @@ export type TagUncheckedUpdateWithoutAltitudeInfosInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journeyId?: Prisma.StringFieldUpdateOperationsInput | string
   stories?: Prisma.StoryUncheckedUpdateManyWithoutTagsNestedInput
+  translations?: Prisma.TagTranslationUncheckedUpdateManyWithoutTagNestedInput
 }
 
 export type TagUncheckedUpdateManyWithoutAltitudeInfosInput = {
@@ -647,6 +739,7 @@ export type TagUpdateWithoutStoriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journey?: Prisma.JourneyUpdateOneRequiredWithoutTagsNestedInput
   altitudeInfos?: Prisma.AltitudeInfoUpdateManyWithoutTagsNestedInput
+  translations?: Prisma.TagTranslationUpdateManyWithoutTagNestedInput
 }
 
 export type TagUncheckedUpdateWithoutStoriesInput = {
@@ -656,6 +749,7 @@ export type TagUncheckedUpdateWithoutStoriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journeyId?: Prisma.StringFieldUpdateOperationsInput | string
   altitudeInfos?: Prisma.AltitudeInfoUncheckedUpdateManyWithoutTagsNestedInput
+  translations?: Prisma.TagTranslationUncheckedUpdateManyWithoutTagNestedInput
 }
 
 export type TagUncheckedUpdateManyWithoutStoriesInput = {
@@ -674,11 +768,13 @@ export type TagUncheckedUpdateManyWithoutStoriesInput = {
 export type TagCountOutputType = {
   stories: number
   altitudeInfos: number
+  translations: number
 }
 
 export type TagCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   stories?: boolean | TagCountOutputTypeCountStoriesArgs
   altitudeInfos?: boolean | TagCountOutputTypeCountAltitudeInfosArgs
+  translations?: boolean | TagCountOutputTypeCountTranslationsArgs
 }
 
 /**
@@ -705,6 +801,13 @@ export type TagCountOutputTypeCountAltitudeInfosArgs<ExtArgs extends runtime.Typ
   where?: Prisma.AltitudeInfoWhereInput
 }
 
+/**
+ * TagCountOutputType without action
+ */
+export type TagCountOutputTypeCountTranslationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TagTranslationWhereInput
+}
+
 
 export type TagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -715,6 +818,7 @@ export type TagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
   stories?: boolean | Prisma.Tag$storiesArgs<ExtArgs>
   altitudeInfos?: boolean | Prisma.Tag$altitudeInfosArgs<ExtArgs>
+  translations?: boolean | Prisma.Tag$translationsArgs<ExtArgs>
   _count?: boolean | Prisma.TagCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tag"]>
 
@@ -749,6 +853,7 @@ export type TagInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
   stories?: boolean | Prisma.Tag$storiesArgs<ExtArgs>
   altitudeInfos?: boolean | Prisma.Tag$altitudeInfosArgs<ExtArgs>
+  translations?: boolean | Prisma.Tag$translationsArgs<ExtArgs>
   _count?: boolean | Prisma.TagCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TagIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -764,6 +869,7 @@ export type $TagPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     journey: Prisma.$JourneyPayload<ExtArgs>
     stories: Prisma.$StoryPayload<ExtArgs>[]
     altitudeInfos: Prisma.$AltitudeInfoPayload<ExtArgs>[]
+    translations: Prisma.$TagTranslationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1168,6 +1274,7 @@ export interface Prisma__TagClient<T, Null = never, ExtArgs extends runtime.Type
   journey<T extends Prisma.JourneyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JourneyDefaultArgs<ExtArgs>>): Prisma.Prisma__JourneyClient<runtime.Types.Result.GetResult<Prisma.$JourneyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   stories<T extends Prisma.Tag$storiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tag$storiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   altitudeInfos<T extends Prisma.Tag$altitudeInfosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tag$altitudeInfosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AltitudeInfoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  translations<T extends Prisma.Tag$translationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tag$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TagTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1648,6 +1755,30 @@ export type Tag$altitudeInfosArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.AltitudeInfoScalarFieldEnum | Prisma.AltitudeInfoScalarFieldEnum[]
+}
+
+/**
+ * Tag.translations
+ */
+export type Tag$translationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TagTranslation
+   */
+  select?: Prisma.TagTranslationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TagTranslation
+   */
+  omit?: Prisma.TagTranslationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagTranslationInclude<ExtArgs> | null
+  where?: Prisma.TagTranslationWhereInput
+  orderBy?: Prisma.TagTranslationOrderByWithRelationInput | Prisma.TagTranslationOrderByWithRelationInput[]
+  cursor?: Prisma.TagTranslationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TagTranslationScalarFieldEnum | Prisma.TagTranslationScalarFieldEnum[]
 }
 
 /**

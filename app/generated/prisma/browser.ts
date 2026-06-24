@@ -23,27 +23,57 @@ export * from './enums';
  */
 export type Journey = Prisma.JourneyModel
 /**
+ * Model JourneyTranslation
+ * 
+ */
+export type JourneyTranslation = Prisma.JourneyTranslationModel
+/**
  * Model Tag
  * 
  */
 export type Tag = Prisma.TagModel
+/**
+ * Model TagTranslation
+ * 
+ */
+export type TagTranslation = Prisma.TagTranslationModel
 /**
  * Model AltitudeInfo
  * 
  */
 export type AltitudeInfo = Prisma.AltitudeInfoModel
 /**
+ * Model AltitudeInfoTranslation
+ * 
+ */
+export type AltitudeInfoTranslation = Prisma.AltitudeInfoTranslationModel
+/**
  * Model AltitudeInfoValue
  * 
  */
 export type AltitudeInfoValue = Prisma.AltitudeInfoValueModel
+/**
+ * Model AltitudeInfoValueTranslation
+ * 
+ */
+export type AltitudeInfoValueTranslation = Prisma.AltitudeInfoValueTranslationModel
 /**
  * Model Epic
  * 
  */
 export type Epic = Prisma.EpicModel
 /**
+ * Model EpicTranslation
+ * 
+ */
+export type EpicTranslation = Prisma.EpicTranslationModel
+/**
  * Model Story
  * 
  */
 export type Story = Prisma.StoryModel
+/**
+ * Model StoryTranslation
+ * 
+ */
+export type StoryTranslation = Prisma.StoryTranslationModel

@@ -4,8 +4,17 @@ import { Form, Link, useActionData, useOutletContext, useParams } from "react-ro
 import StoryExtraContentEditor from "../features/admin/components/StoryExtraContentEditor";
 import { STORY_IMAGE_ACCEPT, STORY_IMAGE_MAX_BYTES } from "../features/admin/domain/storyImage.shared";
 import { AdminActionStatus, AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
+import TranslatedFields from "../features/admin/components/TranslatedFields";
+import {
+  TRANSLATABLE_LOCALES,
+  asTranslationDelegate,
+  readTranslatedField,
+  translatedFieldName,
+  translationDefault,
+  writeEntityTranslations,
+} from "../features/admin/domain/translations";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
-import { parseStoryExtraContent } from "../shared/validation/storySchemas";
+import { STORY_EXTRA_CONTENT_MAX_LENGTH, parseStoryExtraContent } from "../shared/validation/storySchemas";
 import TagSelector from "../features/tags/admin/TagSelector";
 import { TAG_SYSTEM_MAX_COUNT, type TagLike } from "../features/tags/domain/tags";
 import type { TagSuggestion } from "../features/tags/admin/TagSelector";
@@ -74,6 +83,15 @@ export async function action({
     return { error: "Line width must be between 1 and 64." };
   }
 
+  for (const translatedLocale of TRANSLATABLE_LOCALES) {
+    const translatedExtraContent = readTranslatedField(formData, "extraContent", translatedLocale);
+    if (translatedExtraContent.length > STORY_EXTRA_CONTENT_MAX_LENGTH) {
+      return {
+        error: `Extra content (${translatedLocale}) must be ${STORY_EXTRA_CONTENT_MAX_LENGTH} characters or fewer.`,
+      };
+    }
+  }
+
   // Resolve tag IDs before updating
   const tagIds = await resolveJourneyTagIds(formData, params.journeyId);
 
@@ -111,6 +129,14 @@ export async function action({
           set: tagIds.map((id) => ({ id })),
         },
       },
+    });
+
+    await writeEntityTranslations({
+      delegate: asTranslationDelegate(db.storyTranslation),
+      parentKey: "storyId",
+      parentId: params.storyId,
+      fields: ["title", "description", "extraContent", "lineLabel", "tooltipText"],
+      formData,
     });
   } catch (error) {
     if (uploadedStoryImage) {
@@ -218,7 +244,6 @@ const AdminJourneyStoryEditorRoute = () => {
         <Form method="post" encType="multipart/form-data" key={story.id}>
           <Stack>
             <Text size="sm" c="dimmed">Journey: {journey.name}</Text>
-            <TextInput label="Title" name="title" required defaultValue={story.title} />
             <label>
               Story type
               <select
@@ -230,8 +255,27 @@ const AdminJourneyStoryEditorRoute = () => {
                 <option value="LINE">Line</option>
               </select>
             </label>
-            <TextInput label="Description" name="description" defaultValue={story.description} />
-            <StoryExtraContentEditor name="extraContent" initialValue={story.extraContent} />
+            <TranslatedFields
+              render={(locale, isSourceLocale) => (
+                <Stack>
+                  <TextInput
+                    label="Title"
+                    name={translatedFieldName("title", locale)}
+                    required={isSourceLocale}
+                    defaultValue={translationDefault(story.title, story.translations, "title", locale)}
+                  />
+                  <TextInput
+                    label="Description"
+                    name={translatedFieldName("description", locale)}
+                    defaultValue={translationDefault(story.description, story.translations, "description", locale)}
+                  />
+                  <StoryExtraContentEditor
+                    name={translatedFieldName("extraContent", locale)}
+                    initialValue={translationDefault(story.extraContent, story.translations, "extraContent", locale)}
+                  />
+                </Stack>
+              )}
+            />
 
             {story.imageUrl ? (
               <Stack gap={6}>
@@ -279,8 +323,22 @@ const AdminJourneyStoryEditorRoute = () => {
               <>
                 <TextInput label="Line color" name="lineColor" defaultValue={story.lineColor} />
                 <TextInput label="Line width" name="lineWidth" type="number" inputMode="numeric" defaultValue={String(story.lineWidth)} min={1} max={64} />
-                <TextInput label="Line label" name="lineLabel" defaultValue={story.lineLabel} />
-                <TextInput label="Tooltip text" name="tooltipText" defaultValue={story.tooltipText} />
+                <TranslatedFields
+                  render={(locale) => (
+                    <Stack>
+                      <TextInput
+                        label="Line label"
+                        name={translatedFieldName("lineLabel", locale)}
+                        defaultValue={translationDefault(story.lineLabel, story.translations, "lineLabel", locale)}
+                      />
+                      <TextInput
+                        label="Tooltip text"
+                        name={translatedFieldName("tooltipText", locale)}
+                        defaultValue={translationDefault(story.tooltipText, story.translations, "tooltipText", locale)}
+                      />
+                    </Stack>
+                  )}
+                />
                 <TextInput label="Tooltip image URL (mock)" name="tooltipImageUrl" defaultValue={story.tooltipImageUrl ?? ""} />
               </>
             )}

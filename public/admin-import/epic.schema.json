@@ -111,6 +111,18 @@
           "description": "Right-most horizontal ratio."
         }
       }
+    },
+    "translations": {
+      "type": "object",
+      "description": "Optional per-locale overrides. Keys are locale codes (e.g. \"hu\"). The source locale (\"en\") lives in the base fields and is ignored here.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
     }
   }
 }

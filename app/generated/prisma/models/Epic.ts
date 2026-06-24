@@ -273,6 +273,7 @@ export type EpicWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Epic"> | Date | string
   journeyId?: Prisma.StringFilter<"Epic"> | string
   journey?: Prisma.XOR<Prisma.JourneyScalarRelationFilter, Prisma.JourneyWhereInput>
+  translations?: Prisma.EpicTranslationListRelationFilter
 }
 
 export type EpicOrderByWithRelationInput = {
@@ -289,6 +290,7 @@ export type EpicOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   journeyId?: Prisma.SortOrder
   journey?: Prisma.JourneyOrderByWithRelationInput
+  translations?: Prisma.EpicTranslationOrderByRelationAggregateInput
 }
 
 export type EpicWhereUniqueInput = Prisma.AtLeast<{
@@ -308,6 +310,7 @@ export type EpicWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Epic"> | Date | string
   journeyId?: Prisma.StringFilter<"Epic"> | string
   journey?: Prisma.XOR<Prisma.JourneyScalarRelationFilter, Prisma.JourneyWhereInput>
+  translations?: Prisma.EpicTranslationListRelationFilter
 }, "id">
 
 export type EpicOrderByWithAggregationInput = {
@@ -361,6 +364,7 @@ export type EpicCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   journey: Prisma.JourneyCreateNestedOneWithoutEpicsInput
+  translations?: Prisma.EpicTranslationCreateNestedManyWithoutEpicInput
 }
 
 export type EpicUncheckedCreateInput = {
@@ -376,6 +380,7 @@ export type EpicUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   journeyId: string
+  translations?: Prisma.EpicTranslationUncheckedCreateNestedManyWithoutEpicInput
 }
 
 export type EpicUpdateInput = {
@@ -391,6 +396,7 @@ export type EpicUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journey?: Prisma.JourneyUpdateOneRequiredWithoutEpicsNestedInput
+  translations?: Prisma.EpicTranslationUpdateManyWithoutEpicNestedInput
 }
 
 export type EpicUncheckedUpdateInput = {
@@ -406,6 +412,7 @@ export type EpicUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journeyId?: Prisma.StringFieldUpdateOperationsInput | string
+  translations?: Prisma.EpicTranslationUncheckedUpdateManyWithoutEpicNestedInput
 }
 
 export type EpicCreateManyInput = {
@@ -515,6 +522,11 @@ export type EpicSumOrderByAggregateInput = {
   endPoint?: Prisma.SortOrder
 }
 
+export type EpicScalarRelationFilter = {
+  is?: Prisma.EpicWhereInput
+  isNot?: Prisma.EpicWhereInput
+}
+
 export type EpicCreateNestedManyWithoutJourneyInput = {
   create?: Prisma.XOR<Prisma.EpicCreateWithoutJourneyInput, Prisma.EpicUncheckedCreateWithoutJourneyInput> | Prisma.EpicCreateWithoutJourneyInput[] | Prisma.EpicUncheckedCreateWithoutJourneyInput[]
   connectOrCreate?: Prisma.EpicCreateOrConnectWithoutJourneyInput | Prisma.EpicCreateOrConnectWithoutJourneyInput[]
@@ -561,6 +573,20 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type EpicCreateNestedOneWithoutTranslationsInput = {
+  create?: Prisma.XOR<Prisma.EpicCreateWithoutTranslationsInput, Prisma.EpicUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.EpicCreateOrConnectWithoutTranslationsInput
+  connect?: Prisma.EpicWhereUniqueInput
+}
+
+export type EpicUpdateOneRequiredWithoutTranslationsNestedInput = {
+  create?: Prisma.XOR<Prisma.EpicCreateWithoutTranslationsInput, Prisma.EpicUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.EpicCreateOrConnectWithoutTranslationsInput
+  upsert?: Prisma.EpicUpsertWithoutTranslationsInput
+  connect?: Prisma.EpicWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EpicUpdateToOneWithWhereWithoutTranslationsInput, Prisma.EpicUpdateWithoutTranslationsInput>, Prisma.EpicUncheckedUpdateWithoutTranslationsInput>
+}
+
 export type EpicCreateWithoutJourneyInput = {
   id?: string
   title: string
@@ -573,6 +599,7 @@ export type EpicCreateWithoutJourneyInput = {
   endPoint: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  translations?: Prisma.EpicTranslationCreateNestedManyWithoutEpicInput
 }
 
 export type EpicUncheckedCreateWithoutJourneyInput = {
@@ -587,6 +614,7 @@ export type EpicUncheckedCreateWithoutJourneyInput = {
   endPoint: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  translations?: Prisma.EpicTranslationUncheckedCreateNestedManyWithoutEpicInput
 }
 
 export type EpicCreateOrConnectWithoutJourneyInput = {
@@ -633,6 +661,82 @@ export type EpicScalarWhereInput = {
   journeyId?: Prisma.StringFilter<"Epic"> | string
 }
 
+export type EpicCreateWithoutTranslationsInput = {
+  id?: string
+  title: string
+  description?: string
+  color?: string
+  background?: string
+  backgroundImage?: string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startPoint: number
+  endPoint: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  journey: Prisma.JourneyCreateNestedOneWithoutEpicsInput
+}
+
+export type EpicUncheckedCreateWithoutTranslationsInput = {
+  id?: string
+  title: string
+  description?: string
+  color?: string
+  background?: string
+  backgroundImage?: string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startPoint: number
+  endPoint: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  journeyId: string
+}
+
+export type EpicCreateOrConnectWithoutTranslationsInput = {
+  where: Prisma.EpicWhereUniqueInput
+  create: Prisma.XOR<Prisma.EpicCreateWithoutTranslationsInput, Prisma.EpicUncheckedCreateWithoutTranslationsInput>
+}
+
+export type EpicUpsertWithoutTranslationsInput = {
+  update: Prisma.XOR<Prisma.EpicUpdateWithoutTranslationsInput, Prisma.EpicUncheckedUpdateWithoutTranslationsInput>
+  create: Prisma.XOR<Prisma.EpicCreateWithoutTranslationsInput, Prisma.EpicUncheckedCreateWithoutTranslationsInput>
+  where?: Prisma.EpicWhereInput
+}
+
+export type EpicUpdateToOneWithWhereWithoutTranslationsInput = {
+  where?: Prisma.EpicWhereInput
+  data: Prisma.XOR<Prisma.EpicUpdateWithoutTranslationsInput, Prisma.EpicUncheckedUpdateWithoutTranslationsInput>
+}
+
+export type EpicUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startPoint?: Prisma.IntFieldUpdateOperationsInput | number
+  endPoint?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  journey?: Prisma.JourneyUpdateOneRequiredWithoutEpicsNestedInput
+}
+
+export type EpicUncheckedUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  background?: Prisma.StringFieldUpdateOperationsInput | string
+  backgroundImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  backgroundPatternConfig?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startPoint?: Prisma.IntFieldUpdateOperationsInput | number
+  endPoint?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  journeyId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
 export type EpicCreateManyJourneyInput = {
   id?: string
   title: string
@@ -659,6 +763,7 @@ export type EpicUpdateWithoutJourneyInput = {
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  translations?: Prisma.EpicTranslationUpdateManyWithoutEpicNestedInput
 }
 
 export type EpicUncheckedUpdateWithoutJourneyInput = {
@@ -673,6 +778,7 @@ export type EpicUncheckedUpdateWithoutJourneyInput = {
   endPoint?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  translations?: Prisma.EpicTranslationUncheckedUpdateManyWithoutEpicNestedInput
 }
 
 export type EpicUncheckedUpdateManyWithoutJourneyInput = {
@@ -690,6 +796,35 @@ export type EpicUncheckedUpdateManyWithoutJourneyInput = {
 }
 
 
+/**
+ * Count Type EpicCountOutputType
+ */
+
+export type EpicCountOutputType = {
+  translations: number
+}
+
+export type EpicCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  translations?: boolean | EpicCountOutputTypeCountTranslationsArgs
+}
+
+/**
+ * EpicCountOutputType without action
+ */
+export type EpicCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EpicCountOutputType
+   */
+  select?: Prisma.EpicCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * EpicCountOutputType without action
+ */
+export type EpicCountOutputTypeCountTranslationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EpicTranslationWhereInput
+}
+
 
 export type EpicSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -705,6 +840,8 @@ export type EpicSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   journeyId?: boolean
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
+  translations?: boolean | Prisma.Epic$translationsArgs<ExtArgs>
+  _count?: boolean | Prisma.EpicCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["epic"]>
 
 export type EpicSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -757,6 +894,8 @@ export type EpicSelectScalar = {
 export type EpicOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "color" | "background" | "backgroundImage" | "backgroundPatternConfig" | "startPoint" | "endPoint" | "createdAt" | "updatedAt" | "journeyId", ExtArgs["result"]["epic"]>
 export type EpicInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
+  translations?: boolean | Prisma.Epic$translationsArgs<ExtArgs>
+  _count?: boolean | Prisma.EpicCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EpicIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
@@ -769,6 +908,7 @@ export type $EpicPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "Epic"
   objects: {
     journey: Prisma.$JourneyPayload<ExtArgs>
+    translations: Prisma.$EpicTranslationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1178,6 +1318,7 @@ readonly fields: EpicFieldRefs;
 export interface Prisma__EpicClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   journey<T extends Prisma.JourneyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JourneyDefaultArgs<ExtArgs>>): Prisma.Prisma__JourneyClient<runtime.Types.Result.GetResult<Prisma.$JourneyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  translations<T extends Prisma.Epic$translationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Epic$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EpicTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1617,6 +1758,30 @@ export type EpicDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Epics to delete.
    */
   limit?: number
+}
+
+/**
+ * Epic.translations
+ */
+export type Epic$translationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EpicTranslation
+   */
+  select?: Prisma.EpicTranslationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EpicTranslation
+   */
+  omit?: Prisma.EpicTranslationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EpicTranslationInclude<ExtArgs> | null
+  where?: Prisma.EpicTranslationWhereInput
+  orderBy?: Prisma.EpicTranslationOrderByWithRelationInput | Prisma.EpicTranslationOrderByWithRelationInput[]
+  cursor?: Prisma.EpicTranslationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EpicTranslationScalarFieldEnum | Prisma.EpicTranslationScalarFieldEnum[]
 }
 
 /**

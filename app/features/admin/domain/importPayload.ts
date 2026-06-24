@@ -1,6 +1,8 @@
 import { normalizeAltitudeInfoIcon, rangesOverlap } from "../../altitude-info/domain/altitudeInfo";
 import { normalizeBackgroundPatternConfig, type BackgroundPatternConfig } from "../../timeline/pixi/layout/epicBackgroundPattern";
 import { normalizeTagName, TAG_SYSTEM_MAX_COUNT, validateTagName } from "../../tags/domain/tags";
+import { buildTranslationCreateRows } from "./translations";
+import { isLocale, type Locale } from "../../../shared/i18n/locales";
 import {
   defaultColorBackground,
   primaryColorFromBackground,
@@ -14,10 +16,12 @@ export type ParsedImportPayload = {
     icon: string;
     order: number;
     tags: string[];
+    translations: Array<{ locale: Locale; title: string }>;
     values: Array<{
       value: string;
       startPoint: number;
       endPoint: number;
+      translations: Array<{ locale: Locale; value: string }>;
     }>;
   }>;
   epics: Array<{
@@ -28,13 +32,13 @@ export type ParsedImportPayload = {
     backgroundImage: string | null;
     backgroundPatternConfig: BackgroundPatternConfig | null;
     color: string;
+    translations: Array<{ locale: Locale; title: string; description: string }>;
   }>;
   stories: Array<{
     title: string;
     description: string;
     extraContent: string;
     storyType: "CARD" | "LINE";
-    background: string;
     imageUrl: string | null;
     lineColor: string;
     lineWidth: number;
@@ -44,11 +48,48 @@ export type ParsedImportPayload = {
     startPoint: number;
     endPoint: number;
     tags: string[];
+    translations: Array<{
+      locale: Locale;
+      title: string;
+      description: string;
+      extraContent: string;
+      lineLabel: string;
+      tooltipText: string;
+    }>;
   }>;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+/**
+ * Parse an optional `translations: { <locale>: { <field>: value } }` block into the
+ * create-ready rows for a translation table. Unknown/default locales and blank rows are
+ * dropped (the reader falls back to the source text).
+ */
+function parseEntityTranslations<Field extends string>(
+  raw: unknown,
+  fields: readonly Field[],
+): Array<{ locale: Locale } & Record<Field, string>> {
+  if (!isRecord(raw)) {
+    return [];
+  }
+
+  const byLocale: Partial<Record<Locale, Record<string, string>>> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (!isLocale(key) || !isRecord(value)) {
+      continue;
+    }
+    const fieldValues: Record<string, string> = {};
+    for (const field of fields) {
+      const fieldValue = value[field];
+      fieldValues[field] = typeof fieldValue === "string" ? fieldValue : "";
+    }
+    byLocale[key] = fieldValues;
+  }
+
+  return buildTranslationCreateRows(fields, byLocale) as Array<{ locale: Locale } & Record<Field, string>>;
 }
 
 function parseNumberField(value: unknown): number | null {
@@ -168,6 +209,7 @@ export function normalizeImportPayload(payload: unknown): ParsedImportPayload {
           value,
           startPoint,
           endPoint,
+          translations: parseEntityTranslations(valueItem.translations, ["value"] as const),
         };
       })
       .sort((left, right) => left.startPoint - right.startPoint);
@@ -183,6 +225,7 @@ export function normalizeImportPayload(payload: unknown): ParsedImportPayload {
       icon,
       order,
       tags: normalizeTags(item.tags),
+      translations: parseEntityTranslations(item.translations, ["title"] as const),
       values,
     };
   });
@@ -226,6 +269,7 @@ export function normalizeImportPayload(payload: unknown): ParsedImportPayload {
       backgroundImage,
       backgroundPatternConfig,
       color: parsedBackground.color,
+      translations: parseEntityTranslations(item.translations, ["title", "description"] as const),
     };
   });
 
@@ -261,17 +305,11 @@ export function normalizeImportPayload(payload: unknown): ParsedImportPayload {
       throw new Error(`Story #${index + 1} lineWidth must be between 1 and 64.`);
     }
 
-    const parsedBackground = parseBackgroundField(item.background, "#ffd8a8");
-    if ("error" in parsedBackground) {
-      throw new Error(`Story #${index + 1} background is invalid: ${parsedBackground.error}`);
-    }
-
     return {
       title,
       description,
       extraContent,
       storyType,
-      background: parsedBackground.serialized,
       imageUrl: imageUrlRaw || null,
       lineColor,
       lineWidth,
@@ -281,6 +319,13 @@ export function normalizeImportPayload(payload: unknown): ParsedImportPayload {
       startPoint,
       endPoint,
       tags: normalizeTags(item.tags),
+      translations: parseEntityTranslations(item.translations, [
+        "title",
+        "description",
+        "extraContent",
+        "lineLabel",
+        "tooltipText",
+      ] as const),
     };
   });
 

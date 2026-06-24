@@ -1,0 +1,30 @@
+{
+  "common": {
+    "back": "Back",
+    "share": "Share",
+    "close": "Close",
+    "clearFilters": "Clear filters"
+  },
+  "pixi": {
+    "journey": "Journey",
+    "back": "Back",
+    "share": "Share",
+    "speedLabel": "Speed",
+    "unitMeters": "m",
+    "unitKilometers": "km"
+  },
+  "reader": {
+    "recentStories": "Recent stories",
+    "recentStoriesEmpty": "You have not passed any stories yet.",
+    "noFilteredContent": "No stories or altitude info match the selected tags.",
+    "additionalContext": "Additional context",
+    "noDescription": "No description added yet.",
+    "passed": "Passed",
+    "card": "Card",
+    "line": "Line",
+    "label": "Label",
+    "endedAt": "Ended at",
+    "epicLayer": "Epic layer",
+    "epicNoDescription": "No description for this epic layer yet."
+  }
+}

@@ -235,6 +235,7 @@ export type AltitudeInfoWhereInput = {
   journey?: Prisma.XOR<Prisma.JourneyScalarRelationFilter, Prisma.JourneyWhereInput>
   values?: Prisma.AltitudeInfoValueListRelationFilter
   tags?: Prisma.TagListRelationFilter
+  translations?: Prisma.AltitudeInfoTranslationListRelationFilter
 }
 
 export type AltitudeInfoOrderByWithRelationInput = {
@@ -248,6 +249,7 @@ export type AltitudeInfoOrderByWithRelationInput = {
   journey?: Prisma.JourneyOrderByWithRelationInput
   values?: Prisma.AltitudeInfoValueOrderByRelationAggregateInput
   tags?: Prisma.TagOrderByRelationAggregateInput
+  translations?: Prisma.AltitudeInfoTranslationOrderByRelationAggregateInput
 }
 
 export type AltitudeInfoWhereUniqueInput = Prisma.AtLeast<{
@@ -264,6 +266,7 @@ export type AltitudeInfoWhereUniqueInput = Prisma.AtLeast<{
   journey?: Prisma.XOR<Prisma.JourneyScalarRelationFilter, Prisma.JourneyWhereInput>
   values?: Prisma.AltitudeInfoValueListRelationFilter
   tags?: Prisma.TagListRelationFilter
+  translations?: Prisma.AltitudeInfoTranslationListRelationFilter
 }, "id">
 
 export type AltitudeInfoOrderByWithAggregationInput = {
@@ -304,6 +307,7 @@ export type AltitudeInfoCreateInput = {
   journey: Prisma.JourneyCreateNestedOneWithoutAltitudeInfosInput
   values?: Prisma.AltitudeInfoValueCreateNestedManyWithoutAltitudeInfoInput
   tags?: Prisma.TagCreateNestedManyWithoutAltitudeInfosInput
+  translations?: Prisma.AltitudeInfoTranslationCreateNestedManyWithoutAltitudeInfoInput
 }
 
 export type AltitudeInfoUncheckedCreateInput = {
@@ -316,6 +320,7 @@ export type AltitudeInfoUncheckedCreateInput = {
   journeyId: string
   values?: Prisma.AltitudeInfoValueUncheckedCreateNestedManyWithoutAltitudeInfoInput
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutAltitudeInfosInput
+  translations?: Prisma.AltitudeInfoTranslationUncheckedCreateNestedManyWithoutAltitudeInfoInput
 }
 
 export type AltitudeInfoUpdateInput = {
@@ -328,6 +333,7 @@ export type AltitudeInfoUpdateInput = {
   journey?: Prisma.JourneyUpdateOneRequiredWithoutAltitudeInfosNestedInput
   values?: Prisma.AltitudeInfoValueUpdateManyWithoutAltitudeInfoNestedInput
   tags?: Prisma.TagUpdateManyWithoutAltitudeInfosNestedInput
+  translations?: Prisma.AltitudeInfoTranslationUpdateManyWithoutAltitudeInfoNestedInput
 }
 
 export type AltitudeInfoUncheckedUpdateInput = {
@@ -340,6 +346,7 @@ export type AltitudeInfoUncheckedUpdateInput = {
   journeyId?: Prisma.StringFieldUpdateOperationsInput | string
   values?: Prisma.AltitudeInfoValueUncheckedUpdateManyWithoutAltitudeInfoNestedInput
   tags?: Prisma.TagUncheckedUpdateManyWithoutAltitudeInfosNestedInput
+  translations?: Prisma.AltitudeInfoTranslationUncheckedUpdateManyWithoutAltitudeInfoNestedInput
 }
 
 export type AltitudeInfoCreateManyInput = {
@@ -512,6 +519,20 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type AltitudeInfoCreateNestedOneWithoutTranslationsInput = {
+  create?: Prisma.XOR<Prisma.AltitudeInfoCreateWithoutTranslationsInput, Prisma.AltitudeInfoUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.AltitudeInfoCreateOrConnectWithoutTranslationsInput
+  connect?: Prisma.AltitudeInfoWhereUniqueInput
+}
+
+export type AltitudeInfoUpdateOneRequiredWithoutTranslationsNestedInput = {
+  create?: Prisma.XOR<Prisma.AltitudeInfoCreateWithoutTranslationsInput, Prisma.AltitudeInfoUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.AltitudeInfoCreateOrConnectWithoutTranslationsInput
+  upsert?: Prisma.AltitudeInfoUpsertWithoutTranslationsInput
+  connect?: Prisma.AltitudeInfoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AltitudeInfoUpdateToOneWithWhereWithoutTranslationsInput, Prisma.AltitudeInfoUpdateWithoutTranslationsInput>, Prisma.AltitudeInfoUncheckedUpdateWithoutTranslationsInput>
+}
+
 export type AltitudeInfoCreateNestedOneWithoutValuesInput = {
   create?: Prisma.XOR<Prisma.AltitudeInfoCreateWithoutValuesInput, Prisma.AltitudeInfoUncheckedCreateWithoutValuesInput>
   connectOrCreate?: Prisma.AltitudeInfoCreateOrConnectWithoutValuesInput
@@ -535,6 +556,7 @@ export type AltitudeInfoCreateWithoutJourneyInput = {
   updatedAt?: Date | string
   values?: Prisma.AltitudeInfoValueCreateNestedManyWithoutAltitudeInfoInput
   tags?: Prisma.TagCreateNestedManyWithoutAltitudeInfosInput
+  translations?: Prisma.AltitudeInfoTranslationCreateNestedManyWithoutAltitudeInfoInput
 }
 
 export type AltitudeInfoUncheckedCreateWithoutJourneyInput = {
@@ -546,6 +568,7 @@ export type AltitudeInfoUncheckedCreateWithoutJourneyInput = {
   updatedAt?: Date | string
   values?: Prisma.AltitudeInfoValueUncheckedCreateNestedManyWithoutAltitudeInfoInput
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutAltitudeInfosInput
+  translations?: Prisma.AltitudeInfoTranslationUncheckedCreateNestedManyWithoutAltitudeInfoInput
 }
 
 export type AltitudeInfoCreateOrConnectWithoutJourneyInput = {
@@ -596,6 +619,7 @@ export type AltitudeInfoCreateWithoutTagsInput = {
   updatedAt?: Date | string
   journey: Prisma.JourneyCreateNestedOneWithoutAltitudeInfosInput
   values?: Prisma.AltitudeInfoValueCreateNestedManyWithoutAltitudeInfoInput
+  translations?: Prisma.AltitudeInfoTranslationCreateNestedManyWithoutAltitudeInfoInput
 }
 
 export type AltitudeInfoUncheckedCreateWithoutTagsInput = {
@@ -607,6 +631,7 @@ export type AltitudeInfoUncheckedCreateWithoutTagsInput = {
   updatedAt?: Date | string
   journeyId: string
   values?: Prisma.AltitudeInfoValueUncheckedCreateNestedManyWithoutAltitudeInfoInput
+  translations?: Prisma.AltitudeInfoTranslationUncheckedCreateNestedManyWithoutAltitudeInfoInput
 }
 
 export type AltitudeInfoCreateOrConnectWithoutTagsInput = {
@@ -630,6 +655,70 @@ export type AltitudeInfoUpdateManyWithWhereWithoutTagsInput = {
   data: Prisma.XOR<Prisma.AltitudeInfoUpdateManyMutationInput, Prisma.AltitudeInfoUncheckedUpdateManyWithoutTagsInput>
 }
 
+export type AltitudeInfoCreateWithoutTranslationsInput = {
+  id?: string
+  title: string
+  icon?: string
+  order?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  journey: Prisma.JourneyCreateNestedOneWithoutAltitudeInfosInput
+  values?: Prisma.AltitudeInfoValueCreateNestedManyWithoutAltitudeInfoInput
+  tags?: Prisma.TagCreateNestedManyWithoutAltitudeInfosInput
+}
+
+export type AltitudeInfoUncheckedCreateWithoutTranslationsInput = {
+  id?: string
+  title: string
+  icon?: string
+  order?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  journeyId: string
+  values?: Prisma.AltitudeInfoValueUncheckedCreateNestedManyWithoutAltitudeInfoInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutAltitudeInfosInput
+}
+
+export type AltitudeInfoCreateOrConnectWithoutTranslationsInput = {
+  where: Prisma.AltitudeInfoWhereUniqueInput
+  create: Prisma.XOR<Prisma.AltitudeInfoCreateWithoutTranslationsInput, Prisma.AltitudeInfoUncheckedCreateWithoutTranslationsInput>
+}
+
+export type AltitudeInfoUpsertWithoutTranslationsInput = {
+  update: Prisma.XOR<Prisma.AltitudeInfoUpdateWithoutTranslationsInput, Prisma.AltitudeInfoUncheckedUpdateWithoutTranslationsInput>
+  create: Prisma.XOR<Prisma.AltitudeInfoCreateWithoutTranslationsInput, Prisma.AltitudeInfoUncheckedCreateWithoutTranslationsInput>
+  where?: Prisma.AltitudeInfoWhereInput
+}
+
+export type AltitudeInfoUpdateToOneWithWhereWithoutTranslationsInput = {
+  where?: Prisma.AltitudeInfoWhereInput
+  data: Prisma.XOR<Prisma.AltitudeInfoUpdateWithoutTranslationsInput, Prisma.AltitudeInfoUncheckedUpdateWithoutTranslationsInput>
+}
+
+export type AltitudeInfoUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.StringFieldUpdateOperationsInput | string
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  journey?: Prisma.JourneyUpdateOneRequiredWithoutAltitudeInfosNestedInput
+  values?: Prisma.AltitudeInfoValueUpdateManyWithoutAltitudeInfoNestedInput
+  tags?: Prisma.TagUpdateManyWithoutAltitudeInfosNestedInput
+}
+
+export type AltitudeInfoUncheckedUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.StringFieldUpdateOperationsInput | string
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  journeyId?: Prisma.StringFieldUpdateOperationsInput | string
+  values?: Prisma.AltitudeInfoValueUncheckedUpdateManyWithoutAltitudeInfoNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutAltitudeInfosNestedInput
+}
+
 export type AltitudeInfoCreateWithoutValuesInput = {
   id?: string
   title: string
@@ -639,6 +728,7 @@ export type AltitudeInfoCreateWithoutValuesInput = {
   updatedAt?: Date | string
   journey: Prisma.JourneyCreateNestedOneWithoutAltitudeInfosInput
   tags?: Prisma.TagCreateNestedManyWithoutAltitudeInfosInput
+  translations?: Prisma.AltitudeInfoTranslationCreateNestedManyWithoutAltitudeInfoInput
 }
 
 export type AltitudeInfoUncheckedCreateWithoutValuesInput = {
@@ -650,6 +740,7 @@ export type AltitudeInfoUncheckedCreateWithoutValuesInput = {
   updatedAt?: Date | string
   journeyId: string
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutAltitudeInfosInput
+  translations?: Prisma.AltitudeInfoTranslationUncheckedCreateNestedManyWithoutAltitudeInfoInput
 }
 
 export type AltitudeInfoCreateOrConnectWithoutValuesInput = {
@@ -677,6 +768,7 @@ export type AltitudeInfoUpdateWithoutValuesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journey?: Prisma.JourneyUpdateOneRequiredWithoutAltitudeInfosNestedInput
   tags?: Prisma.TagUpdateManyWithoutAltitudeInfosNestedInput
+  translations?: Prisma.AltitudeInfoTranslationUpdateManyWithoutAltitudeInfoNestedInput
 }
 
 export type AltitudeInfoUncheckedUpdateWithoutValuesInput = {
@@ -688,6 +780,7 @@ export type AltitudeInfoUncheckedUpdateWithoutValuesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journeyId?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.TagUncheckedUpdateManyWithoutAltitudeInfosNestedInput
+  translations?: Prisma.AltitudeInfoTranslationUncheckedUpdateManyWithoutAltitudeInfoNestedInput
 }
 
 export type AltitudeInfoCreateManyJourneyInput = {
@@ -708,6 +801,7 @@ export type AltitudeInfoUpdateWithoutJourneyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   values?: Prisma.AltitudeInfoValueUpdateManyWithoutAltitudeInfoNestedInput
   tags?: Prisma.TagUpdateManyWithoutAltitudeInfosNestedInput
+  translations?: Prisma.AltitudeInfoTranslationUpdateManyWithoutAltitudeInfoNestedInput
 }
 
 export type AltitudeInfoUncheckedUpdateWithoutJourneyInput = {
@@ -719,6 +813,7 @@ export type AltitudeInfoUncheckedUpdateWithoutJourneyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   values?: Prisma.AltitudeInfoValueUncheckedUpdateManyWithoutAltitudeInfoNestedInput
   tags?: Prisma.TagUncheckedUpdateManyWithoutAltitudeInfosNestedInput
+  translations?: Prisma.AltitudeInfoTranslationUncheckedUpdateManyWithoutAltitudeInfoNestedInput
 }
 
 export type AltitudeInfoUncheckedUpdateManyWithoutJourneyInput = {
@@ -739,6 +834,7 @@ export type AltitudeInfoUpdateWithoutTagsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journey?: Prisma.JourneyUpdateOneRequiredWithoutAltitudeInfosNestedInput
   values?: Prisma.AltitudeInfoValueUpdateManyWithoutAltitudeInfoNestedInput
+  translations?: Prisma.AltitudeInfoTranslationUpdateManyWithoutAltitudeInfoNestedInput
 }
 
 export type AltitudeInfoUncheckedUpdateWithoutTagsInput = {
@@ -750,6 +846,7 @@ export type AltitudeInfoUncheckedUpdateWithoutTagsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journeyId?: Prisma.StringFieldUpdateOperationsInput | string
   values?: Prisma.AltitudeInfoValueUncheckedUpdateManyWithoutAltitudeInfoNestedInput
+  translations?: Prisma.AltitudeInfoTranslationUncheckedUpdateManyWithoutAltitudeInfoNestedInput
 }
 
 export type AltitudeInfoUncheckedUpdateManyWithoutTagsInput = {
@@ -770,11 +867,13 @@ export type AltitudeInfoUncheckedUpdateManyWithoutTagsInput = {
 export type AltitudeInfoCountOutputType = {
   values: number
   tags: number
+  translations: number
 }
 
 export type AltitudeInfoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   values?: boolean | AltitudeInfoCountOutputTypeCountValuesArgs
   tags?: boolean | AltitudeInfoCountOutputTypeCountTagsArgs
+  translations?: boolean | AltitudeInfoCountOutputTypeCountTranslationsArgs
 }
 
 /**
@@ -801,6 +900,13 @@ export type AltitudeInfoCountOutputTypeCountTagsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.TagWhereInput
 }
 
+/**
+ * AltitudeInfoCountOutputType without action
+ */
+export type AltitudeInfoCountOutputTypeCountTranslationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AltitudeInfoTranslationWhereInput
+}
+
 
 export type AltitudeInfoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -813,6 +919,7 @@ export type AltitudeInfoSelect<ExtArgs extends runtime.Types.Extensions.Internal
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
   values?: boolean | Prisma.AltitudeInfo$valuesArgs<ExtArgs>
   tags?: boolean | Prisma.AltitudeInfo$tagsArgs<ExtArgs>
+  translations?: boolean | Prisma.AltitudeInfo$translationsArgs<ExtArgs>
   _count?: boolean | Prisma.AltitudeInfoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["altitudeInfo"]>
 
@@ -853,6 +960,7 @@ export type AltitudeInfoInclude<ExtArgs extends runtime.Types.Extensions.Interna
   journey?: boolean | Prisma.JourneyDefaultArgs<ExtArgs>
   values?: boolean | Prisma.AltitudeInfo$valuesArgs<ExtArgs>
   tags?: boolean | Prisma.AltitudeInfo$tagsArgs<ExtArgs>
+  translations?: boolean | Prisma.AltitudeInfo$translationsArgs<ExtArgs>
   _count?: boolean | Prisma.AltitudeInfoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AltitudeInfoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -868,6 +976,7 @@ export type $AltitudeInfoPayload<ExtArgs extends runtime.Types.Extensions.Intern
     journey: Prisma.$JourneyPayload<ExtArgs>
     values: Prisma.$AltitudeInfoValuePayload<ExtArgs>[]
     tags: Prisma.$TagPayload<ExtArgs>[]
+    translations: Prisma.$AltitudeInfoTranslationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1274,6 +1383,7 @@ export interface Prisma__AltitudeInfoClient<T, Null = never, ExtArgs extends run
   journey<T extends Prisma.JourneyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JourneyDefaultArgs<ExtArgs>>): Prisma.Prisma__JourneyClient<runtime.Types.Result.GetResult<Prisma.$JourneyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   values<T extends Prisma.AltitudeInfo$valuesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AltitudeInfo$valuesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AltitudeInfoValuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tags<T extends Prisma.AltitudeInfo$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AltitudeInfo$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  translations<T extends Prisma.AltitudeInfo$translationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AltitudeInfo$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AltitudeInfoTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1756,6 +1866,30 @@ export type AltitudeInfo$tagsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.TagScalarFieldEnum | Prisma.TagScalarFieldEnum[]
+}
+
+/**
+ * AltitudeInfo.translations
+ */
+export type AltitudeInfo$translationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AltitudeInfoTranslation
+   */
+  select?: Prisma.AltitudeInfoTranslationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AltitudeInfoTranslation
+   */
+  omit?: Prisma.AltitudeInfoTranslationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AltitudeInfoTranslationInclude<ExtArgs> | null
+  where?: Prisma.AltitudeInfoTranslationWhereInput
+  orderBy?: Prisma.AltitudeInfoTranslationOrderByWithRelationInput | Prisma.AltitudeInfoTranslationOrderByWithRelationInput[]
+  cursor?: Prisma.AltitudeInfoTranslationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AltitudeInfoTranslationScalarFieldEnum | Prisma.AltitudeInfoTranslationScalarFieldEnum[]
 }
 
 /**

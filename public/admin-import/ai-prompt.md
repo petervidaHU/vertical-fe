@@ -12,6 +12,18 @@ Output must be valid JSON only, with this exact root shape:
 
 Do not include markdown fences. Do not include comments. Do not include extra top-level properties.
 
+## Translations (optional)
+
+Any altitudeInfo, altitudeInfo value, epic, or story may include an optional `translations`
+object for multilingual content. Keys are locale codes; the source language ("en") always
+lives in the base fields and must NOT be repeated under `translations`. Only include
+non-English locales (currently "hu"). Each locale object contains the same translatable
+text fields as the entity (e.g. epics: `title`, `description`; stories: `title`,
+`description`, `extraContent`, `lineLabel`, `tooltipText`; altitude info: `title`; altitude
+value: `value`). Blank/missing fields fall back to the English source. Example:
+
+  { "title": "Approach", "startPoint": 0, "endPoint": 120, "translations": { "hu": { "title": "Megközelítés", "description": "" } } }
+
 ## Domain meaning
 
 - Altitude info is persistent environmental or system information tied to altitude ranges, independent from epics and stories.
@@ -75,7 +87,6 @@ Each story object supports:
 - description: string, optional.
 - extraContent: string, optional (HTML or plain text).
 - storyType: "CARD" | "LINE", optional (default "CARD").
-- background: optional, same format as epic background.
 - imageUrl: string, optional.
 - lineColor: string, optional.
 - lineWidth: integer, optional, must be between 1 and 64.

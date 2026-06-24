@@ -24,55 +24,6 @@
       "enum": ["CARD", "LINE"],
       "default": "CARD"
     },
-    "background": {
-      "description": "Optional card background. Can be hex color string or object.",
-      "oneOf": [
-        {
-          "type": "string",
-          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["mode", "color"],
-          "properties": {
-            "mode": { "const": "color" },
-            "color": {
-              "type": "string",
-              "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
-            }
-          }
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["mode", "stops"],
-          "properties": {
-            "mode": { "const": "gradient" },
-            "stops": {
-              "type": "array",
-              "minItems": 2,
-              "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["color", "percentage"],
-                "properties": {
-                  "color": {
-                    "type": "string",
-                    "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
-                  },
-                  "percentage": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100
-                  }
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
     "imageUrl": {
       "type": "string"
     },
@@ -118,6 +69,21 @@
       },
       "default": [],
       "description": "Optional tags for filtering. 3-100 characters each, max 20 unique tags per item."
+    },
+    "translations": {
+      "type": "object",
+      "description": "Optional per-locale overrides. Keys are locale codes (e.g. \"hu\"). The source locale (\"en\") lives in the base fields and is ignored here.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "extraContent": { "type": "string" },
+          "lineLabel": { "type": "string" },
+          "tooltipText": { "type": "string" }
+        }
+      }
     }
   }
 }

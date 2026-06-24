@@ -1,6 +1,6 @@
-import { AppShell, Badge, Box, Burger, Group, NavLink, Stack, Text, Title } from "@mantine/core";
+import { AppShell, Badge, Box, Burger, Divider, Group, NavLink, Stack, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation, useMatches } from "react-router";
 
 const journeyWorkspacePattern = /^\/admin\/[^/]+(?:\/.*)?$/;
 
@@ -18,6 +18,18 @@ const workspaceLinks = [
     matches: (pathname: string) => pathname.startsWith("/admin/journeys") || journeyWorkspacePattern.test(pathname),
   },
 ] as const;
+
+type JourneyMatchData = {
+  journey: {
+    id: string;
+    name: string;
+    slug: string;
+    altitudeInfos: unknown[];
+    epics: unknown[];
+    stories: unknown[];
+    tags: unknown[] | null;
+  };
+};
 
 function getActiveSection(pathname: string) {
   if (journeyWorkspacePattern.test(pathname)) {
@@ -45,8 +57,47 @@ function getActiveSection(pathname: string) {
 
 const AdminRoute = () => {
   const location = useLocation();
+  const matches = useMatches();
   const [mobileOpened, { toggle, close }] = useDisclosure(false);
   const activeSection = getActiveSection(location.pathname);
+
+  const journeyMatch = matches.find((m) => m.id === "routes/admin.$journeyId");
+  const journeyData = journeyMatch?.data as JourneyMatchData | undefined;
+
+  const journeyWorkspaceSections = journeyData
+    ? [
+        {
+          label: "Overview",
+          to: `/admin/${journeyData.journey.id}`,
+          count: null as number | null,
+          matches: (pathname: string) => pathname === `/admin/${journeyData.journey.id}`,
+        },
+        {
+          label: "Altitude info",
+          to: `/admin/${journeyData.journey.id}/altitude-info`,
+          count: journeyData.journey.altitudeInfos.length,
+          matches: (pathname: string) => pathname.startsWith(`/admin/${journeyData.journey.id}/altitude-info`),
+        },
+        {
+          label: "Epics",
+          to: `/admin/${journeyData.journey.id}/epics`,
+          count: journeyData.journey.epics.length,
+          matches: (pathname: string) => pathname.startsWith(`/admin/${journeyData.journey.id}/epics`),
+        },
+        {
+          label: "Stories",
+          to: `/admin/${journeyData.journey.id}/stories`,
+          count: journeyData.journey.stories.length,
+          matches: (pathname: string) => pathname.startsWith(`/admin/${journeyData.journey.id}/stories`),
+        },
+        {
+          label: "Tags",
+          to: `/admin/${journeyData.journey.id}/tags`,
+          count: journeyData.journey.tags?.length ?? 0,
+          matches: (pathname: string) => pathname.startsWith(`/admin/${journeyData.journey.id}/tags`),
+        },
+      ]
+    : [];
 
   return (
     <AppShell
@@ -140,6 +191,107 @@ const AdminRoute = () => {
                 }}
               />
             ))}
+
+            {journeyData && (
+              <>
+                <Divider
+                  color="rgba(255,255,255,0.1)"
+                  my="xs"
+                  label={
+                    <Text size="xs" c="teal.3" fw={700} tt="uppercase" style={{ letterSpacing: "0.1em" }}>
+                      Journey
+                    </Text>
+                  }
+                  labelPosition="left"
+                />
+
+                <Box px="xs" mb={4}>
+                  <Text size="xs" c="rgba(255,255,255,0.4)" fw={600} tt="uppercase" style={{ letterSpacing: "0.1em" }}>
+                    {journeyData.journey.slug}
+                  </Text>
+                  <Text size="sm" fw={700} c="rgba(255,255,255,0.9)" lineClamp={2}>
+                    {journeyData.journey.name}
+                  </Text>
+                </Box>
+
+                {journeyWorkspaceSections.map((section) => {
+                  const isActive = section.matches(location.pathname);
+                  return (
+                    <NavLink
+                      key={section.to}
+                      component={Link}
+                      to={section.to}
+                      label={section.label}
+                      active={isActive}
+                      variant="filled"
+                      color="teal"
+                      autoContrast
+                      onClick={close}
+                      rightSection={
+                        section.count !== null ? (
+                          <Badge size="xs" variant={isActive ? "filled" : "light"} color="teal">
+                            {section.count}
+                          </Badge>
+                        ) : null
+                      }
+                      styles={{
+                        root: {
+                          borderRadius: 12,
+                          background: isActive
+                            ? "linear-gradient(135deg, rgba(194, 242, 221, 0.96) 0%, rgba(160, 230, 214, 0.92) 100%)"
+                            : "rgba(255, 255, 255, 0.04)",
+                          border: isActive
+                            ? "1px solid rgba(194, 242, 221, 0.92)"
+                            : "1px solid rgba(255, 255, 255, 0.08)",
+                        },
+                        label: {
+                          fontWeight: 700,
+                        },
+                      }}
+                    />
+                  );
+                })}
+
+                <Divider color="rgba(255,255,255,0.1)" mt="xs" />
+
+                <NavLink
+                  component={Link}
+                  to="/admin/journeys"
+                  label="← Back to journeys"
+                  onClick={close}
+                  styles={{
+                    root: {
+                      borderRadius: 12,
+                      background: "transparent",
+                      border: "1px solid rgba(255, 255, 255, 0.06)",
+                    },
+                    label: {
+                      fontWeight: 600,
+                      fontSize: "var(--mantine-font-size-sm)",
+                      color: "rgba(255,255,255,0.55)",
+                    },
+                  }}
+                />
+                <NavLink
+                  component={Link}
+                  to={`/journey/${journeyData.journey.id}`}
+                  label="Preview journey →"
+                  onClick={close}
+                  styles={{
+                    root: {
+                      borderRadius: 12,
+                      background: "transparent",
+                      border: "1px solid rgba(134, 239, 172, 0.18)",
+                    },
+                    label: {
+                      fontWeight: 600,
+                      fontSize: "var(--mantine-font-size-sm)",
+                      color: "rgba(134, 239, 172, 0.85)",
+                    },
+                  }}
+                />
+              </>
+            )}
           </Stack>
         </AppShell.Section>
       </AppShell.Navbar>

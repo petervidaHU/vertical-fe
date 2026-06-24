@@ -2,8 +2,11 @@ import { Badge, Button, Group, Paper, Stack, Text, TextInput } from "@mantine/co
 import { useMemo, useState } from "react";
 import { Form, useActionData, useOutletContext } from "react-router";
 import { AdminActionStatus, AdminPage, AdminSection } from "../features/admin/components/AdminScaffold";
+import TranslatedFields from "../features/admin/components/TranslatedFields";
+import { asTranslationDelegate, translatedFieldName, translationDefault, writeEntityTranslations } from "../features/admin/domain/translations";
 import { TAG_SYSTEM_MAX_COUNT } from "../features/tags/domain/tags";
 import { createJourneyTag, deleteJourneyTag, renameJourneyTag } from "../server/api/tags";
+import { db } from "../server/db";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
 
 type ActionData = { error?: string; success?: string };
@@ -29,11 +32,19 @@ export async function action({
     }
 
     if (intent === "rename") {
+      const tagId = String(formData.get("tagId") ?? "");
       const renamed = await renameJourneyTag(
         params.journeyId,
-        String(formData.get("tagId") ?? ""),
+        tagId,
         String(formData.get("newName") ?? ""),
       );
+      await writeEntityTranslations({
+        delegate: asTranslationDelegate(db.tagTranslation),
+        parentKey: "tagId",
+        parentId: tagId,
+        fields: ["name"],
+        formData,
+      });
       return { success: `Tag renamed to "${renamed.name}".` };
     }
 
@@ -126,17 +137,29 @@ const AdminJourneyTagsRoute = () => {
                     <Stack gap="xs">
                       <input type="hidden" name="tagId" value={tag.id} />
                       <input type="hidden" name="intent" value="rename" />
-                      <Group align="flex-end">
-                        <TextInput
-                          name="newName"
-                          label="New name"
-                          defaultValue={tag.name}
-                          required
-                          minLength={3}
-                          maxLength={100}
-                          style={{ flex: 1 }}
-                          autoFocus
-                        />
+                      <TranslatedFields
+                        render={(locale, isSourceLocale) => (
+                          isSourceLocale ? (
+                            <TextInput
+                              name="newName"
+                              label="Name"
+                              defaultValue={tag.name}
+                              required
+                              minLength={3}
+                              maxLength={100}
+                              autoFocus
+                            />
+                          ) : (
+                            <TextInput
+                              name={translatedFieldName("name", locale)}
+                              label="Name"
+                              defaultValue={translationDefault(tag.name, tag.translations, "name", locale)}
+                              maxLength={100}
+                            />
+                          )
+                        )}
+                      />
+                      <Group justify="flex-end">
                         <Button type="submit" size="sm" color="grape">
                           Save
                         </Button>

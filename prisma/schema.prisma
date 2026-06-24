@@ -24,6 +24,20 @@ model Journey {
   epics         Epic[]
   stories       Story[]
   tags          Tag[]
+  translations  JourneyTranslation[]
+}
+
+model JourneyTranslation {
+  id            String   @id @default(cuid())
+  locale        String
+  name          String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  journey   Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+  journeyId String
+
+  @@unique([journeyId, locale])
 }
 
 model Tag {
@@ -37,9 +51,23 @@ model Tag {
 
   stories       Story[]
   altitudeInfos AltitudeInfo[]
+  translations  TagTranslation[]
 
   @@index([journeyId])
   @@index([name])
+}
+
+model TagTranslation {
+  id        String   @id @default(cuid())
+  locale    String
+  name      String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId String
+
+  @@unique([tagId, locale])
 }
 
 model AltitudeInfo {
@@ -54,8 +82,22 @@ model AltitudeInfo {
   journeyId String
   values    AltitudeInfoValue[]
   tags      Tag[]
+  translations AltitudeInfoTranslation[]
 
   @@index([journeyId, order])
+}
+
+model AltitudeInfoTranslation {
+  id        String   @id @default(cuid())
+  locale    String
+  title     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  altitudeInfo   AltitudeInfo @relation(fields: [altitudeInfoId], references: [id], onDelete: Cascade)
+  altitudeInfoId String
+
+  @@unique([altitudeInfoId, locale])
 }
 
 model AltitudeInfoValue {
@@ -71,8 +113,22 @@ model AltitudeInfoValue {
 
   altitudeInfo   AltitudeInfo @relation(fields: [altitudeInfoId], references: [id], onDelete: Cascade)
   altitudeInfoId String
+  translations   AltitudeInfoValueTranslation[]
 
   @@index([altitudeInfoId, startPoint, endPoint])
+}
+
+model AltitudeInfoValueTranslation {
+  id        String   @id @default(cuid())
+  locale    String
+  value     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  altitudeInfoValue   AltitudeInfoValue @relation(fields: [altitudeInfoValueId], references: [id], onDelete: Cascade)
+  altitudeInfoValueId String
+
+  @@unique([altitudeInfoValueId, locale])
 }
 
 model Epic {
@@ -90,8 +146,23 @@ model Epic {
 
   journey   Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
   journeyId String
+  translations EpicTranslation[]
 
   @@index([journeyId, startPoint, endPoint])
+}
+
+model EpicTranslation {
+  id          String   @id @default(cuid())
+  locale      String
+  title       String   @default("")
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  epic   Epic   @relation(fields: [epicId], references: [id], onDelete: Cascade)
+  epicId String
+
+  @@unique([epicId, locale])
 }
 
 model Story {
@@ -115,6 +186,24 @@ model Story {
   journey   Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade)
   journeyId String
   tags      Tag[]
+  translations StoryTranslation[]
 
   @@index([journeyId, startPoint, endPoint])
+}
+
+model StoryTranslation {
+  id          String   @id @default(cuid())
+  locale      String
+  title       String   @default("")
+  description String   @default("")
+  extraContent String  @default("")
+  lineLabel   String   @default("")
+  tooltipText String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  story   Story  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  storyId String
+
+  @@unique([storyId, locale])
 }

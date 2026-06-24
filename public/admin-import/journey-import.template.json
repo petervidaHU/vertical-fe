@@ -5,11 +5,13 @@
       "icon": "thermometer",
       "order": 0,
       "tags": ["climate", "basics"],
+      "translations": { "hu": { "title": "Hőmérséklet" } },
       "values": [
         {
           "value": "18 C",
           "startPoint": 0,
-          "endPoint": 120
+          "endPoint": 120,
+          "translations": { "hu": { "value": "18 °C" } }
         },
         {
           "value": "11 C",
@@ -48,7 +50,8 @@
           { "color": "#4ecdc4", "percentage": 0 },
           { "color": "#0c1626", "percentage": 100 }
         ]
-      }
+      },
+      "translations": { "hu": { "title": "Hegyi alapok", "description": "" } }
     },
     {
       "title": "Advanced Climb",
@@ -63,11 +66,11 @@
       "description": "Prepare tools and baseline checkpoints.",
       "extraContent": "<p>Optional rich details shown in modal.</p>",
       "storyType": "CARD",
-      "background": "#ffd8a8",
       "imageUrl": "https://example.com/mock-card-image.png",
       "tags": ["planning", "basics"],
       "startPoint": 20,
-      "endPoint": 90
+      "endPoint": 90,
+      "translations": { "hu": { "title": "Tábor felállítása", "description": "Eszközök előkészítése." } }
     },
     {
       "title": "Checkpoint Marker",

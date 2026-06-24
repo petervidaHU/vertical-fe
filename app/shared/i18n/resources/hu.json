@@ -1,0 +1,30 @@
+{
+  "common": {
+    "back": "Vissza",
+    "share": "Megosztás",
+    "close": "Bezárás",
+    "clearFilters": "Szűrők törlése"
+  },
+  "pixi": {
+    "journey": "Utazás",
+    "back": "Vissza",
+    "share": "Megosztás",
+    "speedLabel": "Sebesség",
+    "unitMeters": "m",
+    "unitKilometers": "km"
+  },
+  "reader": {
+    "recentStories": "Legutóbbi történetek",
+    "recentStoriesEmpty": "Még nem haladtál el történet mellett.",
+    "noFilteredContent": "Egyetlen történet vagy magassági adat sem felel meg a kiválasztott címkéknek.",
+    "additionalContext": "További információ",
+    "noDescription": "Még nincs leírás hozzáadva.",
+    "passed": "Elhaladt",
+    "card": "Kártya",
+    "line": "Vonal",
+    "label": "Címke",
+    "endedAt": "Vége itt:",
+    "epicLayer": "Epic réteg",
+    "epicNoDescription": "Ehhez az epic réteghez még nincs leírás."
+  }
+}

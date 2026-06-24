@@ -52,11 +52,17 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Journey: 'Journey',
+  JourneyTranslation: 'JourneyTranslation',
   Tag: 'Tag',
+  TagTranslation: 'TagTranslation',
   AltitudeInfo: 'AltitudeInfo',
+  AltitudeInfoTranslation: 'AltitudeInfoTranslation',
   AltitudeInfoValue: 'AltitudeInfoValue',
+  AltitudeInfoValueTranslation: 'AltitudeInfoValueTranslation',
   Epic: 'Epic',
-  Story: 'Story'
+  EpicTranslation: 'EpicTranslation',
+  Story: 'Story',
+  StoryTranslation: 'StoryTranslation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -87,6 +93,18 @@ export const JourneyScalarFieldEnum = {
 export type JourneyScalarFieldEnum = (typeof JourneyScalarFieldEnum)[keyof typeof JourneyScalarFieldEnum]
 
 
+export const JourneyTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  journeyId: 'journeyId'
+} as const
+
+export type JourneyTranslationScalarFieldEnum = (typeof JourneyTranslationScalarFieldEnum)[keyof typeof JourneyTranslationScalarFieldEnum]
+
+
 export const TagScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -96,6 +114,18 @@ export const TagScalarFieldEnum = {
 } as const
 
 export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const TagTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  tagId: 'tagId'
+} as const
+
+export type TagTranslationScalarFieldEnum = (typeof TagTranslationScalarFieldEnum)[keyof typeof TagTranslationScalarFieldEnum]
 
 
 export const AltitudeInfoScalarFieldEnum = {
@@ -109,6 +139,18 @@ export const AltitudeInfoScalarFieldEnum = {
 } as const
 
 export type AltitudeInfoScalarFieldEnum = (typeof AltitudeInfoScalarFieldEnum)[keyof typeof AltitudeInfoScalarFieldEnum]
+
+
+export const AltitudeInfoTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  altitudeInfoId: 'altitudeInfoId'
+} as const
+
+export type AltitudeInfoTranslationScalarFieldEnum = (typeof AltitudeInfoTranslationScalarFieldEnum)[keyof typeof AltitudeInfoTranslationScalarFieldEnum]
 
 
 export const AltitudeInfoValueScalarFieldEnum = {
@@ -127,6 +169,18 @@ export const AltitudeInfoValueScalarFieldEnum = {
 export type AltitudeInfoValueScalarFieldEnum = (typeof AltitudeInfoValueScalarFieldEnum)[keyof typeof AltitudeInfoValueScalarFieldEnum]
 
 
+export const AltitudeInfoValueTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  value: 'value',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  altitudeInfoValueId: 'altitudeInfoValueId'
+} as const
+
+export type AltitudeInfoValueTranslationScalarFieldEnum = (typeof AltitudeInfoValueTranslationScalarFieldEnum)[keyof typeof AltitudeInfoValueTranslationScalarFieldEnum]
+
+
 export const EpicScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -143,6 +197,19 @@ export const EpicScalarFieldEnum = {
 } as const
 
 export type EpicScalarFieldEnum = (typeof EpicScalarFieldEnum)[keyof typeof EpicScalarFieldEnum]
+
+
+export const EpicTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  epicId: 'epicId'
+} as const
+
+export type EpicTranslationScalarFieldEnum = (typeof EpicTranslationScalarFieldEnum)[keyof typeof EpicTranslationScalarFieldEnum]
 
 
 export const StoryScalarFieldEnum = {
@@ -166,6 +233,22 @@ export const StoryScalarFieldEnum = {
 } as const
 
 export type StoryScalarFieldEnum = (typeof StoryScalarFieldEnum)[keyof typeof StoryScalarFieldEnum]
+
+
+export const StoryTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  extraContent: 'extraContent',
+  lineLabel: 'lineLabel',
+  tooltipText: 'tooltipText',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  storyId: 'storyId'
+} as const
+
+export type StoryTranslationScalarFieldEnum = (typeof StoryTranslationScalarFieldEnum)[keyof typeof StoryTranslationScalarFieldEnum]
 
 
 export const SortOrder = {

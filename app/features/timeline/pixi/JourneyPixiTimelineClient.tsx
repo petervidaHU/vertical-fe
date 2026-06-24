@@ -30,6 +30,12 @@ type StoryItem = {
   endPoint: number;
 };
 
+type TimelineLabels = {
+  back: string;
+  share: string;
+  journey: string;
+};
+
 type JourneyPixiTimelineProps = {
   epics: EpicItem[];
   stories: StoryItem[];
@@ -38,12 +44,15 @@ type JourneyPixiTimelineProps = {
   journeyTitle?: string;
   scrollMultiplier?: number;
   viewMode?: "full" | "line-only";
+  locale?: string;
+  labels?: TimelineLabels;
   onStoryCardClick?: (story: StoryItem) => void;
   onBackToJourneys?: () => void;
   onShareJourney?: () => void;
   onScrollMultiplierChange?: (nextMultiplier: number) => void;
   onRenderedAltitudeChange?: (altitude: number) => void;
   onEpicPanelOpenChange?: (open: boolean) => void;
+  onToggleLocale?: () => void;
 };
 
 type JourneyPixiTimelineComponent = (props: JourneyPixiTimelineProps) => JSX.Element;

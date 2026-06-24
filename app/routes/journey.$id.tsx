@@ -13,13 +13,30 @@ import { DEFAULT_SCROLL_MULTIPLIER, normalizeScrollMultiplier } from "../feature
 import { normalizeBackgroundPatternConfig } from "../features/timeline/pixi/layout/epicBackgroundPattern";
 import { getRecentPassedStories } from "../features/timeline/domain/recentStories";
 import { useWheelAltitude } from "../shared/hooks/useWheelAltitude";
+import { useTranslation } from "react-i18next";
+import {
+  type Locale,
+  nextLocale,
+  normalizeLocale,
+  resolveRequestLocale,
+} from "../shared/i18n/locales";
+import { persistLocale } from "../shared/i18n/persistLocale";
+import {
+  localizeAltitudeInfo,
+  localizeEpic,
+  localizeJourney,
+  localizeStory,
+  localizeTag,
+} from "../shared/i18n/localizeContent";
 import { db } from "../server/db";
 import { countTagsPerItem, filterOutByExcludedTags } from "../features/tags/domain/tags";
 import { TagFilterButton } from "../shared/components/tags/TagFilterButton";
 import { TagFilterModal } from "../shared/components/tags/TagFilterModal";
 
 type JourneyPageData = Awaited<ReturnType<typeof loader>>;
-type JourneyStory = JourneyPageData["journey"]["stories"][number];
+// Stories handed to the UI are localized — translation rows are resolved into the base
+// fields and then stripped (see localizeStory).
+type JourneyStory = Omit<JourneyPageData["journey"]["stories"][number], "translations">;
 
 const FAST_STOP_PACE_THRESHOLD = 10;
 const FAST_STOP_MIN_JUMP_DISTANCE = 800;
@@ -30,6 +47,7 @@ function formatAltitude(altitude: number): string {
 }
 
 function StoryDetailContent({ story }: { story: JourneyStory }) {
+  const { t } = useTranslation();
   return (
     <Stack gap="md">
       {story.imageUrl ? (
@@ -64,12 +82,12 @@ function StoryDetailContent({ story }: { story: JourneyStory }) {
 
         {story.storyType === "LINE" ? (
           <Text size="xs" c="dimmed" fw={700}>
-            Label: {story.lineLabel || story.title}
+            {t("reader.label")}: {story.lineLabel || story.title}
           </Text>
         ) : null}
 
         <Text size="sm" c="dark" style={{ lineHeight: 1.65 }}>
-          {story.description || "No description added yet."}
+          {story.description || t("reader.noDescription")}
         </Text>
       </Stack>
 
@@ -85,7 +103,7 @@ function StoryDetailContent({ story }: { story: JourneyStory }) {
         >
           <Stack gap="xs">
             <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.06em" }}>
-              Additional context
+              {t("reader.additionalContext")}
             </Text>
             <ScrollArea.Autosize mah={420}>
               <div
@@ -104,7 +122,7 @@ function StoryDetailContent({ story }: { story: JourneyStory }) {
   );
 }
 
-export async function loader({ params }: { params: { id?: string } }) {
+export async function loader({ params, request }: { params: { id?: string }; request: Request }) {
   if (!params.id) {
     throw new Response("Missing journey id", { status: 400, statusText: "Bad Request" });
   }
@@ -112,25 +130,30 @@ export async function loader({ params }: { params: { id?: string } }) {
   const journey = await db.journey.findUnique({
     where: { id: params.id },
     include: {
+      translations: true,
       altitudeInfos: {
         orderBy: [{ order: "asc" }, { title: "asc" }],
         include: {
+          translations: true,
           values: {
             orderBy: { startPoint: "asc" },
+            include: { translations: true },
           },
           tags: { orderBy: { name: "asc" } },
         },
       },
       epics: {
         orderBy: { startPoint: "asc" },
+        include: { translations: true },
       },
       stories: {
         orderBy: { startPoint: "asc" },
         include: {
+          translations: true,
           tags: { orderBy: { name: "asc" } },
         },
       },
-      tags: { orderBy: { name: "asc" } },
+      tags: { orderBy: { name: "asc" }, include: { translations: true } },
       _count: {
         select: { epics: true, stories: true },
       },
@@ -141,13 +164,15 @@ export async function loader({ params }: { params: { id?: string } }) {
     throw new Response("Journey not found", { status: 404, statusText: "Not Found" });
   }
 
-  return { journey };
+  return { journey, initialLocale: resolveRequestLocale(request) };
 }
 
 export default function JourneyPage() {
-  const { journey } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
+  const { journey, initialLocale } = useLoaderData() as Awaited<ReturnType<typeof loader>>;
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [locale, setLocale] = useState<Locale>(normalizeLocale(initialLocale));
   const [scrollMultiplier, setScrollMultiplier] = useState<number>(DEFAULT_SCROLL_MULTIPLIER);
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
   const [currentAltitude, setCurrentAltitude] = useState(0);
@@ -236,33 +261,51 @@ export default function JourneyPage() {
     }
   }, [applyEnabledTagIds, availableTagIds, rawTagsParam, tagFilterStorageKey]);
 
+  // Localized content (resolved against the active locale, with fallback to source text)
+  const localizedStories = useMemo(
+    () => journey.stories.map((story) => localizeStory(story, locale)),
+    [journey.stories, locale],
+  );
+  const localizedEpics = useMemo(
+    () => journey.epics.map((epic) => localizeEpic(epic, locale)),
+    [journey.epics, locale],
+  );
+  const localizedAltitudeInfos = useMemo(
+    () => journey.altitudeInfos.map((altitudeInfo) => localizeAltitudeInfo(altitudeInfo, locale)),
+    [journey.altitudeInfos, locale],
+  );
+  const localizedTags = useMemo(
+    () => (journey.tags ?? []).map((tag) => localizeTag(tag, locale)),
+    [journey.tags, locale],
+  );
+
   // Filtered data
   const filteredStories = useMemo(
-    () => filterOutByExcludedTags(journey.stories, enabledTagIds, allTagIds),
-    [journey.stories, enabledTagIds, allTagIds],
+    () => filterOutByExcludedTags(localizedStories, enabledTagIds, allTagIds),
+    [localizedStories, enabledTagIds, allTagIds],
   );
 
   const filteredAltitudeInfos = useMemo(
-    () => filterOutByExcludedTags(journey.altitudeInfos, enabledTagIds, allTagIds),
-    [journey.altitudeInfos, enabledTagIds, allTagIds],
+    () => filterOutByExcludedTags(localizedAltitudeInfos, enabledTagIds, allTagIds),
+    [localizedAltitudeInfos, enabledTagIds, allTagIds],
   );
   const storyTagCounts = useMemo(
-    () => countTagsPerItem(journey.stories, journey.tags ?? []),
-    [journey.stories, journey.tags],
+    () => countTagsPerItem(localizedStories, localizedTags),
+    [localizedStories, localizedTags],
   );
   const altitudeInfoTagCounts = useMemo(
-    () => countTagsPerItem(journey.altitudeInfos, journey.tags ?? []),
-    [journey.altitudeInfos, journey.tags],
+    () => countTagsPerItem(localizedAltitudeInfos, localizedTags),
+    [localizedAltitudeInfos, localizedTags],
   );
   const noFilteredContent = enabledTagIds.length < allTagIds.length && filteredStories.length === 0 && filteredAltitudeInfos.length === 0;
 
   const selectedStory = filteredStories.find((story) => story.id === selectedStoryId) ?? null;
   const timelineEpics = useMemo(
-    () => journey.epics.map((epic) => ({
+    () => localizedEpics.map((epic) => ({
       ...epic,
       backgroundPatternConfig: normalizeBackgroundPatternConfig(epic.backgroundPatternConfig),
     })),
-    [journey.epics],
+    [localizedEpics],
   );
   const journeyMaxAltitude = Math.max(
     journey.stories.reduce((max, story) => Math.max(max, story.endPoint), 0),
@@ -334,7 +377,7 @@ export default function JourneyPage() {
   );
 
   const selectedRecentStory = recentPassedStories.find((story) => story.id === selectedRecentStoryId) ?? null;
-  const selectedEpic = journey.epics.find((epic) => epic.id === selectedEpicId) ?? null;
+  const selectedEpic = timelineEpics.find((epic) => epic.id === selectedEpicId) ?? null;
 
   useEffect(() => {
     if (selectedRecentStoryId && !selectedRecentStory) {
@@ -373,13 +416,36 @@ export default function JourneyPage() {
   }, []);
 
   const displayJourneyTitle = useMemo(() => {
-    const normalizedTitle = typeof journey.name === "string" ? journey.name.trim() : "";
+    const localizedName = localizeJourney(journey, locale).name;
+    const normalizedTitle = typeof localizedName === "string" ? localizedName.trim() : "";
     return normalizedTitle.length > 0 && normalizedTitle !== "Untitled journey" ? normalizedTitle : "teszt2";
-  }, [journey.name]);
+  }, [journey, locale]);
 
   const handleEpicPanelOpenChange = useCallback((open: boolean) => {
     setEpicPanelOpen(open);
   }, []);
+
+  const handleLocaleChange = useCallback(
+    (next: Locale) => {
+      setLocale((previous) => (previous === next ? previous : next));
+      persistLocale(next);
+      void i18n.changeLanguage(next);
+    },
+    [i18n],
+  );
+
+  const handleToggleLocale = useCallback(() => {
+    handleLocaleChange(nextLocale(locale));
+  }, [handleLocaleChange, locale]);
+
+  const pixiLabels = useMemo(
+    () => ({
+      back: t("pixi.back"),
+      share: t("pixi.share"),
+      journey: t("pixi.journey"),
+    }),
+    [t, locale],
+  );
 
   const handleScrollMultiplierChange = useCallback((nextMultiplier: number) => {
     const normalizedMultiplier = normalizeScrollMultiplier(nextMultiplier);
@@ -437,12 +503,15 @@ export default function JourneyPage() {
           targetAltitudeRef={targetAltitudeRef}
           journeyTitle={displayJourneyTitle}
           scrollMultiplier={scrollMultiplier}
+          locale={locale}
+          labels={pixiLabels}
           onStoryCardClick={handleStoryCardClick}
           onBackToJourneys={handleBackToJourneys}
           onShareJourney={handleShareJourney}
           onScrollMultiplierChange={handleScrollMultiplierChange}
           onRenderedAltitudeChange={handleRenderedAltitudeChange}
           onEpicPanelOpenChange={handleEpicPanelOpenChange}
+          onToggleLocale={handleToggleLocale}
         />
       </div>
 
@@ -465,24 +534,26 @@ export default function JourneyPage() {
         >
           <Group gap="sm" wrap="nowrap">
             <Text size="sm" c="dark">
-              No stories or altitude info match the selected tags.
+              {t("reader.noFilteredContent")}
             </Text>
             <Button size="xs" variant="light" onClick={() => applyEnabledTagIds(allTagIds)}>
-              Clear filters
+              {t("common.clearFilters")}
             </Button>
           </Group>
         </Paper>
       ) : null}
 
-      <TagFilterButton
-        activeCount={allTagIds.length - enabledTagIds.length}
-        onClick={() => setTagFilterOpen(true)}
-      />
+      {!epicPanelOpen && (
+        <TagFilterButton
+          activeCount={allTagIds.length - enabledTagIds.length}
+          onClick={() => setTagFilterOpen(true)}
+        />
+      )}
 
       <TagFilterModal
         opened={tagFilterOpen}
         onClose={() => setTagFilterOpen(false)}
-        allTags={journey.tags ?? []}
+        allTags={localizedTags}
         enabledTagIds={enabledTagIds}
         onApply={applyEnabledTagIds}
         storyCounts={storyTagCounts}
@@ -527,7 +598,7 @@ export default function JourneyPage() {
       <Modal
         opened={selectedEpic !== null}
         onClose={() => setSelectedEpicId(null)}
-        title={selectedEpic?.title ?? "Epic layer"}
+        title={selectedEpic?.title ?? t("reader.epicLayer")}
         size="lg"
         centered
       >
@@ -549,7 +620,7 @@ export default function JourneyPage() {
               )}
               {!selectedEpic.description && (
                 <Text size="sm" c="dimmed">
-                  No description for this epic layer yet.
+                  {t("reader.epicNoDescription")}
                 </Text>
               )}
             </Paper>
@@ -573,12 +644,12 @@ export default function JourneyPage() {
 
             <div>
               <Text fw={700}>{selectedRecentStory.title}</Text>
-              <Text size="xs" c="dimmed">Recent stories</Text>
+              <Text size="xs" c="dimmed">{t("reader.recentStories")}</Text>
             </div>
           </Group>
         ) : (
           <Group gap="xs">
-            <Text fw={700}>Recent stories</Text>
+            <Text fw={700}>{t("reader.recentStories")}</Text>
             <Badge variant="light" color="teal">{recentPassedStories.length}</Badge>
           </Group>
         )}
@@ -615,14 +686,14 @@ export default function JourneyPage() {
                       </Text>
                       <Group gap={6}>
                         <Badge variant="light" color={story.storyType === "LINE" ? "grape" : "teal"}>
-                          {story.storyType === "LINE" ? "Line" : "Card"}
+                          {story.storyType === "LINE" ? t("reader.line") : t("reader.card")}
                         </Badge>
-                        <Badge variant="light" color="teal">Passed</Badge>
+                        <Badge variant="light" color="teal">{t("reader.passed")}</Badge>
                       </Group>
                     </Group>
 
                     <Text size="xs" c="dimmed">
-                      Ended at {formatAltitude(story.endPoint)}
+                      {t("reader.endedAt")} {formatAltitude(story.endPoint)}
                     </Text>
 
                     {story.imageUrl ? (
@@ -641,12 +712,12 @@ export default function JourneyPage() {
 
                     {story.storyType === "LINE" ? (
                       <Text size="xs" c="dimmed">
-                        Label: {story.lineLabel || story.title}
+                        {t("reader.label")}: {story.lineLabel || story.title}
                       </Text>
                     ) : null}
 
                     <Text size="sm" c="dark" lineClamp={2}>
-                      {story.description || "No description added yet."}
+                      {story.description || t("reader.noDescription")}
                     </Text>
                   </Stack>
                 </Paper>
@@ -654,14 +725,14 @@ export default function JourneyPage() {
             </Stack>
           </ScrollArea.Autosize>
         ) : (
-          <Text c="dimmed">You have not passed any stories yet.</Text>
+          <Text c="dimmed">{t("reader.recentStoriesEmpty")}</Text>
         )}
       </Modal>
 
       {recentPassedStories.length > 0 ? (
         <button
           type="button"
-          aria-label="Open recent stories"
+          aria-label={t("reader.recentStories")}
           onClick={() => {
             setRecentStoriesOpen(true);
           }}
@@ -698,7 +769,7 @@ export default function JourneyPage() {
               whiteSpace: "nowrap",
             }}
           >
-            Recent stories
+            {t("reader.recentStories")}
           </span>
         </button>
       ) : null}

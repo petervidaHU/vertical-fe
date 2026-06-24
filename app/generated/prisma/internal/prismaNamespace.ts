@@ -385,11 +385,17 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Journey: 'Journey',
+  JourneyTranslation: 'JourneyTranslation',
   Tag: 'Tag',
+  TagTranslation: 'TagTranslation',
   AltitudeInfo: 'AltitudeInfo',
+  AltitudeInfoTranslation: 'AltitudeInfoTranslation',
   AltitudeInfoValue: 'AltitudeInfoValue',
+  AltitudeInfoValueTranslation: 'AltitudeInfoValueTranslation',
   Epic: 'Epic',
-  Story: 'Story'
+  EpicTranslation: 'EpicTranslation',
+  Story: 'Story',
+  StoryTranslation: 'StoryTranslation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -405,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "journey" | "tag" | "altitudeInfo" | "altitudeInfoValue" | "epic" | "story"
+    modelProps: "journey" | "journeyTranslation" | "tag" | "tagTranslation" | "altitudeInfo" | "altitudeInfoTranslation" | "altitudeInfoValue" | "altitudeInfoValueTranslation" | "epic" | "epicTranslation" | "story" | "storyTranslation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -483,6 +489,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    JourneyTranslation: {
+      payload: Prisma.$JourneyTranslationPayload<ExtArgs>
+      fields: Prisma.JourneyTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JourneyTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JourneyTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.JourneyTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JourneyTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.JourneyTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.JourneyTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.JourneyTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.JourneyTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.JourneyTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>
+        }
+        update: {
+          args: Prisma.JourneyTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.JourneyTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JourneyTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.JourneyTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.JourneyTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JourneyTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.JourneyTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJourneyTranslation>
+        }
+        groupBy: {
+          args: Prisma.JourneyTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JourneyTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JourneyTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JourneyTranslationCountAggregateOutputType> | number
+        }
+      }
+    }
     Tag: {
       payload: Prisma.$TagPayload<ExtArgs>
       fields: Prisma.TagFieldRefs
@@ -554,6 +634,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TagCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TagCountAggregateOutputType> | number
+        }
+      }
+    }
+    TagTranslation: {
+      payload: Prisma.$TagTranslationPayload<ExtArgs>
+      fields: Prisma.TagTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TagTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TagTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.TagTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TagTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.TagTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.TagTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.TagTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TagTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.TagTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>
+        }
+        update: {
+          args: Prisma.TagTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.TagTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TagTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TagTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.TagTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TagTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.TagTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTagTranslation>
+        }
+        groupBy: {
+          args: Prisma.TagTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TagTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TagTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TagTranslationCountAggregateOutputType> | number
         }
       }
     }
@@ -631,6 +785,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AltitudeInfoTranslation: {
+      payload: Prisma.$AltitudeInfoTranslationPayload<ExtArgs>
+      fields: Prisma.AltitudeInfoTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AltitudeInfoTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AltitudeInfoTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.AltitudeInfoTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AltitudeInfoTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.AltitudeInfoTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.AltitudeInfoTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.AltitudeInfoTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AltitudeInfoTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.AltitudeInfoTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>
+        }
+        update: {
+          args: Prisma.AltitudeInfoTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AltitudeInfoTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AltitudeInfoTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AltitudeInfoTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.AltitudeInfoTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.AltitudeInfoTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAltitudeInfoTranslation>
+        }
+        groupBy: {
+          args: Prisma.AltitudeInfoTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AltitudeInfoTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoTranslationCountAggregateOutputType> | number
+        }
+      }
+    }
     AltitudeInfoValue: {
       payload: Prisma.$AltitudeInfoValuePayload<ExtArgs>
       fields: Prisma.AltitudeInfoValueFieldRefs
@@ -702,6 +930,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AltitudeInfoValueCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoValueCountAggregateOutputType> | number
+        }
+      }
+    }
+    AltitudeInfoValueTranslation: {
+      payload: Prisma.$AltitudeInfoValueTranslationPayload<ExtArgs>
+      fields: Prisma.AltitudeInfoValueTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AltitudeInfoValueTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AltitudeInfoValueTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.AltitudeInfoValueTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AltitudeInfoValueTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.AltitudeInfoValueTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.AltitudeInfoValueTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.AltitudeInfoValueTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AltitudeInfoValueTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.AltitudeInfoValueTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>
+        }
+        update: {
+          args: Prisma.AltitudeInfoValueTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AltitudeInfoValueTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AltitudeInfoValueTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AltitudeInfoValueTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.AltitudeInfoValueTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AltitudeInfoValueTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.AltitudeInfoValueTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAltitudeInfoValueTranslation>
+        }
+        groupBy: {
+          args: Prisma.AltitudeInfoValueTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoValueTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AltitudeInfoValueTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AltitudeInfoValueTranslationCountAggregateOutputType> | number
         }
       }
     }
@@ -779,6 +1081,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EpicTranslation: {
+      payload: Prisma.$EpicTranslationPayload<ExtArgs>
+      fields: Prisma.EpicTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EpicTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EpicTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.EpicTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EpicTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.EpicTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.EpicTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.EpicTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EpicTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.EpicTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>
+        }
+        update: {
+          args: Prisma.EpicTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.EpicTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EpicTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EpicTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.EpicTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EpicTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.EpicTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEpicTranslation>
+        }
+        groupBy: {
+          args: Prisma.EpicTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EpicTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EpicTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EpicTranslationCountAggregateOutputType> | number
+        }
+      }
+    }
     Story: {
       payload: Prisma.$StoryPayload<ExtArgs>
       fields: Prisma.StoryFieldRefs
@@ -853,6 +1229,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StoryTranslation: {
+      payload: Prisma.$StoryTranslationPayload<ExtArgs>
+      fields: Prisma.StoryTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StoryTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StoryTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.StoryTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StoryTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.StoryTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.StoryTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.StoryTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StoryTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.StoryTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>
+        }
+        update: {
+          args: Prisma.StoryTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.StoryTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StoryTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StoryTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.StoryTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.StoryTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStoryTranslation>
+        }
+        groupBy: {
+          args: Prisma.StoryTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StoryTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StoryTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StoryTranslationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -904,6 +1354,18 @@ export const JourneyScalarFieldEnum = {
 export type JourneyScalarFieldEnum = (typeof JourneyScalarFieldEnum)[keyof typeof JourneyScalarFieldEnum]
 
 
+export const JourneyTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  journeyId: 'journeyId'
+} as const
+
+export type JourneyTranslationScalarFieldEnum = (typeof JourneyTranslationScalarFieldEnum)[keyof typeof JourneyTranslationScalarFieldEnum]
+
+
 export const TagScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -913,6 +1375,18 @@ export const TagScalarFieldEnum = {
 } as const
 
 export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const TagTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  tagId: 'tagId'
+} as const
+
+export type TagTranslationScalarFieldEnum = (typeof TagTranslationScalarFieldEnum)[keyof typeof TagTranslationScalarFieldEnum]
 
 
 export const AltitudeInfoScalarFieldEnum = {
@@ -926,6 +1400,18 @@ export const AltitudeInfoScalarFieldEnum = {
 } as const
 
 export type AltitudeInfoScalarFieldEnum = (typeof AltitudeInfoScalarFieldEnum)[keyof typeof AltitudeInfoScalarFieldEnum]
+
+
+export const AltitudeInfoTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  altitudeInfoId: 'altitudeInfoId'
+} as const
+
+export type AltitudeInfoTranslationScalarFieldEnum = (typeof AltitudeInfoTranslationScalarFieldEnum)[keyof typeof AltitudeInfoTranslationScalarFieldEnum]
 
 
 export const AltitudeInfoValueScalarFieldEnum = {
@@ -944,6 +1430,18 @@ export const AltitudeInfoValueScalarFieldEnum = {
 export type AltitudeInfoValueScalarFieldEnum = (typeof AltitudeInfoValueScalarFieldEnum)[keyof typeof AltitudeInfoValueScalarFieldEnum]
 
 
+export const AltitudeInfoValueTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  value: 'value',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  altitudeInfoValueId: 'altitudeInfoValueId'
+} as const
+
+export type AltitudeInfoValueTranslationScalarFieldEnum = (typeof AltitudeInfoValueTranslationScalarFieldEnum)[keyof typeof AltitudeInfoValueTranslationScalarFieldEnum]
+
+
 export const EpicScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -960,6 +1458,19 @@ export const EpicScalarFieldEnum = {
 } as const
 
 export type EpicScalarFieldEnum = (typeof EpicScalarFieldEnum)[keyof typeof EpicScalarFieldEnum]
+
+
+export const EpicTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  epicId: 'epicId'
+} as const
+
+export type EpicTranslationScalarFieldEnum = (typeof EpicTranslationScalarFieldEnum)[keyof typeof EpicTranslationScalarFieldEnum]
 
 
 export const StoryScalarFieldEnum = {
@@ -983,6 +1494,22 @@ export const StoryScalarFieldEnum = {
 } as const
 
 export type StoryScalarFieldEnum = (typeof StoryScalarFieldEnum)[keyof typeof StoryScalarFieldEnum]
+
+
+export const StoryTranslationScalarFieldEnum = {
+  id: 'id',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  extraContent: 'extraContent',
+  lineLabel: 'lineLabel',
+  tooltipText: 'tooltipText',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  storyId: 'storyId'
+} as const
+
+export type StoryTranslationScalarFieldEnum = (typeof StoryTranslationScalarFieldEnum)[keyof typeof StoryTranslationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1233,11 +1760,17 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   journey?: Prisma.JourneyOmit
+  journeyTranslation?: Prisma.JourneyTranslationOmit
   tag?: Prisma.TagOmit
+  tagTranslation?: Prisma.TagTranslationOmit
   altitudeInfo?: Prisma.AltitudeInfoOmit
+  altitudeInfoTranslation?: Prisma.AltitudeInfoTranslationOmit
   altitudeInfoValue?: Prisma.AltitudeInfoValueOmit
+  altitudeInfoValueTranslation?: Prisma.AltitudeInfoValueTranslationOmit
   epic?: Prisma.EpicOmit
+  epicTranslation?: Prisma.EpicTranslationOmit
   story?: Prisma.StoryOmit
+  storyTranslation?: Prisma.StoryTranslationOmit
 }
 
 /* Types for Logging */

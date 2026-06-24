@@ -58,7 +58,29 @@
             "type": "integer",
             "minimum": 0,
             "description": "Inclusive end altitude for this value band. Must be >= startPoint and must not overlap other value bands in the same series."
+          },
+          "translations": {
+            "type": "object",
+            "description": "Optional per-locale overrides for the band value. Keys are locale codes (e.g. \"hu\").",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "value": { "type": "string" }
+              }
+            }
           }
+        }
+      }
+    },
+    "translations": {
+      "type": "object",
+      "description": "Optional per-locale overrides for the series title. Keys are locale codes (e.g. \"hu\"). The source locale (\"en\") lives in the base fields and is ignored here.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" }
         }
       }
     }

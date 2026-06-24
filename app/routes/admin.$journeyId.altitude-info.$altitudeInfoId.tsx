@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Form, Link, useActionData, useOutletContext, useParams } from "react-router";
 import { ALTITUDE_INFO_ICON_OPTIONS, normalizeAltitudeInfoIcon, rangesOverlap, resolveAltitudeInfoIconSymbol } from "../features/altitude-info/domain/altitudeInfo";
 import { AdminActionStatus, AdminPage, AdminPageHeader, AdminSection } from "../features/admin/components/AdminScaffold";
+import TranslatedFields from "../features/admin/components/TranslatedFields";
+import { asTranslationDelegate, translatedFieldName, translationDefault, writeEntityTranslations } from "../features/admin/domain/translations";
 import type { AdminJourneyOutletContext } from "./admin.$journeyId";
 import TagSelector from "../features/tags/admin/TagSelector";
 import { TAG_SYSTEM_MAX_COUNT, type TagLike } from "../features/tags/domain/tags";
@@ -76,6 +78,14 @@ export async function action({
       },
     });
 
+    await writeEntityTranslations({
+      delegate: asTranslationDelegate(db.altitudeInfoTranslation),
+      parentKey: "altitudeInfoId",
+      parentId: existingAltitudeInfo.id,
+      fields: ["title"],
+      formData,
+    });
+
     return { success: "Altitude info updated." };
   }
 
@@ -121,7 +131,7 @@ export async function action({
     }
 
     if (intent === "create-value") {
-      await db.altitudeInfoValue.create({
+      const createdValue = await db.altitudeInfoValue.create({
         data: {
           altitudeInfoId: existingAltitudeInfo.id,
           value: useGradient ? "" : value,
@@ -132,6 +142,16 @@ export async function action({
           endValue,
         },
       });
+
+      if (!useGradient) {
+        await writeEntityTranslations({
+          delegate: asTranslationDelegate(db.altitudeInfoValueTranslation),
+          parentKey: "altitudeInfoValueId",
+          parentId: createdValue.id,
+          fields: ["value"],
+          formData,
+        });
+      }
 
       return { success: "Altitude value band created." };
     }
@@ -151,6 +171,14 @@ export async function action({
         startValue,
         endValue,
       },
+    });
+
+    await writeEntityTranslations({
+      delegate: asTranslationDelegate(db.altitudeInfoValueTranslation),
+      parentKey: "altitudeInfoValueId",
+      parentId: existingValue.id,
+      fields: ["value"],
+      formData,
     });
 
     return { success: "Altitude value band updated." };
@@ -229,7 +257,16 @@ const AdminJourneyAltitudeInfoEditorRoute = () => {
         <Form method="post">
           <Stack>
             <Text size="sm" c="dimmed">Journey: {journey.name}</Text>
-            <TextInput label="Title" name="title" required defaultValue={altitudeInfo.title} />
+            <TranslatedFields
+              render={(locale, isSourceLocale) => (
+                <TextInput
+                  label="Title"
+                  name={translatedFieldName("title", locale)}
+                  required={isSourceLocale}
+                  defaultValue={translationDefault(altitudeInfo.title, altitudeInfo.translations, "title", locale)}
+                />
+              )}
+            />
             <label>
               Icon
               <select name="icon" defaultValue={altitudeInfo.icon}>
@@ -296,7 +333,16 @@ const AdminJourneyAltitudeInfoEditorRoute = () => {
                 </Group>
               </>
             ) : (
-              <TextInput label="Value" name="value" required placeholder="12 C" />
+              <TranslatedFields
+                render={(locale, isSourceLocale) => (
+                  <TextInput
+                    label="Value"
+                    name={translatedFieldName("value", locale)}
+                    required={isSourceLocale}
+                    placeholder="12 C"
+                  />
+                )}
+              />
             )}
             <Group grow>
               <TextInput label="Start point" name="startPoint" type="number" inputMode="numeric" required defaultValue="0" />
@@ -357,7 +403,16 @@ const AdminJourneyAltitudeInfoEditorRoute = () => {
                         </Group>
                       </>
                     ) : (
-                      <TextInput label="Value" name="value" required defaultValue={valueBand.value} />
+                      <TranslatedFields
+                        render={(locale, isSourceLocale) => (
+                          <TextInput
+                            label="Value"
+                            name={translatedFieldName("value", locale)}
+                            required={isSourceLocale}
+                            defaultValue={translationDefault(valueBand.value, valueBand.translations, "value", locale)}
+                          />
+                        )}
+                      />
                     )}
                     <Group grow align="flex-end">
                       <TextInput label="Start point" name="startPoint" type="number" inputMode="numeric" required defaultValue={String(valueBand.startPoint)} />
