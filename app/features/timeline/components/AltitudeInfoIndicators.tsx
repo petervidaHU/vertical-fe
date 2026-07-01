@@ -65,10 +65,11 @@ const AltitudeInfoIndicators = ({ items, placement = "top-center" }: AltitudeInf
                 minHeight: 44,
                 padding: "0 14px",
                 borderRadius: 999,
-                border: "1px solid rgba(186, 155, 114, 0.28)",
-                background: "linear-gradient(180deg, rgba(255, 250, 240, 0.98) 0%, rgba(248, 236, 208, 0.95) 100%)",
-                boxShadow: "0 14px 28px rgba(92, 65, 36, 0.14)",
-                backdropFilter: "blur(14px)",
+                border: "1px solid rgba(188, 212, 255, 0.32)",
+                background: "linear-gradient(180deg, rgba(18, 26, 44, 0.62) 0%, rgba(11, 17, 31, 0.62) 100%)",
+                boxShadow: "0 14px 30px rgba(5, 7, 15, 0.42)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
                 cursor: "default",
               }}
             >
@@ -81,8 +82,8 @@ const AltitudeInfoIndicators = ({ items, placement = "top-center" }: AltitudeInf
                   width: 22,
                   height: 22,
                   borderRadius: 999,
-                  background: "rgba(122, 101, 73, 0.12)",
-                  color: "#7a6549",
+                  background: "rgba(79, 227, 211, 0.16)",
+                  color: "#7fe7da",
                   fontSize: 14,
                   fontWeight: 700,
                   lineHeight: 1,
@@ -92,7 +93,7 @@ const AltitudeInfoIndicators = ({ items, placement = "top-center" }: AltitudeInf
               </span>
               <span
                 style={{
-                  color: "#5a4832",
+                  color: "#eef3ff",
                   fontFamily: "Avenir Next, Trebuchet MS, sans-serif",
                   fontSize: 12,
                   fontWeight: 700,

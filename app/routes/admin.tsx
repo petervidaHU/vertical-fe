@@ -96,6 +96,12 @@ const AdminRoute = () => {
           count: journeyData.journey.tags?.length ?? 0,
           matches: (pathname: string) => pathname.startsWith(`/admin/${journeyData.journey.id}/tags`),
         },
+        {
+          label: "Import",
+          to: `/admin/${journeyData.journey.id}/import`,
+          count: null as number | null,
+          matches: (pathname: string) => pathname.startsWith(`/admin/${journeyData.journey.id}/import`),
+        },
       ]
     : [];
 

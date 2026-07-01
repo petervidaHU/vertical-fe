@@ -1,7 +1,5 @@
 import { EPIC_BACKGROUND_IMAGE_ACCEPT, EPIC_BACKGROUND_IMAGE_MAX_BYTES } from "../features/admin/domain/epicBackgroundImage.shared";
 import { normalizeBackgroundPatternConfig, type BackgroundPatternConfig } from "../features/timeline/pixi/layout/epicBackgroundPattern";
-import { normalizeImportPayload } from "../features/admin/domain/importPayload";
-import { readImportJsonSource } from "../features/admin/domain/importJsonSource";
 import {
   backgroundToCss,
   parseStoredBackground,
@@ -167,104 +165,6 @@ export async function action({ request, params }: { request: Request; params: { 
       return redirect(`/admin/${journeyId}/epics?success=Epic+deleted`);
     } catch {
       return { error: "Unable to delete epic." };
-    }
-  }
-
-  if (intent === "import-json") {
-    try {
-      const raw = await readImportJsonSource(formData);
-      const parsed = normalizeImportPayload(JSON.parse(raw));
-
-      await db.$transaction(async (tx) => {
-        for (const altitudeInfo of parsed.altitudeInfos) {
-          await tx.altitudeInfo.create({
-            data: {
-              title: altitudeInfo.title,
-              icon: altitudeInfo.icon,
-              order: altitudeInfo.order,
-              journeyId,
-              ...(altitudeInfo.translations.length > 0 && {
-                translations: { create: altitudeInfo.translations },
-              }),
-              values: {
-                create: altitudeInfo.values.map((valueBand) => ({
-                  value: valueBand.value,
-                  startPoint: valueBand.startPoint,
-                  endPoint: valueBand.endPoint,
-                  ...(valueBand.translations.length > 0 && {
-                    translations: { create: valueBand.translations },
-                  }),
-                })),
-              },
-              ...(altitudeInfo.tags.length > 0 && {
-                tags: {
-                  connectOrCreate: altitudeInfo.tags.map((name) => ({
-                    where: { name },
-                    create: { name, journeyId },
-                  })),
-                },
-              }),
-            },
-          });
-        }
-
-        for (const epic of parsed.epics) {
-          await tx.epic.create({
-            data: {
-              title: epic.title,
-              color: epic.color,
-              background: epic.background,
-              backgroundImage: epic.backgroundImage,
-              backgroundPatternConfig: epic.backgroundPatternConfig ?? undefined,
-              journeyId,
-              startPoint: epic.startPoint,
-              endPoint: epic.endPoint,
-              ...(epic.translations.length > 0 && {
-                translations: { create: epic.translations },
-              }),
-            },
-          });
-        }
-
-        for (const story of parsed.stories) {
-          await tx.story.create({
-            data: {
-              title: story.title,
-              description: story.description,
-              extraContent: story.extraContent,
-              storyType: story.storyType,
-              imageUrl: story.imageUrl,
-              lineColor: story.lineColor,
-              lineWidth: story.lineWidth,
-              lineLabel: story.lineLabel,
-              tooltipText: story.tooltipText,
-              tooltipImageUrl: story.tooltipImageUrl,
-              journeyId,
-              startPoint: story.startPoint,
-              endPoint: story.endPoint,
-              ...(story.translations.length > 0 && {
-                translations: { create: story.translations },
-              }),
-              ...(story.tags.length > 0 && {
-                tags: {
-                  connectOrCreate: story.tags.map((name) => ({
-                    where: { name },
-                    create: { name, journeyId },
-                  })),
-                },
-              }),
-            },
-          });
-        }
-      });
-
-      const successText = encodeURIComponent(
-        `Imported ${parsed.altitudeInfos.length} altitude info series, ${parsed.epics.length} epics, and ${parsed.stories.length} stories`,
-      );
-      return redirect(`/admin/${journeyId}/epics?success=${successText}`);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to import JSON.";
-      return { error: message };
     }
   }
 
@@ -462,52 +362,6 @@ const AdminEpicsRoute = () => {
             })}
           </SimpleGrid>
         )}
-      </AdminSection>
-
-      <AdminSection
-        title="Bulk import altitude info, epics, and stories"
-        description="Use JSON import when the journey content already exists in a structured format and should be loaded in one pass."
-      >
-        <Form method="post" encType="multipart/form-data" key={success ?? "import-form"}>
-          <Stack>
-            <Group gap="xs">
-              <Button component="a" href="/admin-import/altitude-info.schema.json" download variant="light" size="xs">
-                Download altitude info schema
-              </Button>
-              <Button component="a" href="/admin-import/epic.schema.json" download variant="light" size="xs">
-                Download epic schema
-              </Button>
-              <Button component="a" href="/admin-import/story.schema.json" download variant="light" size="xs">
-                Download story schema
-              </Button>
-              <Button component="a" href="/admin-import/journey-import.template.json" download variant="light" size="xs">
-                Download JSON template
-              </Button>
-              <Button component="a" href="/admin-import/ai-prompt.md" download variant="subtle" size="xs">
-                Download AI prompt
-              </Button>
-            </Group>
-            <Textarea
-              label="Paste JSON"
-              name="jsonText"
-              placeholder='{"altitudeInfos": [...], "epics": [...], "stories": [...]}'
-              description="Optional. If JSON is pasted here, it will be imported instead of the uploaded file."
-              autosize
-              minRows={8}
-              maxRows={18}
-              spellCheck={false}
-              styles={{ input: { fontFamily: "monospace" } }}
-            />
-            <Text size="xs" c="dimmed" ta="center">or</Text>
-            <label htmlFor="jsonFileUpload">JSON file</label>
-            <input id="jsonFileUpload" name="jsonFile" type="file" accept="application/json,.json" />
-            <Group justify="flex-end">
-              <Button type="submit" name="intent" value="import-json" disabled={!selectedJourney} color="teal">
-                Import JSON into this journey
-              </Button>
-            </Group>
-          </Stack>
-        </Form>
       </AdminSection>
 
       <AdminSection

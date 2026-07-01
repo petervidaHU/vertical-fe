@@ -1,4 +1,12 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"isHexColor\" \"/home/petervida/vertical-fe/app/routes/journey.\\\\$id.tsx\")",
+      "Read(//home/petervida/vertical-fe/app/routes/**)",
+      "Bash(grep -n \"GlassCloseButton\" \"/home/petervida/vertical-fe/app/routes/journey.\\\\$id.tsx\")",
+      "Bash(grep -E 'journey\\\\.\\\\$id|StoryDetailContent|admin\\\\.stories')"
+    ]
+  },
   "skills": {
     "pixijs": {
       "source": "github:pixijs/pixijs-skills"
@@ -7,7 +15,10 @@
   "mcpServers": {
     "mantine": {
       "command": "npx",
-      "args": ["-y", "@mantine/mcp-server"]
+      "args": [
+        "-y",
+        "@mantine/mcp-server"
+      ]
     }
   },
   "customAgents": {

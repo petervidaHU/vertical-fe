@@ -20,13 +20,16 @@ export function TagFilterButton({ activeCount, onClick }: TagFilterButtonProps) 
         padding: "10px 24px",
         borderRadius: 999,
         border: activeCount > 0
-          ? "1px solid rgba(95, 163, 197, 0.48)"
-          : "1px solid rgba(186, 155, 114, 0.24)",
+          ? "1px solid rgba(79, 227, 211, 0.55)"
+          : "1px solid rgba(188, 212, 255, 0.34)",
         background: activeCount > 0
-          ? "linear-gradient(180deg, rgba(223, 238, 248, 0.98) 0%, rgba(203, 224, 236, 0.96) 100%)"
-          : "linear-gradient(180deg, rgba(255, 250, 240, 0.98) 0%, rgba(248, 236, 208, 0.96) 100%)",
-        boxShadow: "0 14px 26px rgba(92, 65, 36, 0.16)",
-        backdropFilter: "blur(14px)",
+          ? "linear-gradient(180deg, rgba(20, 46, 58, 0.66) 0%, rgba(13, 28, 38, 0.66) 100%)"
+          : "linear-gradient(180deg, rgba(18, 26, 44, 0.62) 0%, rgba(11, 17, 31, 0.62) 100%)",
+        boxShadow: activeCount > 0
+          ? "0 14px 34px rgba(5, 7, 15, 0.42), 0 0 22px rgba(79, 227, 211, 0.22)"
+          : "0 14px 34px rgba(5, 7, 15, 0.42)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
         cursor: "pointer",
         opacity: 0.3,
         transition: "opacity 200ms ease",
@@ -49,7 +52,7 @@ export function TagFilterButton({ activeCount, onClick }: TagFilterButtonProps) 
           display: "flex",
           alignItems: "center",
           gap: 8,
-          color: "#7a6549",
+          color: activeCount > 0 ? "#a9f4ea" : "#dce6fb",
           fontFamily: "Avenir Next, Trebuchet MS, sans-serif",
           fontSize: 12,
           fontWeight: 700,

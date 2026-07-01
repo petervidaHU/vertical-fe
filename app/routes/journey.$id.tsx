@@ -1,5 +1,5 @@
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActionIcon, Badge, Button, Group, Modal, Paper, ScrollArea, Stack, Text } from "@mantine/core";
+import { Badge, Button, Group, Modal, Paper, ScrollArea, Stack, Text } from "@mantine/core";
 import { useLoaderData, useNavigate, useSearchParams } from "react-router";
 import { getActiveAltitudeInfoItems } from "../features/altitude-info/domain/altitudeInfo";
 import {
@@ -28,7 +28,8 @@ import {
   localizeStory,
   localizeTag,
 } from "../shared/i18n/localizeContent";
-import { isHexColor, parseStoredBackground, primaryColorFromBackground } from "../shared/domain/background";
+import { isHexColor } from "../shared/domain/background";
+import { GlassCloseButton, StoryDetailContent } from "../features/timeline/components/StoryDetailContent";
 import { db } from "../server/db";
 import { countTagsPerItem, filterOutByExcludedTags } from "../features/tags/domain/tags";
 import { TagFilterButton } from "../shared/components/tags/TagFilterButton";
@@ -47,165 +48,6 @@ function formatAltitude(altitude: number): string {
   return `${(altitude / 1000).toFixed(1)} km`;
 }
 
-function GlassCloseButton({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
-  return (
-    <ActionIcon
-      onClick={onClose}
-      variant="transparent"
-      aria-label={t("common.close")}
-      style={{
-        position: "absolute",
-        top: 16,
-        right: 16,
-        zIndex: 3,
-        width: 34,
-        height: 34,
-        borderRadius: 999,
-        color: "rgba(255, 255, 255, 0.92)",
-        background: "rgba(16, 21, 34, 0.4)",
-        border: "1px solid rgba(255, 255, 255, 0.28)",
-        backdropFilter: "blur(8px)",
-      }}
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-        <path d="M18 6 6 18M6 6l12 12" />
-      </svg>
-    </ActionIcon>
-  );
-}
-
-function StoryDetailContent({ story, onClose }: { story: JourneyStory; onClose: () => void }) {
-  const { t } = useTranslation();
-  const isLine = story.storyType === "LINE";
-  const accent = isLine
-    ? (isHexColor(story.lineColor ?? "") ? (story.lineColor as string) : "#4ecdc4")
-    : primaryColorFromBackground(parseStoredBackground(story.background, "#4ecdc4"));
-  const altitudeDisplay = isLine
-    ? formatAltitude(story.startPoint)
-    : `${formatAltitude(story.startPoint)} – ${formatAltitude(story.endPoint)}`;
-  const lineLabel = isLine && story.lineLabel && story.lineLabel !== story.title ? story.lineLabel : null;
-  const bodyText = isLine
-    ? (story.tooltipText || story.description)
-    : story.description;
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        borderRadius: 28,
-        overflow: "hidden",
-        background: "linear-gradient(180deg, rgba(255, 251, 244, 0.98) 0%, rgba(247, 238, 220, 0.98) 100%)",
-        boxShadow: `0 36px 90px rgba(12, 16, 26, 0.45), 0 0 0 1px color-mix(in srgb, ${accent} 38%, transparent)`,
-      }}
-    >
-      {story.imageUrl ? (
-        <div style={{ position: "relative", height: 220 }}>
-          <img
-            src={story.imageUrl}
-            alt={story.title}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(180deg, rgba(8, 11, 20, 0.05) 28%, rgba(8, 11, 20, 0.82) 100%)",
-            }}
-          />
-          <GlassCloseButton onClose={onClose} />
-          <div style={{ position: "absolute", left: 24, right: 24, bottom: 18 }}>
-            {lineLabel ? (
-              <Text style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
-                {lineLabel}
-              </Text>
-            ) : null}
-            <Text fw={800} style={{ color: "#ffffff", fontSize: 26, lineHeight: 1.15, letterSpacing: "-0.01em", marginBottom: 6 }}>
-              {story.title}
-            </Text>
-            <Text style={{ color: "rgba(255, 255, 255, 0.78)", fontSize: 13, lineHeight: 1.4 }}>
-              {altitudeDisplay}
-            </Text>
-          </div>
-        </div>
-      ) : (
-        <div
-          style={{
-            position: "relative",
-            padding: "28px 28px 26px",
-            overflow: "hidden",
-            background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 90%, #0c1020) 0%, color-mix(in srgb, ${accent} 50%, #0c1020) 100%)`,
-          }}
-        >
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              top: -90,
-              right: -70,
-              width: 220,
-              height: 220,
-              borderRadius: "50%",
-              background: `radial-gradient(circle, color-mix(in srgb, ${accent} 65%, #ffffff) 0%, transparent 70%)`,
-              opacity: 0.4,
-              pointerEvents: "none",
-            }}
-          />
-          <GlassCloseButton onClose={onClose} />
-          <Stack gap={4} style={{ position: "relative" }}>
-            {lineLabel ? (
-              <Text style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                {lineLabel}
-              </Text>
-            ) : null}
-            <Text fw={800} style={{ color: "#ffffff", fontSize: 26, lineHeight: 1.15, letterSpacing: "-0.01em" }}>
-              {story.title}
-            </Text>
-            <Text style={{ color: "rgba(255, 255, 255, 0.78)", fontSize: 13, lineHeight: 1.4 }}>
-              {altitudeDisplay}
-            </Text>
-          </Stack>
-        </div>
-      )}
-
-      <div style={{ padding: "22px 28px 28px" }}>
-        <Stack gap="md">
-          <Text size="sm" style={{ color: "#3a2f22", lineHeight: 1.75 }}>
-            {bodyText || t("reader.noDescription")}
-          </Text>
-
-          {story.extraContent ? (
-            <Paper
-              radius={20}
-              p="lg"
-              style={{
-                border: `1px solid color-mix(in srgb, ${accent} 22%, rgba(196, 168, 128, 0.3))`,
-                background: "rgba(255, 252, 245, 0.7)",
-                boxShadow: "0 14px 30px rgba(92, 65, 36, 0.07)",
-              }}
-            >
-              <Stack gap="xs">
-                <Group gap={8} align="center">
-                  <span style={{ width: 18, height: 3, borderRadius: 999, background: accent }} />
-                  <Text size="xs" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.08em" }}>
-                    {t("reader.additionalContext")}
-                  </Text>
-                </Group>
-                <ScrollArea.Autosize mah={420}>
-                  <div
-                    style={{ lineHeight: 1.7, fontSize: 15, color: "#33291f" }}
-                    dangerouslySetInnerHTML={{ __html: story.extraContent }}
-                  />
-                </ScrollArea.Autosize>
-              </Stack>
-            </Paper>
-          ) : null}
-        </Stack>
-      </div>
-    </div>
-  );
-}
 
 type EpicEnteredCardEpic = {
   title: string;
@@ -225,93 +67,33 @@ function EpicEnteredCard({ epic, onClose }: { epic: EpicEnteredCardEpic; onClose
         position: "relative",
         borderRadius: 28,
         overflow: "hidden",
-        background: "linear-gradient(180deg, rgba(255, 251, 244, 0.98) 0%, rgba(247, 238, 220, 0.98) 100%)",
+        background: "linear-gradient(180deg, rgba(17, 24, 41, 0.95) 0%, rgba(10, 14, 26, 0.97) 100%)",
         boxShadow: `0 36px 90px rgba(12, 16, 26, 0.45), 0 0 0 1px color-mix(in srgb, ${accent} 38%, transparent)`,
+        padding: "28px 30px 30px",
       }}
     >
-      {/* Hero banner — tinted with the epic's own color, deepened toward space navy */}
-      <div
-        style={{
-          position: "relative",
-          padding: "30px 30px 32px",
-          overflow: "hidden",
-          background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 90%, #0c1020) 0%, color-mix(in srgb, ${accent} 50%, #0c1020) 100%)`,
-        }}
-      >
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            top: -90,
-            right: -70,
-            width: 240,
-            height: 240,
-            borderRadius: "50%",
-            background: `radial-gradient(circle, color-mix(in srgb, ${accent} 65%, #ffffff) 0%, transparent 70%)`,
-            opacity: 0.4,
-            pointerEvents: "none",
-          }}
-        />
+      <GlassCloseButton onClose={onClose} />
 
-        <GlassCloseButton onClose={onClose} />
+      <Stack gap={4} style={{ marginBottom: 20, paddingRight: 40 }}>
+        <Text fw={800} style={{ color: "#ffffff", fontSize: 28, lineHeight: 1.12, letterSpacing: "-0.01em" }}>
+          {epic.title}
+        </Text>
+        <Text size="sm" fw={600} style={{ color: "rgba(180, 200, 240, 0.72)" }}>
+          {formatAltitude(epic.startPoint)} – {formatAltitude(epic.endPoint)}
+        </Text>
+      </Stack>
 
-        <Stack gap={14} style={{ position: "relative" }}>
-          <Group gap={7} align="center">
-            <span style={{ display: "inline-flex", color: "rgba(255, 255, 255, 0.85)" }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 15l-6-6-6 6" />
-              </svg>
-            </span>
-            <Text
-              size="xs"
-              fw={700}
-              style={{ color: "rgba(255, 255, 255, 0.82)", textTransform: "uppercase", letterSpacing: "0.2em" }}
-            >
-              {t("reader.nowEntering")}
-            </Text>
-          </Group>
-
-          <Text fw={800} style={{ color: "#ffffff", fontSize: 30, lineHeight: 1.12, letterSpacing: "-0.01em" }}>
-            {epic.title}
+      {epic.description ? (
+        <ScrollArea.Autosize mah={360}>
+          <Text size="sm" style={{ color: "#d7e1f5", lineHeight: 1.75 }}>
+            {epic.description}
           </Text>
-
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 9,
-              alignSelf: "flex-start",
-              padding: "6px 14px",
-              borderRadius: 999,
-              background: "rgba(255, 255, 255, 0.15)",
-              border: "1px solid rgba(255, 255, 255, 0.24)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <Text size="xs" fw={700} style={{ color: "rgba(255, 255, 255, 0.72)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              {t("reader.epicLayer")}
-            </Text>
-            <Text size="sm" fw={700} style={{ color: "#ffffff" }}>
-              {formatAltitude(epic.startPoint)} – {formatAltitude(epic.endPoint)}
-            </Text>
-          </div>
-        </Stack>
-      </div>
-
-      {/* Body — warm reader surface, consistent with story cards */}
-      <div style={{ padding: "24px 30px 30px" }}>
-        {epic.description ? (
-          <ScrollArea.Autosize mah={360}>
-            <Text size="sm" style={{ color: "#3a2f22", lineHeight: 1.75 }}>
-              {epic.description}
-            </Text>
-          </ScrollArea.Autosize>
-        ) : (
-          <Text size="sm" c="dimmed">
-            {t("reader.epicNoDescription")}
-          </Text>
-        )}
-      </div>
+        </ScrollArea.Autosize>
+      ) : (
+        <Text size="sm" style={{ color: "#9fb2d6" }}>
+          {t("reader.epicNoDescription")}
+        </Text>
+      )}
     </div>
   );
 }
@@ -692,7 +474,15 @@ export default function JourneyPage() {
       <div ref={handleWheelTargetRef} style={{ position: "fixed", inset: 0 }}>
         <JourneyPixiTimelineClient
           epics={timelineEpics}
-          stories={filteredStories}
+          stories={filteredStories.map((s) => ({
+            ...s,
+            background: s.background ?? "",
+            description: s.description ?? "",
+            extraContent: s.extraContent ?? "",
+            lineColor: s.lineColor ?? "",
+            lineLabel: s.lineLabel ?? "",
+            tooltipText: s.tooltipText ?? "",
+          }))}
           startGround={journey.startingPoint}
           targetAltitudeRef={targetAltitudeRef}
           journeyTitle={displayJourneyTitle}
@@ -721,13 +511,15 @@ export default function JourneyPage() {
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 1001,
-            border: "1px solid rgba(196, 168, 128, 0.28)",
-            background: "rgba(255, 250, 240, 0.96)",
-            boxShadow: "0 14px 30px rgba(92, 65, 36, 0.12)",
+            border: "1px solid rgba(188, 212, 255, 0.32)",
+            background: "linear-gradient(180deg, rgba(18, 26, 44, 0.7) 0%, rgba(11, 17, 31, 0.7) 100%)",
+            boxShadow: "0 14px 30px rgba(5, 7, 15, 0.42)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
           }}
         >
           <Group gap="sm" wrap="nowrap">
-            <Text size="sm" c="dark">
+            <Text size="sm" c="#eef3ff">
               {t("reader.noFilteredContent")}
             </Text>
             <Button size="xs" variant="light" onClick={() => applyEnabledTagIds(allTagIds)}>
@@ -798,18 +590,27 @@ export default function JourneyPage() {
         withCloseButton={!selectedRecentStory}
         title={selectedRecentStory ? undefined : (
           <Group gap="xs">
-            <Text fw={700}>{t("reader.recentStories")}</Text>
+            <Text fw={700} c="#f2f6ff">{t("reader.recentStories")}</Text>
             <Badge variant="light" color="teal">{recentPassedStories.length}</Badge>
           </Group>
         )}
         size="xl"
         centered
         padding={selectedRecentStory ? 0 : undefined}
-        overlayProps={selectedRecentStory ? { backgroundOpacity: 0.6, blur: 4 } : undefined}
+        overlayProps={{ backgroundOpacity: 0.6, blur: 4 }}
         styles={selectedRecentStory ? {
           content: { background: "transparent", boxShadow: "none", overflow: "visible" },
           body: { padding: 0 },
-        } : undefined}
+        } : {
+          content: {
+            background: "linear-gradient(180deg, rgba(17, 24, 41, 0.96) 0%, rgba(10, 14, 26, 0.97) 100%)",
+            border: "1px solid rgba(188, 212, 255, 0.18)",
+            boxShadow: "0 36px 90px rgba(5, 7, 15, 0.55)",
+            backdropFilter: "blur(18px)",
+          },
+          header: { background: "transparent" },
+          close: { color: "#dce6fb" },
+        }}
       >
         {selectedRecentStory ? (
           <StoryDetailContent story={selectedRecentStory} onClose={() => setSelectedRecentStoryId(null)} />
@@ -828,15 +629,15 @@ export default function JourneyPage() {
                     width: "100%",
                     cursor: "pointer",
                     textAlign: "left",
-                    border: "1px solid rgba(181, 149, 108, 0.22)",
-                    background: "linear-gradient(180deg, rgba(255, 249, 238, 0.98) 0%, rgba(249, 237, 212, 0.96) 100%)",
+                    border: "1px solid rgba(188, 212, 255, 0.16)",
+                    background: "rgba(255, 255, 255, 0.05)",
                     transition: "transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease",
-                    boxShadow: "0 18px 34px rgba(92, 65, 36, 0.12)",
+                    boxShadow: "0 14px 30px rgba(5, 7, 15, 0.28)",
                   }}
                 >
                   <Stack gap={8}>
                     <Group justify="space-between" align="flex-start">
-                      <Text fw={700} size="md" c="dark">
+                      <Text fw={700} size="md" c="#f2f6ff">
                         {story.title}
                       </Text>
                       <Group gap={6}>
@@ -847,7 +648,7 @@ export default function JourneyPage() {
                       </Group>
                     </Group>
 
-                    <Text size="xs" c="dimmed">
+                    <Text size="xs" style={{ color: "#9fb2d6" }}>
                       {t("reader.endedAt")} {formatAltitude(story.endPoint)}
                     </Text>
 
@@ -860,18 +661,18 @@ export default function JourneyPage() {
                           maxHeight: 120,
                           objectFit: "cover",
                           borderRadius: 12,
-                          border: "1px solid rgba(181, 149, 108, 0.18)",
+                          border: "1px solid rgba(188, 212, 255, 0.18)",
                         }}
                       />
                     ) : null}
 
                     {story.storyType === "LINE" ? (
-                      <Text size="xs" c="dimmed">
+                      <Text size="xs" style={{ color: "#9fb2d6" }}>
                         {t("reader.label")}: {story.lineLabel || story.title}
                       </Text>
                     ) : null}
 
-                    <Text size="sm" c="dark" lineClamp={2}>
+                    <Text size="sm" c="#d7e1f5" lineClamp={2}>
                       {story.description || t("reader.noDescription")}
                     </Text>
                   </Stack>
@@ -880,7 +681,7 @@ export default function JourneyPage() {
             </Stack>
           </ScrollArea.Autosize>
         ) : (
-          <Text c="dimmed">{t("reader.recentStoriesEmpty")}</Text>
+          <Text style={{ color: "#9fb2d6" }}>{t("reader.recentStoriesEmpty")}</Text>
         )}
       </Modal>
 
@@ -900,10 +701,11 @@ export default function JourneyPage() {
             padding: "10px 24px",
             transform: "translateX(-50%)",
             borderRadius: 999,
-            border: "1px solid rgba(186, 155, 114, 0.24)",
-            background: "linear-gradient(180deg, rgba(255, 250, 240, 0.98) 0%, rgba(248, 236, 208, 0.96) 100%)",
-            boxShadow: "0 14px 26px rgba(92, 65, 36, 0.16)",
-            backdropFilter: "blur(14px)",
+            border: "1px solid rgba(188, 212, 255, 0.32)",
+            background: "linear-gradient(180deg, rgba(18, 26, 44, 0.62) 0%, rgba(11, 17, 31, 0.62) 100%)",
+            boxShadow: "0 14px 30px rgba(5, 7, 15, 0.42)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
             cursor: "pointer",
             opacity: 0.3,
             transition: "opacity 200ms ease",
@@ -915,7 +717,7 @@ export default function JourneyPage() {
         >
           <span
             style={{
-              color: "#7a6549",
+              color: "#dce6fb",
               fontFamily: "Avenir Next, Trebuchet MS, sans-serif",
               fontSize: 12,
               fontWeight: 700,

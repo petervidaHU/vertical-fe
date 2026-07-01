@@ -21,6 +21,7 @@ export default [
       route("stories", "routes/admin.stories.tsx"),
       route("stories/:storyId", "routes/admin.$journeyId.stories.$storyId.tsx"),
       route("tags", "routes/admin.$journeyId.tags.tsx"),
+      route("import", "routes/admin.$journeyId.import.tsx"),
     ]),
   ]),
   route("documentation", "routes/documentation.tsx"),

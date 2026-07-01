@@ -1,6 +1,5 @@
-import { ActionIcon, Alert, Button, Group, SimpleGrid, Stack, Text, TextInput, Textarea, Tooltip } from "@mantine/core";
-import { useState } from "react";
-import { Form, useActionData, useOutletContext, useParams } from "react-router";
+import { Alert, Button, Group, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
+import { Form, Link, useActionData, useOutletContext, useParams } from "react-router";
 import BackgroundField from "../features/admin/components/BackgroundField";
 import AdminJourneyMapPreviewClient from "../features/admin/components/AdminJourneyMapPreviewClient";
 import { AdminPage, AdminSection, AdminStatCard, AdminStatGrid } from "../features/admin/components/AdminScaffold";
@@ -14,47 +13,6 @@ import {
 import { db } from "../server/db";
 
 type ActionData = { error?: string; success?: string };
-
-function CopyIconButton({ url }: { url: string }) {
-  const [state, setState] = useState<"idle" | "done" | "error">("idle");
-
-  const handleCopy = async () => {
-    try {
-      const text = await fetch(url).then((r) => r.text());
-      await navigator.clipboard.writeText(text);
-      setState("done");
-      window.setTimeout(() => setState("idle"), 1600);
-    } catch {
-      setState("error");
-      window.setTimeout(() => setState("idle"), 2000);
-    }
-  };
-
-  return (
-    <Tooltip
-      label={state === "done" ? "Copied!" : state === "error" ? "Copy failed" : "Copy to clipboard"}
-      withArrow
-    >
-      <ActionIcon
-        variant="subtle"
-        color={state === "done" ? "green" : state === "error" ? "red" : "gray"}
-        size="xs"
-        onClick={handleCopy}
-      >
-        {state === "done" ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-          </svg>
-        )}
-      </ActionIcon>
-    </Tooltip>
-  );
-}
 
 export async function action({
   request,
@@ -178,60 +136,14 @@ const AdminJourneyOverviewRoute = () => {
           </AdminSection>
 
           <AdminSection title="Import content">
-            <Form method="post" action={`/admin/${journey.id}/epics`} encType="multipart/form-data">
-              <Stack>
-                <Group gap="xs">
-                  <Group gap={4} wrap="nowrap">
-                    <Button component="a" href="/admin-import/altitude-info.schema.json" download variant="light" size="xs">
-                      Altitude info schema
-                    </Button>
-                    <CopyIconButton url="/admin-import/altitude-info.schema.json" />
-                  </Group>
-                  <Group gap={4} wrap="nowrap">
-                    <Button component="a" href="/admin-import/epic.schema.json" download variant="light" size="xs">
-                      Epic schema
-                    </Button>
-                    <CopyIconButton url="/admin-import/epic.schema.json" />
-                  </Group>
-                  <Group gap={4} wrap="nowrap">
-                    <Button component="a" href="/admin-import/story.schema.json" download variant="light" size="xs">
-                      Story schema
-                    </Button>
-                    <CopyIconButton url="/admin-import/story.schema.json" />
-                  </Group>
-                  <Group gap={4} wrap="nowrap">
-                    <Button component="a" href="/admin-import/journey-import.template.json" download variant="light" size="xs">
-                      JSON template
-                    </Button>
-                    <CopyIconButton url="/admin-import/journey-import.template.json" />
-                  </Group>
-                  <Group gap={4} wrap="nowrap">
-                    <Button component="a" href="/admin-import/ai-prompt.md" download variant="subtle" size="xs">
-                      AI prompt
-                    </Button>
-                    <CopyIconButton url="/admin-import/ai-prompt.md" />
-                  </Group>
-                </Group>
-                <Textarea
-                  label="Paste JSON"
-                  name="jsonText"
-                  placeholder='{"altitudeInfos": [...], "epics": [...], "stories": [...]}'
-                  autosize
-                  minRows={4}
-                  maxRows={12}
-                  spellCheck={false}
-                  styles={{ input: { fontFamily: "monospace" } }}
-                />
-                <Text size="xs" c="dimmed" ta="center">or</Text>
-                <label htmlFor="journeyJsonFileUpload">JSON file</label>
-                <input id="journeyJsonFileUpload" name="jsonFile" type="file" accept="application/json,.json" />
-                <Group justify="flex-end">
-                  <Button type="submit" name="intent" value="import-json" color="teal">
-                    Import JSON
-                  </Button>
-                </Group>
-              </Stack>
-            </Form>
+            <Text size="sm" c="dimmed">
+              Merge epics, stories, and altitude info from JSON. Existing records matched by title are updated; new ones are created.
+            </Text>
+            <Group>
+              <Button component={Link} to={`/admin/${journey.id}/import`} color="teal">
+                Go to import page
+              </Button>
+            </Group>
           </AdminSection>
         </Stack>
       </SimpleGrid>

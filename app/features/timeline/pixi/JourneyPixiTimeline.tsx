@@ -96,7 +96,7 @@ const CARD_SHELL_X = 28;
 const CARD_SHELL_RADIUS = 12;
 const CARD_IMAGE_SIZE = 118;
 const CARD_IMAGE_RADIUS = 10;
-const CARD_IMAGE_X = 0;
+const CARD_IMAGE_X = 8;
 const CARD_IMAGE_Y = 14;
 const CARD_CONTENT_X_WITH_IMAGE = 142;
 const CARD_CONTENT_X_NO_IMAGE = 22;
@@ -115,14 +115,19 @@ const HUD_TOP_PADDING = 16;
 const TOOLTIP_IMAGE_MAX_WIDTH = 220;
 const TOOLTIP_IMAGE_MAX_HEIGHT = 110;
 
-// Shared light HUD panel theme — keeps the reader chrome (info + epic panels)
-// consistent with the warm parchment cards. Minimal chrome, soft layered shadows.
-const PANEL_SURFACE = 0xfbf4e7;
-const PANEL_BORDER = 0xe7dcc8;
-const PANEL_SHADOW = 0x6f5736;
-const PANEL_TEXT = 0x33291f;
-const PANEL_TEXT_DIM = 0x8c7c66;
-const PANEL_BTN_FILL = 0xfffdf8;
+// Frosted-glass HUD theme — dark translucent panels floating over the sky with a
+// light hairline, light text, and a vibrant per-epic accent glow. Deliberately
+// no warm parchment; the chrome should read as cool, modern glassmorphism.
+const PANEL_SURFACE = 0x0e1626;     // deep space-navy glass body
+const PANEL_BORDER = 0xbcd4ff;      // cool light hairline (used at low alpha)
+const PANEL_SHADOW = 0x05070f;      // near-black drop shadow under the glass
+const PANEL_TEXT = 0xf2f6ff;        // near-white primary text
+const PANEL_TEXT_DIM = 0x9fb2d6;    // muted slate-blue secondary text
+const PANEL_BTN_FILL = 0xcfe0ff;    // cool light, used at low alpha for glass buttons
+const PANEL_ACCENT = 0x4fe3d3;      // default cyan accent when no epic colour is active
+// Glass fill opacities — high enough to stay legible where clouds drift behind.
+const PANEL_GLASS_ALPHA = 0.62;
+const PANEL_GLASS_HI_ALPHA = 0.18;  // top edge highlight line
 
 type CardLayoutState = {
   x: number;
@@ -379,29 +384,34 @@ function drawCardLiftShadow(
     softAlpha: number;
     coreAlpha: number;
     hasImage: boolean;
+    // Frameless cards skip the shell shadow and only float a soft shadow under the
+    // image (if any); the text relies on its own drop shadow instead.
+    shellShadow?: boolean;
   },
 ) {
   const spreadInset = options.spread / 2;
 
   graphics.clear();
 
-  graphics.roundRect(
-    options.shellX + options.offsetX - spreadInset,
-    options.offsetY - spreadInset,
-    options.shellWidth + options.spread,
-    options.shellHeight + options.spread,
-    CARD_SHELL_RADIUS + 3,
-  );
-  graphics.fill({ color: 0x000000, alpha: options.softAlpha });
+  if (options.shellShadow !== false) {
+    graphics.roundRect(
+      options.shellX + options.offsetX - spreadInset,
+      options.offsetY - spreadInset,
+      options.shellWidth + options.spread,
+      options.shellHeight + options.spread,
+      CARD_SHELL_RADIUS + 3,
+    );
+    graphics.fill({ color: 0x000000, alpha: options.softAlpha });
 
-  graphics.roundRect(
-    options.shellX + options.offsetX,
-    options.offsetY,
-    options.shellWidth,
-    options.shellHeight,
-    CARD_SHELL_RADIUS + 1,
-  );
-  graphics.fill({ color: 0x000000, alpha: options.coreAlpha });
+    graphics.roundRect(
+      options.shellX + options.offsetX,
+      options.offsetY,
+      options.shellWidth,
+      options.shellHeight,
+      CARD_SHELL_RADIUS + 1,
+    );
+    graphics.fill({ color: 0x000000, alpha: options.coreAlpha });
+  }
 
   if (!options.hasImage) {
     return;
@@ -750,17 +760,55 @@ function drawGradientRect(
 }
 
 // Soft, smoothly-falling panel shadow built from a few low-alpha offset layers
-// (cheaper and softer-looking than a single hard drop shadow).
-function drawSoftPanelShadow(graphics: Graphics, width: number, height: number, radius: number) {
+// (cheaper and softer-looking than a single hard drop shadow). When an accent is
+// supplied, a faint coloured halo is laid down first so the glass panel reads as
+// glowing in the active epic's hue.
+function drawSoftPanelShadow(
+  graphics: Graphics,
+  width: number,
+  height: number,
+  radius: number,
+  accent?: number,
+) {
   const w = Math.max(0, width);
   const h = Math.max(0, height);
   graphics.clear();
-  graphics.roundRect(6, 16, w, h, radius + 2);
-  graphics.fill({ color: PANEL_SHADOW, alpha: 0.05 });
-  graphics.roundRect(4, 10, w, h, radius);
+  // Symmetric accent halo — concentric rounded rects centred on the panel so the
+  // glow reads as an even bloom rather than an offset ghost outline.
+  if (accent !== undefined) {
+    graphics.roundRect(-6, -6, w + 12, h + 12, radius + 6);
+    graphics.fill({ color: accent, alpha: 0.05 });
+    graphics.roundRect(-3, -3, w + 6, h + 6, radius + 3);
+    graphics.fill({ color: accent, alpha: 0.05 });
+  }
+  // Gentle drop shadow — small offset + low alpha so it lifts the glass off the sky
+  // without smearing a dark blob beneath it.
+  graphics.roundRect(2, 7, w, h, radius);
+  graphics.fill({ color: PANEL_SHADOW, alpha: 0.07 });
+  graphics.roundRect(1, 3, w, h, radius);
   graphics.fill({ color: PANEL_SHADOW, alpha: 0.06 });
-  graphics.roundRect(2, 5, w, h, radius);
-  graphics.fill({ color: PANEL_SHADOW, alpha: 0.08 });
+}
+
+// Frosted-glass panel body: a translucent dark fill, a faint top sheen, and a
+// cool hairline. Shared by every HUD panel so the chrome stays consistent.
+function drawGlassPanel(
+  graphics: Graphics,
+  width: number,
+  height: number,
+  radius: number,
+  options?: { alpha?: number; borderAlpha?: number },
+) {
+  const w = Math.max(0, width);
+  const h = Math.max(0, height);
+  graphics.clear();
+  graphics.roundRect(0, 0, w, h, radius);
+  graphics.fill({ color: PANEL_SURFACE, alpha: options?.alpha ?? PANEL_GLASS_ALPHA });
+  // Top edge highlight — a slim 2px line just inside the top, like light catching the
+  // glass rim. Kept thin so it reads as an edge, not a banded seam across the panel.
+  graphics.roundRect(radius * 0.6, 1.5, Math.max(0, w - radius * 1.2), 1.5, 1);
+  graphics.fill({ color: 0xffffff, alpha: PANEL_GLASS_HI_ALPHA });
+  graphics.roundRect(0, 0, w, h, radius);
+  graphics.stroke({ color: PANEL_BORDER, width: 1, alpha: options?.borderAlpha ?? 0.4 });
 }
 
 type EpicVisual = EpicItem & {
@@ -1122,9 +1170,11 @@ export default function JourneyPixiTimeline({
     const speedDecreaseButton = new Container();
     const speedDecreaseBg = new Graphics();
     const speedDecreaseChevron = new Graphics();
+    const speedDecreaseHitArea = new Graphics();
     const speedIncreaseButton = new Container();
     const speedIncreaseBg = new Graphics();
     const speedIncreaseChevron = new Graphics();
+    const speedIncreaseHitArea = new Graphics();
     speedDecreaseButton.eventMode = "static";
     speedDecreaseButton.cursor = "pointer";
     speedIncreaseButton.eventMode = "static";
@@ -1146,8 +1196,10 @@ export default function JourneyPixiTimeline({
       applyMultiplierChange(1);
     });
 
+    speedDecreaseButton.addChild(speedDecreaseHitArea);
     speedDecreaseButton.addChild(speedDecreaseBg);
     speedDecreaseButton.addChild(speedDecreaseChevron);
+    speedIncreaseButton.addChild(speedIncreaseHitArea);
     speedIncreaseButton.addChild(speedIncreaseBg);
     speedIncreaseButton.addChild(speedIncreaseChevron);
 
@@ -1231,7 +1283,7 @@ export default function JourneyPixiTimeline({
       text: "",
       style: {
         breakWords: true,
-        fill: "#342d28",
+        fill: "#dbe6fb",
         fontFamily: BODY_FONT,
         fontSize: 14,
         lineHeight: 21,
@@ -1314,7 +1366,7 @@ export default function JourneyPixiTimeline({
       text: "",
       style: {
         breakWords: true,
-        fill: 0x2b2b29,
+        fill: 0xf2f6ff,
         fontFamily: DISPLAY_FONT,
         fontSize: 12,
         fontWeight: "700",
@@ -1327,7 +1379,7 @@ export default function JourneyPixiTimeline({
       text: "",
       style: {
         breakWords: true,
-        fill: 0x5e5347,
+        fill: 0xc2d2ee,
         fontFamily: BODY_FONT,
         fontSize: 11,
         lineHeight: 14,
@@ -1360,6 +1412,11 @@ export default function JourneyPixiTimeline({
       return nextState;
     };
 
+    const cardBackgroundStates = new Map<string, number>(); // Track background hover state for smooth transition
+    const getCardBackgroundState = (storyId: string): number => {
+      return cardBackgroundStates.get(storyId) ?? 0;
+    };
+
     const cardNodes = storyVisuals
       .filter((story) => story.storyType === "CARD")
       .map((story) => {
@@ -1375,6 +1432,13 @@ export default function JourneyPixiTimeline({
         const shellWidth = CARD_WIDTH - shellX;
         const contentX = hasStoryImage ? CARD_CONTENT_X_WITH_IMAGE : CARD_CONTENT_X_NO_IMAGE;
         const contentWidth = hasStoryImage ? CARD_CONTENT_WIDTH_WITH_IMAGE : CARD_CONTENT_WIDTH_NO_IMAGE;
+        // Frameless cards float directly on the sky, so the story's own colour drives
+        // a left accent bar + the altitude readout, and a brightened tint keeps it
+        // vivid and legible against the blue backdrop.
+        const cardAccent = story.cardColor;
+        const cardAccentBright = mixColorNumbers(cardAccent, 0xffffff, 0.55);
+        // Soft dark halo so light text stays readable wherever clouds drift behind.
+        const cardTextShadow = { color: 0x0a1222, alpha: 0.55, blur: 5, angle: Math.PI / 2, distance: 1 } as const;
 
         container.on("pointerenter", () => {
           hovered = true;
@@ -1392,19 +1456,13 @@ export default function JourneyPixiTimeline({
           onStoryCardClick?.(story);
         });
 
-        // Card shell sits slightly right so the image can break out on the left edge.
+        // Frameless: the card body is painted per-frame (accent bar when expanded,
+        // frosted-glass pill when collapsed). Nothing drawn at construction so no
+        // parchment box flashes before the first render pass.
         const cardLiftShadow = new Graphics();
         const cardBg = new Graphics();
-        cardBg.roundRect(shellX, 0, shellWidth, CARD_HEIGHT, CARD_SHELL_RADIUS);
-        cardBg.fill({ color: 0xfafaf8, alpha: 0.95 });
-        cardBg.stroke({ color: 0xe0dbd5, width: 1, alpha: 0.6 });
-
-        // Keep a subtle fixed shell shadow; the stronger lift shadow is driven per-frame.
+        const cardHoverBg = new Graphics();
         const cardShadow = new Graphics();
-        cardShadow.roundRect(shellX + 6, 10, shellWidth - 4, CARD_HEIGHT - 10, CARD_SHELL_RADIUS + 2);
-        cardShadow.fill({ color: 0x000000, alpha: 0.04 });
-        cardShadow.roundRect(shellX + 2, 4, shellWidth - 2, CARD_HEIGHT - 6, CARD_SHELL_RADIUS);
-        cardShadow.fill({ color: 0x000000, alpha: 0.08 });
 
         // Chevron icon in top-right
         const chevronGraphic = new Graphics();
@@ -1435,8 +1493,8 @@ export default function JourneyPixiTimeline({
 
           imageBg = new Graphics();
           imageBg.roundRect(0, 0, CARD_IMAGE_SIZE, CARD_IMAGE_SIZE, CARD_IMAGE_RADIUS);
-          imageBg.fill({ color: 0xf0ebe5, alpha: 0.92 });
-          imageBg.stroke({ color: 0xffffff, width: 2, alpha: 0.88 });
+          imageBg.fill({ color: 0x0e1626, alpha: 0.35 });
+          imageBg.stroke({ color: 0xffffff, width: 1.5, alpha: 0.5 });
           imageContainer.addChild(imageBg);
 
           imageMask = new Graphics();
@@ -1448,23 +1506,24 @@ export default function JourneyPixiTimeline({
         const titleText = new Text({
           text: story.title,
           style: {
-            fill: 0x2c2c28,
+            fill: 0xffffff,
             fontFamily: DISPLAY_FONT,
             fontSize: 19,
             fontWeight: "700",
             lineHeight: 22,
             wordWrap: true,
             wordWrapWidth: contentWidth,
+            dropShadow: cardTextShadow,
           },
         });
         titleText.position.set(contentX, CARD_PADDING_TOP);
         fitTextToHeight(titleText, story.title, 48, 18);
 
-        // Collapsed state title - single line, truncated
+        // Collapsed state title - single line, truncated (shown on the glass pill)
         const collapsedTitleText = new Text({
           text: story.title,
           style: {
-            fill: 0x2c2c28,
+            fill: 0xf2f6ff,
             fontFamily: DISPLAY_FONT,
             fontSize: 14,
             fontWeight: "700",
@@ -1477,23 +1536,25 @@ export default function JourneyPixiTimeline({
         const descText = new Text({
           text: story.description || "No description",
           style: {
-            fill: 0x6b6560,
+            fill: 0xdce5f7,
             fontFamily: BODY_FONT,
             fontSize: 12,
             lineHeight: 17,
             wordWrap: true,
             wordWrapWidth: contentWidth,
+            dropShadow: { ...cardTextShadow, blur: 4, alpha: 0.5 },
           },
         });
 
         const altitudeText = new Text({
           text: `${formatAltitude(story.startPoint)} → ${formatAltitude(story.endPoint)}`,
           style: {
-            fill: 0x43362c,
+            fill: cardAccentBright,
             fontFamily: BODY_FONT,
             fontSize: 15,
             fontWeight: "700",
             letterSpacing: 0.2,
+            dropShadow: cardTextShadow,
           },
         });
         const altitudeY = CARD_HEIGHT - CARD_PADDING_BOTTOM - altitudeText.height - 6;
@@ -1506,6 +1567,7 @@ export default function JourneyPixiTimeline({
 
         container.addChild(cardLiftShadow);
         container.addChild(cardShadow);
+        container.addChild(cardHoverBg);
         container.addChild(cardBg);
         if (imageContainer) {
           container.addChild(imageContainer);
@@ -1545,6 +1607,7 @@ export default function JourneyPixiTimeline({
           altitudeText,
           cardShadow,
           cardBg,
+          cardHoverBg,
         };
     });
 
@@ -1754,10 +1817,10 @@ export default function JourneyPixiTimeline({
       topInfoValue.text = formatAltitude(currentAltitude);
       topInfoMeta.text = `/ ${formatAltitude(totalDistance)}`;
 
-      const speedWidth = Math.max(152, speedValue.width + 96);
+      const speedWidth = Math.max(100, speedValue.width + 60);
       const topInfoMinWidth = clampNumber(
-        Math.max(220, topInfoValue.width + 40, speedWidth + 40),
-        220,
+        Math.max(180, topInfoValue.width + topInfoMeta.width + 50, speedWidth + 40),
+        180,
         Math.min(320, rendererWidth - 32),
       );
       const previewEpicClosedX = Math.max(EPIC_PANEL_PADDING, rendererWidth - EPIC_PANEL_PADDING - EPIC_HEADER_WIDTH);
@@ -1774,9 +1837,9 @@ export default function JourneyPixiTimeline({
       );
       topInfoProgressRef.current = topInfoProgress;
       const topInfoWidth = lerp(topInfoMinWidth, topInfoExpandedWidth, smoothstep(topInfoProgress));
-      // Closed: 112 fits altitude + meta + pace control.
+      // Closed: 88 = altitudeY(12) + altitudeH(34) + gap(8) + speedH(20) + bottomPad(14).
       // Open: 144 = expandedMenuMargin(16) + languageButtonY(86) + menuButtonHeight(30) + bottomPad(12).
-      const topInfoHeight = Math.round(lerp(112, 144, smoothstep(topInfoProgress)));
+      const topInfoHeight = Math.round(lerp(88, 144, smoothstep(topInfoProgress)));
       const topInfoX = 16;
       const topInfoY = HUD_TOP_PADDING;
 
@@ -1784,7 +1847,8 @@ export default function JourneyPixiTimeline({
       topInfoContainer.position.set(topInfoX, topInfoY);
       topInfoBoundsRef.current = { x: topInfoX, y: topInfoY, width: topInfoWidth, height: topInfoHeight };
       topInfoValue.position.set(20, 12);
-      topInfoMeta.position.set(22, 52);
+      // Bottom-align 13px meta with 34px altitude text: 12 + (34 - 13) = 33
+      topInfoMeta.position.set(20 + topInfoValue.width + 6, 33);
 
       const topInfoChevronCenterX = topInfoWidth - 20;
       const topInfoChevronCenterY = 22;
@@ -1801,12 +1865,10 @@ export default function JourneyPixiTimeline({
         direction: "horizontal",
       });
 
-      drawSoftPanelShadow(topInfoShadow, topInfoWidth, topInfoHeight, 28);
+      const hudAccent = activeEpicForBackground?.primaryColor ?? PANEL_ACCENT;
+      drawSoftPanelShadow(topInfoShadow, topInfoWidth, topInfoHeight, 28, hudAccent);
 
-      topInfoBackground.clear();
-      topInfoBackground.roundRect(0, 0, topInfoWidth, topInfoHeight, 28);
-      topInfoBackground.fill({ color: PANEL_SURFACE, alpha: 0.96 });
-      topInfoBackground.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.7 });
+      drawGlassPanel(topInfoBackground, topInfoWidth, topInfoHeight, 28);
 
       const expandedMenuAlpha = smoothstep(topInfoProgress);
       const expandedMenuMargin = 16;
@@ -1835,16 +1897,16 @@ export default function JourneyPixiTimeline({
       topInfoBackButton.position.set(0, menuButtonsY);
       topInfoBackButtonBg.clear();
       topInfoBackButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
-      topInfoBackButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.96 });
-      topInfoBackButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.8 });
+      topInfoBackButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.14 });
+      topInfoBackButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.42 });
       fitTextToWidth(topInfoBackButtonLabel, labelsRef.current?.back ?? "Back to journeys", menuButtonWidth - 20, 8);
       topInfoBackButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoBackButtonLabel.width) / 2), 8);
 
       topInfoShareButton.position.set(menuButtonWidth + menuButtonGap, menuButtonsY);
       topInfoShareButtonBg.clear();
       topInfoShareButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
-      topInfoShareButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.96 });
-      topInfoShareButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.8 });
+      topInfoShareButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.14 });
+      topInfoShareButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.42 });
       fitTextToWidth(topInfoShareButtonLabel, labelsRef.current?.share ?? "Share", menuButtonWidth - 20, 5);
       topInfoShareButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoShareButtonLabel.width) / 2), 8);
 
@@ -1853,8 +1915,8 @@ export default function JourneyPixiTimeline({
       topInfoLanguageButton.position.set(0, languageButtonY);
       topInfoLanguageButtonBg.clear();
       topInfoLanguageButtonBg.roundRect(0, 0, menuButtonWidth, menuButtonHeight, 14);
-      topInfoLanguageButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.96 });
-      topInfoLanguageButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.8 });
+      topInfoLanguageButtonBg.fill({ color: PANEL_BTN_FILL, alpha: 0.14 });
+      topInfoLanguageButtonBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.42 });
       const languageButtonText = LOCALE_LABELS[localeRef.current] ?? localeRef.current;
       fitTextToWidth(topInfoLanguageButtonLabel, `🌐 ${languageButtonText}`, menuButtonWidth - 20, 8);
       topInfoLanguageButtonLabel.position.set(Math.max(10, (menuButtonWidth - topInfoLanguageButtonLabel.width) / 2), 8);
@@ -1872,25 +1934,25 @@ export default function JourneyPixiTimeline({
       const canIncreaseSpeed = canIncreaseScrollMultiplier(scrollMultiplierRef.current);
 
       speedControlContainer.visible = !lineOnly;
-      speedControlContainer.position.set(20, 72);
+      // Line 1: altitude (34px) occupies ~Y:12–50; speed control goes on line 2.
+      speedControlContainer.position.set(20, 54);
       speedValue.text = formatScrollMultiplierValue(scrollMultiplierRef.current);
-      speedValue.position.set(34, 4);
-
-      speedBackground.clear();
-      speedBackground.rect(0, 0, 1, 1);
-      speedBackground.fill({ color: 0xffffff, alpha: 0 });
+      // Center value between the two chevrons: chevrons at x:0 and x:(22+speedValue.width+4)
+      const speedValueX = 22;
+      speedValue.position.set(speedValueX, 3);
+      // Align chevrons vertically with the text (center 16px chevron with text)
+      const chevronY = 4;
 
       speedDecreaseButton.alpha = canDecreaseSpeed ? 1 : 0.45;
       speedDecreaseButton.cursor = canDecreaseSpeed ? "pointer" : "default";
-      speedDecreaseButton.position.set(8, 6);
-      speedDecreaseBg.clear();
-      speedDecreaseBg.circle(10, 10, 10);
-      speedDecreaseBg.fill({ color: PANEL_BTN_FILL, alpha: canDecreaseSpeed ? 1 : 0.6 });
-      speedDecreaseBg.stroke({ color: PANEL_BORDER, width: 1, alpha: canDecreaseSpeed ? 0.85 : 0.4 });
+      speedDecreaseButton.position.set(0, chevronY);
+      speedDecreaseHitArea.clear();
+      speedDecreaseHitArea.roundRect(-8, -4, 28, 20, 4);
+      speedDecreaseHitArea.fill({ color: 0xffffff, alpha: 0.001 });
       drawChevronIcon(speedDecreaseChevron, {
-        x: 4,
-        y: 4,
-        size: 12,
+        x: 0,
+        y: 0,
+        size: 16,
         progress: 0,
         color: canDecreaseSpeed ? PANEL_TEXT : PANEL_TEXT_DIM,
         alpha: 0.9,
@@ -1899,15 +1961,14 @@ export default function JourneyPixiTimeline({
 
       speedIncreaseButton.alpha = canIncreaseSpeed ? 1 : 0.45;
       speedIncreaseButton.cursor = canIncreaseSpeed ? "pointer" : "default";
-      speedIncreaseButton.position.set(98, 6);
-      speedIncreaseBg.clear();
-      speedIncreaseBg.circle(10, 10, 10);
-      speedIncreaseBg.fill({ color: PANEL_BTN_FILL, alpha: canIncreaseSpeed ? 1 : 0.6 });
-      speedIncreaseBg.stroke({ color: PANEL_BORDER, width: 1, alpha: canIncreaseSpeed ? 0.85 : 0.4 });
+      speedIncreaseButton.position.set(speedValueX + speedValue.width + 4, chevronY);
+      speedIncreaseHitArea.clear();
+      speedIncreaseHitArea.roundRect(-8, -4, 28, 20, 4);
+      speedIncreaseHitArea.fill({ color: 0xffffff, alpha: 0.001 });
       drawChevronIcon(speedIncreaseChevron, {
-        x: 4,
-        y: 4,
-        size: 12,
+        x: 0,
+        y: 0,
+        size: 16,
         progress: 1,
         color: canIncreaseSpeed ? PANEL_TEXT : PANEL_TEXT_DIM,
         alpha: 0.9,
@@ -2113,7 +2174,7 @@ export default function JourneyPixiTimeline({
         },
       );
 
-      cardNodes.forEach(({ cardLiftShadow, chevronHitArea, imageBg, imageMask, container, hovered, hoverAmount, setHoverAmount, story, imageContainer, hasStoryImage, chevronGraphic, collapsedTitleText, titleText, descText, altitudeText, cardShadow, cardBg, chevronHovered }) => {
+      cardNodes.forEach(({ cardLiftShadow, chevronHitArea, imageBg, imageMask, container, hovered, hoverAmount, setHoverAmount, story, imageContainer, hasStoryImage, chevronGraphic, collapsedTitleText, titleText, descText, altitudeText, cardShadow, cardBg, cardHoverBg, chevronHovered, contentX }) => {
         if (lineOnly) {
           cardLayoutStates.delete(story.id);
           container.visible = false;
@@ -2151,8 +2212,8 @@ export default function JourneyPixiTimeline({
         const resolvedX = layoutState?.x ?? targetLayout.x;
         const resolvedY = layoutState?.y ?? targetLayout.y;
 
-        // Eased scale transition on hover
-        const targetCardScale = cardScale * (1 + nextHoverAmount * 0.08);
+        // Subtle scale transition on hover (reduced from 0.08 to 0.03)
+        const targetCardScale = cardScale * (1 + nextHoverAmount * 0.03);
         const currentCardScale = cardScaleStates.get(story.id) ?? cardScale;
         const easedCardScale = smoothToward(currentCardScale, targetCardScale, 120, frameDeltaMs);
         cardScaleStates.set(story.id, easedCardScale);
@@ -2186,8 +2247,8 @@ export default function JourneyPixiTimeline({
           y: frameMetrics.chevronY,
           size: CARD_CHEVRON_SIZE,
           progress: frameMetrics.progress,
-          color: 0x8b7d72,
-          alpha: 0.7,
+          color: 0xe2ebff,
+          alpha: 0.78,
           hovered: chevronHovered(),
         });
 
@@ -2204,27 +2265,48 @@ export default function JourneyPixiTimeline({
         );
 
         cardBg.clear();
-        cardBg.roundRect(frameMetrics.shellX, 0, frameMetrics.shellWidth, frameMetrics.shellHeight, CARD_SHELL_RADIUS);
-        cardBg.fill({ color: 0xfafaf8, alpha: 0.95 });
-        cardBg.stroke({ color: 0xe0dbd5, width: 1, alpha: 0.6 });
+        // Collapsed: a compact frosted-glass pill so the chip stays tappable/legible.
+        if (collapsedAlpha > 0.01) {
+          cardBg.roundRect(frameMetrics.shellX, 0, frameMetrics.shellWidth, frameMetrics.shellHeight, CARD_SHELL_RADIUS);
+          cardBg.fill({ color: PANEL_SURFACE, alpha: 0.66 * collapsedAlpha });
+          cardBg.roundRect(frameMetrics.shellX, 0, frameMetrics.shellWidth, frameMetrics.shellHeight, CARD_SHELL_RADIUS);
+          cardBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.4 * collapsedAlpha });
+        }
+        // Expanded: frameless — show a vibrant accent bar only when there's no image
+        // (cards with images have visual weight and don't need the accent for legibility).
+        if (expandedAlpha > 0.01 && !hasStoryImage) {
+          cardBg.roundRect(contentX - 14, CARD_PADDING_TOP, 4, CARD_HEIGHT - CARD_PADDING_TOP - CARD_PADDING_BOTTOM - 6, 2);
+          cardBg.fill({ color: story.cardColor, alpha: 0.95 * expandedAlpha });
+        }
 
+        // Hover background: frosted glass effect on expanded cards with smooth transition
+        const targetBackgroundAmount = expandedAlpha > 0.01 ? nextHoverAmount : 0;
+        const currentBackgroundAmount = getCardBackgroundState(story.id);
+        const smoothedBackgroundAmount = smoothToward(currentBackgroundAmount, targetBackgroundAmount, 140, frameDeltaMs);
+        cardBackgroundStates.set(story.id, smoothedBackgroundAmount);
+
+        cardHoverBg.clear();
+        if (smoothedBackgroundAmount > 0.01) {
+          const hoverAlpha = smoothedBackgroundAmount * 0.32;
+          cardHoverBg.roundRect(0, 0, frameMetrics.width, frameMetrics.height, CARD_SHELL_RADIUS);
+          cardHoverBg.fill({ color: PANEL_SURFACE, alpha: hoverAlpha });
+          cardHoverBg.roundRect(0, 0, frameMetrics.width, frameMetrics.height, CARD_SHELL_RADIUS);
+          cardHoverBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.3 * hoverAlpha });
+        }
+
+        // The card shadow only backs the collapsed glass pill; the expanded state is
+        // frameless and leans on per-element drop shadows instead.
         cardShadow.clear();
-        cardShadow.roundRect(
-          frameMetrics.shellX + 6,
-          10,
-          Math.max(0, frameMetrics.shellWidth - 4),
-          Math.max(0, frameMetrics.shellHeight - 10),
-          CARD_SHELL_RADIUS + 2,
-        );
-        cardShadow.fill({ color: 0x000000, alpha: 0.04 * expandedAlpha });
-        cardShadow.roundRect(
-          frameMetrics.shellX + 2,
-          4,
-          Math.max(0, frameMetrics.shellWidth - 2),
-          Math.max(0, frameMetrics.shellHeight - 6),
-          CARD_SHELL_RADIUS,
-        );
-        cardShadow.fill({ color: 0x000000, alpha: 0.08 * expandedAlpha });
+        if (collapsedAlpha > 0.01) {
+          cardShadow.roundRect(
+            frameMetrics.shellX + 4,
+            8,
+            Math.max(0, frameMetrics.shellWidth - 2),
+            Math.max(0, frameMetrics.shellHeight - 8),
+            CARD_SHELL_RADIUS + 2,
+          );
+          cardShadow.fill({ color: 0x000000, alpha: 0.22 * collapsedAlpha });
+        }
 
         drawCardLiftShadow(cardLiftShadow, {
           shellX: frameMetrics.shellX,
@@ -2235,11 +2317,13 @@ export default function JourneyPixiTimeline({
           imageSize: frameMetrics.imageSize,
           imageRadius: frameMetrics.imageRadius,
           offsetX: 2 + centerLift * 2.5,
-          offsetY: 4 + centerLift * 7 + nextHoverAmount * 2,
+          offsetY: 5 + centerLift * 7 + nextHoverAmount * 2,
           spread: 2 + centerLift * 6,
-          softAlpha: (0.045 + centerLift * 0.055) * expandedAlpha,
-          coreAlpha: (0.055 + centerLift * 0.08) * expandedAlpha,
+          softAlpha: hasStoryImage ? 0.07 + centerLift * 0.06 : 0,
+          coreAlpha: hasStoryImage ? 0.09 + centerLift * 0.08 : 0,
           hasImage: hasStoryImage,
+          // Frameless: no shell shadow, only a soft shadow under the floating image.
+          shellShadow: false,
         });
 
         if (!hasStoryImage || !imageContainer || !imageBg || !imageMask) {
@@ -2254,12 +2338,13 @@ export default function JourneyPixiTimeline({
 
         imageContainer.position.set(frameMetrics.imageX, frameMetrics.imageY);
         imageContainer.scale.set(1);
-        imageContainer.alpha = 1;
+        // Image opacity matches expanded state visibility
+        imageContainer.alpha = expandedAlpha;
 
         imageBg.clear();
         imageBg.roundRect(0, 0, frameMetrics.imageSize, frameMetrics.imageSize, frameMetrics.imageRadius);
-        imageBg.fill({ color: 0xf0ebe5, alpha: 0.92 });
-        imageBg.stroke({ color: 0xffffff, width: 2, alpha: 0.88 });
+        imageBg.fill({ color: 0x0e1626, alpha: 0.35 * expandedAlpha });
+        imageBg.stroke({ color: 0xffffff, width: 1.5, alpha: 0.5 * expandedAlpha });
 
         imageMask.clear();
         imageMask.roundRect(0, 0, frameMetrics.imageSize, frameMetrics.imageSize, frameMetrics.imageRadius);
@@ -2293,10 +2378,10 @@ export default function JourneyPixiTimeline({
           );
           const imageScale = imageDims.width / cardImageTexture.width;
           imageSprite.scale.set(imageScale);
-          imageSprite.position.set(
-            (frameMetrics.imageSize - imageDims.width) / 2,
-            (frameMetrics.imageSize - imageDims.height) / 2,
-          );
+          // Center image precisely within container
+          const offsetX = Math.round((frameMetrics.imageSize - imageDims.width) / 2);
+          const offsetY = Math.round((frameMetrics.imageSize - imageDims.height) / 2);
+          imageSprite.position.set(offsetX, offsetY);
         } else {
           imageContainer.visible = true;
 
@@ -2408,8 +2493,8 @@ export default function JourneyPixiTimeline({
         tooltipImageFrame.clear();
         if (tooltipTexture && tooltipImageSize) {
           tooltipImageFrame.roundRect(10, imageY, tooltipImageSize.width, tooltipImageSize.height, 8);
-          tooltipImageFrame.fill({ color: 0xfffaf2, alpha: 0.82 });
-          tooltipImageFrame.stroke({ color: 0xe3d0b2, width: 1, alpha: 0.8 });
+          tooltipImageFrame.fill({ color: 0x0e1626, alpha: 0.4 });
+          tooltipImageFrame.stroke({ color: 0xffffff, width: 1, alpha: 0.4 });
 
           if (!tooltipImageSprite || tooltipImageUrlRef.current !== tooltipImageUrl) {
             if (tooltipImageSprite) {
@@ -2436,8 +2521,8 @@ export default function JourneyPixiTimeline({
 
         tooltipBg.clear();
         tooltipBg.roundRect(0, 0, width, height, 8);
-        tooltipBg.fill({ color: 0xfff4e3, alpha: 0.97 });
-        tooltipBg.stroke({ color: 0xe2cfb0, width: 1.2 });
+        tooltipBg.fill({ color: PANEL_SURFACE, alpha: 0.82 });
+        tooltipBg.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.4 });
 
         tooltipContainer.position.set(
           Math.min(rendererWidth - width - 8, pointerPosRef.current.x + 14),
@@ -2516,12 +2601,10 @@ export default function JourneyPixiTimeline({
         }
         epicPanelBody.style.wordWrapWidth = Math.max(220, epicPanelWidth - 48);
 
-        drawSoftPanelShadow(epicPanelShadow, Math.max(0, epicCurrentWidth), Math.max(0, epicCurrentHeight), 28);
+        const epicAccent = activeEpicForBackground.primaryColor ?? PANEL_ACCENT;
+        drawSoftPanelShadow(epicPanelShadow, Math.max(0, epicCurrentWidth), Math.max(0, epicCurrentHeight), 28, epicAccent);
 
-        epicPanelBackground.clear();
-        epicPanelBackground.roundRect(0, 0, epicCurrentWidth, epicCurrentHeight, 28);
-        epicPanelBackground.fill({ color: PANEL_SURFACE, alpha: 0.97 });
-        epicPanelBackground.stroke({ color: PANEL_BORDER, width: 1, alpha: 0.7 });
+        drawGlassPanel(epicPanelBackground, epicCurrentWidth, epicCurrentHeight, 28);
 
         epicPanelContentMask.clear();
         epicPanelContentMask.roundRect(0, 0, epicCurrentWidth, epicCurrentHeight, 28);
